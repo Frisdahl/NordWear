@@ -1,0 +1,175 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+//
+// ───────────────────────────────────────────
+// CATEGORIES
+// ───────────────────────────────────────────
+//
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  products Product[]
+}
+
+//
+// ───────────────────────────────────────────
+// PRODUCTS
+// ───────────────────────────────────────────
+//
+model Product {
+  id          Int          @id @default(autoincrement())
+  name        String
+  price       Float
+  offer_price Float?
+  category_Id Int
+  category    Category     @relation(fields: [category_Id], references: [id])
+  
+  // Product variants (sizes/colors/stock)
+  quantities  Product_Quantity[]
+  
+  // For order items
+  order_Items  Order_Item[]
+  
+  // Liked by customers
+  likedBy     Customer_Likes[]
+
+  // Cart items (add this opposite relation)
+  cart_Items   Cart_Item[]
+}
+
+//
+// ───────────────────────────────────────────
+// SIZES
+// ───────────────────────────────────────────
+//
+model Size {
+  id        Int               @id @default(autoincrement())
+  name      String
+  quantities Product_Quantity[]
+  order_Items Order_Item[]
+  cart_Items  Cart_Item[]
+}
+
+//
+// ───────────────────────────────────────────
+// COLORS
+// ───────────────────────────────────────────
+//
+model Color {
+  id        Int               @id @default(autoincrement())
+  name      String
+  quantities Product_Quantity[]
+  order_Items Order_Item[]
+  cart_Items  Cart_Item[]
+}
+
+//
+// ───────────────────────────────────────────
+// PRODUCT QUANTITY (stock per size/color)
+// MATCHES YOUR SPREADSHEET
+// ───────────────────────────────────────────
+//
+model Product_Quantity {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  sizeId    Int
+  colorId   Int
+  quantity  Int
+  
+  product Product @relation(fields: [productId], references: [id])
+  size    Size    @relation(fields: [sizeId], references: [id])
+  color   Color   @relation(fields: [colorId], references: [id])
+}
+
+//
+// ───────────────────────────────────────────
+// CUSTOMERS
+// ───────────────────────────────────────────
+//
+model Customer {
+  id         Int              @id @default(autoincrement())
+  created_at DateTime         @default(now())
+  deleted_at DateTime?
+
+  orders      Order[]
+  likes       Customer_Likes[]
+  cart_Items   Cart_Item[]
+}
+
+//
+// ───────────────────────────────────────────
+// CUSTOMER LIKED PRODUCTS
+// ───────────────────────────────────────────
+//
+model Customer_Likes {
+  id          Int      @id @default(autoincrement())
+  customerId  Int
+  productId   Int
+
+  customer Customer @relation(fields: [customerId], references: [id])
+  product  Product  @relation(fields: [productId], references: [id])
+}
+
+//
+// ───────────────────────────────────────────
+// ORDERS
+// ───────────────────────────────────────────
+//
+model Order {
+  id          Int         @id @default(autoincrement())
+  customerId  Int
+  subtotal    Float
+  created_at  DateTime    @default(now())
+  deleted_at  DateTime?
+
+  customer   Customer   @relation(fields: [customerId], references: [id])
+  order_Items Order_Item[]
+}
+
+//
+// ───────────────────────────────────────────
+// ORDER ITEMS
+// THE MOST IMPORTANT TABLE
+// ───────────────────────────────────────────
+//
+model Order_Item {
+  id         Int     @id @default(autoincrement())
+  orderId    Int
+  productId  Int
+  sizeId     Int
+  colorId    Int
+  quantity   Int
+  price_each Float
+  total_price Float
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+  size    Size    @relation(fields: [sizeId], references: [id])
+  color   Color   @relation(fields: [colorId], references: [id])
+}
+
+//
+// ───────────────────────────────────────────
+// CUSTOMER CART
+// ───────────────────────────────────────────
+//
+model Cart_Item {
+  id         Int  @id @default(autoincrement())
+  customerId Int
+  productId  Int
+  sizeId     Int
+  colorId    Int
+  quantity   Int
+
+  customer Customer @relation(fields: [customerId], references: [id])
+  product  Product  @relation(fields: [productId], references: [id])
+  size     Size     @relation(fields: [sizeId], references: [id])
+  color    Color    @relation(fields: [colorId], references: [id])
+}

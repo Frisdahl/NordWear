@@ -1,0 +1,44 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.esbuild/
+
+# Logs
+logs/
+*.log
+*.log.*
+*.out
+*.err
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# Editor junk
+.DS_Store
+.vscode/
+.idea/
+
+# Temporary
+*.tmp
+*.swp
+*.lock
+
+# Vite cache
+.vite/
+*.tsbuildinfo
+
+# OS
+Thumbs.db
+
+# Git
+.git-ignore

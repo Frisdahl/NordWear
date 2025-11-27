@@ -1,0 +1,11 @@
+@layer components {
+  .customer-header {
+    @apply bg-teal-600 text-white px-4 py-3;
+  }
+  .customer-container {
+    @apply max-w-6xl mx-auto px-4;
+  }
+  .btn-primary {
+    @apply bg-teal-600 text-white btn;
+  }
+}

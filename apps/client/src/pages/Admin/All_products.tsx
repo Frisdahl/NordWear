@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Button from "@/components/Button";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import Dropdown from "@/components/Dropdown";
@@ -6,6 +6,36 @@ import { DropdownItem } from "@/components/DropdownItem";
 import ProductTable from "@/components/admin/ProductTable";
 
 const AllProducts = () => {
+  const [selected, setSelected] = useState<number[]>([]);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const deleteSelected = async () => {
+    if (selected.length === 0) {
+      alert("Ingen produkter valgt");
+      return;
+    }
+    if (!confirm(`Slet ${selected.length} produkter?`)) return;
+
+    try {
+      const res = await fetch("/api/products", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: selected }),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Status ${res.status}: ${text}`);
+      }
+      // clear selection and refresh table
+      setSelected([]);
+      setRefreshKey((k) => k + 1);
+      alert("Slettet valgt(e) produkt(er)");
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert("Kunne ikke slette produkterne");
+    }
+  };
+
   return (
     <div className="container">
       <div className="flex justify-between">
@@ -23,9 +53,7 @@ const AllProducts = () => {
 
         <div className="flex gap-4">
           <Dropdown label="Flere handlinger">
-            <DropdownItem onClick={() => alert("Slettede 3 produkter")}>
-              Slet valgte
-            </DropdownItem>
+            <DropdownItem onClick={deleteSelected}>Slet valgte</DropdownItem>
 
             <DropdownItem onClick={() => alert("Eksporter CSV")}>
               Eksporter CSV
@@ -66,7 +94,11 @@ const AllProducts = () => {
       </div>
 
       <div>
-        <ProductTable />
+        <ProductTable
+          selected={selected}
+          onSelectedChange={setSelected}
+          refreshKey={refreshKey}
+        />
       </div>
     </div>
   );

@@ -1,13 +1,14 @@
-import express from 'express';
-import { PrismaClient } from '@prisma/client';
-import apiRoutes from './routes/api.routes';
-import errorHandler from './middleware/errorHandler';
+import "dotenv/config";
+import express from "express";
+import { PrismaClient } from "@prisma/client";
+import apiRoutes from "./routes/api.routes";
+import errorHandler from "./middleware/errorHandler";
 
 const app = express();
 const prisma = new PrismaClient();
 
 app.use(express.json());
-app.use('/api', apiRoutes);
+app.use("/api", apiRoutes);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;

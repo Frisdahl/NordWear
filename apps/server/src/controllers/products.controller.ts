@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import { Product } from "@prisma/client";
 import {
   getProducts as getProductsService,
   createProduct as createProductService,
   getCategories as getCategoriesService,
+  deleteProducts as deleteProductsService,
 } from "../services/product.service";
 
 export const getProducts = async (
@@ -11,10 +11,12 @@ export const getProducts = async (
   res: Response
 ): Promise<void> => {
   try {
-    const products: Product[] = await getProductsService();
+    const products: any[] = await getProductsService();
     res.status(200).json(products);
   } catch (error) {
-    res.status(500).json({ message: "Error retrieving products", error });
+    console.error("GET /api/products error:", error);
+    const msg = error instanceof Error ? error.message : String(error);
+    res.status(500).json({ message: "Error retrieving products", error: msg });
   }
 };
 
@@ -24,10 +26,12 @@ export const createProduct = async (
 ): Promise<void> => {
   try {
     const productData = req.body;
-    const newProduct: Product = await createProductService(productData);
+    const newProduct: any = await createProductService(productData);
     res.status(201).json(newProduct);
   } catch (error) {
-    res.status(500).json({ message: "Error creating product", error });
+    console.error("POST /api/products error:", error);
+    const msg = error instanceof Error ? error.message : String(error);
+    res.status(500).json({ message: "Error creating product", error: msg });
   }
 };
 
@@ -39,6 +43,30 @@ export const getCategories = async (
     const categories = await getCategoriesService();
     res.status(200).json(categories);
   } catch (error) {
-    res.status(500).json({ message: "Error retrieving categories", error });
+    console.error("GET /api/categories error:", error);
+    const msg = error instanceof Error ? error.message : String(error);
+    res
+      .status(500)
+      .json({ message: "Error retrieving categories", error: msg });
+  }
+};
+
+export const deleteProducts = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.some((id) => typeof id !== "number")) {
+      res.status(400).json({ message: "Invalid 'ids' array in request body" });
+      return;
+    }
+
+    const result = await deleteProductsService(ids);
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("DELETE /api/products error:", error);
+    const msg = error instanceof Error ? error.message : String(error);
+    res.status(500).json({ message: "Error deleting products", error: msg });
   }
 };

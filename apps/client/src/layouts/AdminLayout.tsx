@@ -8,7 +8,7 @@ const AdminLayout: React.FC = () => (
     <AdminHeader />
     <div className="flex min-h-screen mt-14">
       <AdminNav />
-      <main className="w-full px-11 bg-gray-100">
+      <main className="w-full px-11">
         <Outlet />
       </main>
     </div>

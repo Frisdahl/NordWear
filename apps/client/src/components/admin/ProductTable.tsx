@@ -2,58 +2,75 @@ import React, { useEffect, useState } from "react";
 
 type ProductItem = {
   id: number;
-  name: string;
+  name?: string;
+  price?: number;
   stock?: number;
   status?: string;
   revenue?: number;
-  // add category if your schema has it
   category?: { id: number; name: string } | null;
 };
 
-export default function ProductTable() {
+type Props = {
+  selected: number[];
+  onSelectedChange: React.Dispatch<React.SetStateAction<number[]>>;
+  refreshKey?: number;
+};
+
+export default function ProductTable({
+  selected,
+  onSelectedChange,
+  refreshKey = 0,
+}: Props) {
   const [products, setProducts] = useState<ProductItem[]>([]);
-  const [selected, setSelected] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // adjust path if your server mounts routes under a different prefix
-    fetch("/api/products")
-      .then((res) => {
-        if (!res.ok) throw new Error("Network response was not ok");
-        return res.json();
-      })
-      .then((data: ProductItem[]) => setProducts(data))
-      .catch((err) => {
-        console.error("Failed to fetch products:", err);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+    (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch("/api/products");
+        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+        const data: ProductItem[] = await res.json();
+        setProducts(data);
+        // remove any selected ids that no longer exist
+        onSelectedChange((prev) =>
+          prev.filter((id) => data.some((p) => p.id === id))
+        );
+      } catch (err: any) {
+        console.error("Fetch products failed:", err);
+        setError(err.message ?? "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [refreshKey]); // refetch when parent increments refreshKey
 
   const allSelected =
     products.length > 0 && selected.length === products.length;
   const someSelected = selected.length > 0 && !allSelected;
 
   const toggleSelectAll = () => {
-    if (allSelected) {
-      setSelected([]);
-    } else {
-      setSelected(products.map((p) => p.id));
-    }
+    if (allSelected) onSelectedChange([]);
+    else onSelectedChange(products.map((p) => p.id));
   };
 
   const toggleSingle = (id: number) => {
-    setSelected((prev) =>
+    onSelectedChange((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
   };
 
   if (loading) return <div>Loading products…</div>;
+  if (error)
+    return <div className="text-red-600">Error loading products: {error}</div>;
+  if (products.length === 0) return <div>No products found.</div>;
 
   return (
     <table className="w-full text-left border-separate border-spacing-y-2">
       <thead>
         <tr className="text-gray-500 font-medium">
-          {/* SELECT ALL checkbox */}
           <th className="pl-2 w-6">
             <input
               type="checkbox"
@@ -64,11 +81,11 @@ export default function ProductTable() {
               onChange={toggleSelectAll}
             />
           </th>
-
           <th>Produkt ID</th>
           <th>Produkt navn</th>
           <th>Totalt lager</th>
           <th>Status</th>
+          <th>Pris</th>
           <th>Omsætning</th>
           <th>Handling</th>
         </tr>
@@ -77,13 +94,11 @@ export default function ProductTable() {
       <tbody>
         {products.map((product) => {
           const isSelected = selected.includes(product.id);
-
           return (
             <tr
               key={product.id}
               className={`${isSelected ? "bg-green-100" : "bg-white"} `}
             >
-              {/* Single row checkbox */}
               <td className="pl-2 w-6">
                 <input
                   type="checkbox"
@@ -93,7 +108,15 @@ export default function ProductTable() {
               </td>
 
               <td>#{product.id}</td>
-              <td>{product.name}</td>
+              <td>
+                <div>{product.name ?? "—"}</div>
+                {product.category?.name && (
+                  <div className="text-xs text-gray-500">
+                    {product.category.name}
+                  </div>
+                )}
+              </td>
+
               <td>{product.stock ?? "—"}</td>
 
               <td
@@ -104,6 +127,12 @@ export default function ProductTable() {
                 }
               >
                 {product.status ?? "—"}
+              </td>
+
+              <td>
+                {product.price != null
+                  ? `${product.price.toLocaleString()} kr.`
+                  : "—"}
               </td>
 
               <td>{(product.revenue ?? 0).toLocaleString()} kr.</td>

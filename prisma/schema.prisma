@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("DEV_DATABASE_URL")
 }
 
 model cart_item {
@@ -94,16 +95,33 @@ model order_item {
 model product {
   id               Int                @id @default(autoincrement())
   name             String
+  description      String?
   price            Float
   offer_price      Float?
+  status           ProductStatus      @default(DRAFT)
   category_Id      Int
+  deleted_at       DateTime?
+  varenummer       String?
+  barkode          String?
+  images           ProductImage[]
   cart_item        cart_item[]
   customer_likes   customer_likes[]
   order_item       order_item[]
   category         category           @relation(fields: [category_Id], references: [id], map: "Product_category_Id_fkey")
   product_quantity product_quantity[]
+  shipment_size    shipment_size?
 
   @@index([category_Id], map: "Product_category_Id_fkey")
+}
+
+model ProductImage {
+  id          Int     @id @default(autoincrement())
+  url         String
+  isThumbnail Boolean @default(false)
+  product     product @relation(fields: [productId], references: [id])
+  productId   Int
+
+  @@index([productId])
 }
 
 model product_quantity {
@@ -127,4 +145,19 @@ model size {
   cart_item        cart_item[]
   order_item       order_item[]
   product_quantity product_quantity[]
+}
+
+model shipment_size {
+  id        Int      @id @default(autoincrement())
+  weight    Float?
+  height    Float?
+  width     Float?
+  product   product  @relation(fields: [productId], references: [id])
+  productId Int      @unique
+}
+
+enum ProductStatus {
+  ONLINE
+  OFFLINE
+  DRAFT
 }

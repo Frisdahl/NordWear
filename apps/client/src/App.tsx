@@ -5,6 +5,7 @@ import AdminLayout from "./layouts/AdminLayout";
 
 const Dashboard = lazy(() => import("./pages/Admin/Dashboard"));
 const AllProducts = lazy(() => import("./pages/Admin/all_products"));
+const AddProduct = lazy(() => import("./pages/Admin/AddProduct"));
 const Home = lazy(() => import("./pages/Customer/Home"));
 const Product = lazy(() => import("./pages/Customer/Product"));
 
@@ -15,6 +16,8 @@ const App: React.FC = () => (
         <Route element={<AdminLayout />}>
           <Route path="/admin/dashboard" element={<Dashboard />} />
           <Route path="/admin/all-products" element={<AllProducts />} />
+          <Route path="/admin/add-product" element={<AddProduct />} />
+          <Route path="/admin/add-product/:id" element={<AddProduct />} />
           {/* more admin routes */}
         </Route>
 

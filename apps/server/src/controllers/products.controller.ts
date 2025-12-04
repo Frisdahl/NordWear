@@ -4,6 +4,8 @@ import {
   createProduct as createProductService,
   getCategories as getCategoriesService,
   deleteProducts as deleteProductsService,
+  getProduct as getProductService,
+  updateProduct as updateProductService,
 } from "../services/product.service";
 
 export const getProducts = async (
@@ -17,6 +19,49 @@ export const getProducts = async (
     console.error("GET /api/products error:", error);
     const msg = error instanceof Error ? error.message : String(error);
     res.status(500).json({ message: "Error retrieving products", error: msg });
+  }
+};
+
+export const getProduct = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      res.status(400).json({ message: "Invalid product ID." });
+      return;
+    }
+    const product = await getProductService(id);
+    if (!product) {
+      res.status(404).json({ message: "Product not found." });
+      return;
+    }
+    res.status(200).json(product);
+  } catch (error) {
+    console.error(`GET /api/products/${req.params.id} error:`, error);
+    const msg = error instanceof Error ? error.message : String(error);
+    res.status(500).json({ message: "Error retrieving product", error: msg });
+  }
+};
+
+export const updateProduct = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      res.status(400).json({ message: "Invalid product ID." });
+      return;
+    }
+    const productData = req.body;
+    const updatedProduct = await updateProductService(id, productData);
+    res.status(200).json(updatedProduct);
+  } catch (error) {
+    console.error(`PUT /api/products/${req.params.id} error:`, error);
+    const msg = error instanceof Error ? error.message : String(error);
+    res.status(500).json({ message: "Error updating product", error: msg });
   }
 };
 

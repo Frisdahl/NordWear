@@ -23,7 +23,7 @@ const items = [
 
 const AdminNav: React.FC = () => {
   return (
-    <div className="pl-6 w-[20%]">
+    <div className="pl-6 pr-6 pt-14 bg-[#ebebeb]">
       <nav>
         <ul className="flex flex-col gap-3">
           {items.map((item) => (

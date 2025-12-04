@@ -7,7 +7,7 @@ import Icon from "../Icon";
 
 const AdminHeader: React.FC = () => {
   return (
-    <header className="text-2D2F36 px-11 py-5">
+    <header className="text-white px-11 py-5 bg-[#1a1a1a]">
       <nav className="flex justify-between items-center gap-4 w-full">
         <Link to="/admin" className="font-bold text-xl">
           Nordwear

@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import cors from "cors";
 import { PrismaClient } from "@prisma/client";
 import apiRoutes from "./routes/api.routes";
 import errorHandler from "./middleware/errorHandler";
@@ -7,7 +8,14 @@ import errorHandler from "./middleware/errorHandler";
 const app = express();
 const prisma = new PrismaClient();
 
-app.use(express.json());
+app.options('*', cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+app.use(express.json({ limit: '10mb' }));
 app.use("/api", apiRoutes);
 app.use(errorHandler);
 

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Button from "@/components/Button";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import Dropdown from "@/components/Dropdown";
@@ -6,8 +7,10 @@ import { DropdownItem } from "@/components/DropdownItem";
 import ProductTable from "@/components/admin/ProductTable";
 
 const AllProducts = () => {
+  const navigate = useNavigate();
   const [selected, setSelected] = useState<number[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [productCount, setProductCount] = useState(0);
 
   const deleteSelected = async () => {
     if (selected.length === 0) {
@@ -37,13 +40,13 @@ const AllProducts = () => {
   };
 
   return (
-    <div className="container">
+    <div className="container mx-auto p-6 bg-gray-50 min-h-screen">
       <div className="flex justify-between">
         <div>
           <div className="flex gap-2">
-            <h1 className="text-fluidTitle font-medium">Produkter</h1>
-            <div className="w-max px-5 py-1 bg-nwDarkGray text-[12px] text-white rounded-[4px] flex items-start justify-center self-start">
-              5
+            <h1 className="text-fluidTitle font-semibold">Produkter</h1>
+            <div className="w-max px-5 py-1 font-medium bg-nwDarkGray text-[14px] text-white rounded-[4px] flex items-start justify-center self-start">
+              {productCount}
             </div>
           </div>
           <text className="font-medium">
@@ -60,7 +63,11 @@ const AllProducts = () => {
             </DropdownItem>
           </Dropdown>
 
-          <Button variant="primary" size="md">
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => navigate("/admin/add-product")}
+          >
             <PlusIcon className="w-4 h-4" /> Tilføj produkt
           </Button>
         </div>
@@ -98,6 +105,8 @@ const AllProducts = () => {
           selected={selected}
           onSelectedChange={setSelected}
           refreshKey={refreshKey}
+          onTotalChange={setProductCount}
+          onDeleteSelected={deleteSelected}
         />
       </div>
     </div>

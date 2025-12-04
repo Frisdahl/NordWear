@@ -1,11 +1,11 @@
-version: '3.8'
+version: "3.8"
 
 services:
   db:
     image: mysql:8
     restart: always
     environment:
-      MYSQL_DATABASE: clothing_webshop
+      MYSQL_DATABASE: nordwear_db
       MYSQL_USER: user
       MYSQL_PASSWORD: password
       MYSQL_ROOT_PASSWORD: rootpassword
@@ -20,7 +20,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     environment:
-      DATABASE_URL: mysql://user:password@db:3306/clothing_webshop
+      DATABASE_URL: mysql://user:password@db:3306/nordwear_db
     ports:
       - "5000:5000"
     depends_on:

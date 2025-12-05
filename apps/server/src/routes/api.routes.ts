@@ -8,9 +8,11 @@ import {
   deleteProducts,
 } from "../controllers/products.controller";
 import { uploadImage } from "../controllers/upload.controller";
+import { login } from "../controllers/auth.controller"; // Import the login controller
 
 const router = Router();
 
+router.post("/login", login); // Add the login route
 router.get("/products", getProducts);
 router.get("/products/:id", getProduct);
 router.post("/products", createProduct);

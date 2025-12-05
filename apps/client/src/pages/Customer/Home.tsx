@@ -48,11 +48,10 @@ const Home: React.FC = () => {
         />
       )}
 
-      {/* Hero Section */}
-      <section className="h-screen bg-gray-800 flex items-center justify-center text-white relative">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
+            {/* Hero Section */}
+            <section className="h-screen bg-gray-800 flex items-center justify-center text-white relative -mt-24">
+              <div 
+                className="absolute inset-0 bg-cover bg-center"          style={{
             backgroundImage:
               "url('https://images.unsplash.com/photo-1551232864-3f0890e58e35?q=80&w=2940&auto=format&fit=crop')",
             filter: "brightness(0.6)",

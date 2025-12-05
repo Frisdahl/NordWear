@@ -14,6 +14,8 @@ export interface ProductQuantity {
   sizeId?: number;
   colorId?: number;
   quantity?: number;
+  color?: Color;
+  size?: Size;
 }
 
 export interface ProductImage {

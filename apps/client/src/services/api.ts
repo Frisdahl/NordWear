@@ -38,3 +38,8 @@ export const fetchCategories = async () => {
   const response = await apiClient.get("/categories");
   return response.data;
 };
+
+export const login = async (email: string, password: string) => {
+  const response = await apiClient.post("/login", { email, password });
+  return response.data;
+};

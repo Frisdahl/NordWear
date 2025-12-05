@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Role, ProductStatus } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -18,8 +19,22 @@ async function main() {
   await prisma.$executeRawUnsafe('TRUNCATE TABLE `cart_item`;');
   await prisma.$executeRawUnsafe('TRUNCATE TABLE `customer_likes`;');
   await prisma.$executeRawUnsafe('TRUNCATE TABLE `shipment_size`;');
+  await prisma.$executeRawUnsafe('TRUNCATE TABLE `User`;'); // Clear User table
   await prisma.$executeRawUnsafe('SET FOREIGN_KEY_CHECKS = 1;');
   console.log('Tables cleared.');
+
+  // 1.5. Seed Users
+  const hashedPasswordAdmin = await bcrypt.hash('admin123', 10);
+  const hashedPasswordUser = await bcrypt.hash('user123', 10);
+
+  await prisma.user.createMany({
+    data: [
+      { email: 'admin@example.com', password: hashedPasswordAdmin, role: Role.ADMIN },
+      { email: 'user@example.com', password: hashedPasswordUser, role: Role.USER },
+    ],
+    skipDuplicates: true,
+  });
+  console.log('Users seeded.');
 
   // 2. Insert Categories
   await prisma.category.createMany({
@@ -57,21 +72,43 @@ async function main() {
   });
   console.log('Sizes seeded.');
 
-  // 5. Insert Products
+  // 5. Insert Products (and associated images)
+  const productsToSeed = [
+    { id: 1, name: 'Nordic Rune Tee', price: 29.99, offer_price: 24.99, category_Id: 1, status: ProductStatus.ONLINE, description: 'En behagelig t-shirt med nordisk design.' },
+    { id: 2, name: 'Viking Spirit Hoodie', price: 69.99, offer_price: null, category_Id: 2, status: ProductStatus.OFFLINE, description: 'En varm hoodie med et råt look.' },
+    { id: 3, name: 'Fjörd Explorer Jacket', price: 149.99, offer_price: 129.99, category_Id: 3, status: ProductStatus.DRAFT, description: 'En holdbar jakke til eventyrere.' },
+    { id: 4, name: 'Urban Cargo Pants', price: 79.99, offer_price: null, category_Id: 4, status: ProductStatus.ONLINE, description: 'Praktiske cargo bukser til hverdagsbrug.' },
+    { id: 5, name: 'Arctic Patrol Parka', price: 199.99, offer_price: null, category_Id: 3, status: ProductStatus.ONLINE, description: 'Ultimativ vinterparka mod kulden.' },
+    { id: 6, name: 'Longship Crewneck', price: 59.99, offer_price: 54.99, category_Id: 2, status: ProductStatus.DRAFT, description: 'Klassisk crewneck med maritimt tema.' },
+    { id: 7, name: 'Asgardian Denim Jeans', price: 89.99, offer_price: null, category_Id: 4, status: ProductStatus.ONLINE, description: 'Slidstærke jeans med god pasform.' },
+    { id: 8, name: 'Basic Logo Tee', price: 24.99, offer_price: null, category_Id: 1, status: ProductStatus.DRAFT, description: 'En simpel t-shirt med vores logo.' },
+  ];
+
   await prisma.product.createMany({
-    data: [
-      { id: 1, name: 'Nordic Rune Tee', price: 29.99, offer_price: 24.99, category_Id: 1, status: 'ONLINE', imageUrl: 'https://picsum.photos/seed/tee1/300/300' },
-      { id: 2, name: 'Viking Spirit Hoodie', price: 69.99, offer_price: null, category_Id: 2, status: 'OFFLINE', imageUrl: 'https://picsum.photos/seed/hoodie1/300/300' },
-      { id: 3, name: 'Fjörd Explorer Jacket', price: 149.99, offer_price: 129.99, category_Id: 3, status: 'DRAFT', imageUrl: 'https://picsum.photos/seed/jacket1/300/300' },
-      { id: 4, name: 'Urban Cargo Pants', price: 79.99, offer_price: null, category_Id: 4, status: 'ONLINE', imageUrl: 'https://picsum.photos/seed/pants1/300/300' },
-      { id: 5, name: 'Arctic Patrol Parka', price: 199.99, offer_price: null, category_Id: 3, status: 'ONLINE', imageUrl: 'https://picsum.photos/seed/jacket2/300/300' },
-      { id: 6, name: 'Longship Crewneck', price: 59.99, offer_price: 54.99, category_Id: 2, status: 'DRAFT', imageUrl: 'https://picsum.photos/seed/hoodie2/300/300' },
-      { id: 7, name: 'Asgardian Denim Jeans', price: 89.99, offer_price: null, category_Id: 4, status: 'ONLINE', imageUrl: 'https://picsum.photos/seed/pants2/300/300' },
-      { id: 8, name: 'Basic Logo Tee', price: 24.99, offer_price: null, category_Id: 1, status: 'DRAFT', imageUrl: 'https://picsum.photos/seed/tee2/300/300' },
-    ],
+    data: productsToSeed.map(p => ({
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      offer_price: p.offer_price,
+      category_Id: p.category_Id,
+      status: p.status,
+      description: p.description,
+    })),
     skipDuplicates: true,
   });
   console.log('Products seeded.');
+
+  // Create ProductImage entries for each product
+  for (const product of productsToSeed) {
+    await prisma.productImage.create({
+      data: {
+        productId: product.id,
+        url: `https://picsum.photos/seed/product${product.id}/300/300`, // Using original imageUrl logic
+        isThumbnail: true,
+      },
+    });
+  }
+  console.log('Product images seeded.');
 
   // 6. Insert Product Quantities
   await prisma.product_quantity.createMany({

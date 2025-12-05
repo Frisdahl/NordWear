@@ -1,38 +1,44 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import * as authService from '../services/auth.service';
 
-const prisma = new PrismaClient();
+export const login = async (req: Request, res: Response): Promise<void> => {
+  const { email, password } = req.body;
 
-export const register = async (req: Request, res: Response) => {
-    const { email, password } = req.body;
+  if (!email || !password) {
+    res.status(400).json({ message: 'Email and password are required.' });
+    return;
+  }
 
-    try {
-        const user = await prisma.user.create({
-            data: {
-                email,
-                password, // In a real application, make sure to hash the password
-            },
-        });
-        res.status(201).json(user);
-    } catch (error) {
-        res.status(500).json({ error: 'User registration failed' });
+  try {
+    const result = await authService.login(email, password);
+
+    if (!result) {
+      res.status(401).json({ message: 'Invalid credentials.' });
+      return;
     }
+
+    // On successful login, send the token and user info
+    res.status(200).json({ token: result.token, user: result.user });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
 };
 
-export const login = async (req: Request, res: Response) => {
-    const { email, password } = req.body;
+// Placeholder for future registration endpoint
+export const register = async (req: Request, res: Response): Promise<void> => {
+  const { email, password } = req.body;
 
-    try {
-        const user = await prisma.user.findUnique({
-            where: { email },
-        });
+  if (!email || !password) {
+    res.status(400).json({ message: 'Email and password are required.' });
+    return;
+  }
 
-        if (!user || user.password !== password) { // In a real application, compare hashed passwords
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-
-        res.status(200).json({ message: 'Login successful', user });
-    } catch (error) {
-        res.status(500).json({ error: 'Login failed' });
-    }
+  try {
+    const newUser = await authService.register(email, password);
+    res.status(201).json({ message: 'User registered successfully.', user: newUser });
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
 };

@@ -7,7 +7,7 @@ import {
   CheckIcon,
   TruckIcon,
   ShieldCheckIcon,
-} from "@heroicons/react/20/solid";
+} from "@heroicons/react/24/solid";
 import Accordion from "../../components/Accordion";
 
 // Mock Rating
@@ -94,7 +94,8 @@ const Product: React.FC = () => {
   const { name, price, offer_price, images } = product;
 
   return (
-    <div className="bg-white">
+    // add top padding to clear the (fixed) header — adjust pt-20 to match your header height
+    <div className="bg-white pt-20">
       {/* Main Image */}
       <div className="w-full aspect-square bg-gray-200">
         <img
@@ -108,9 +109,10 @@ const Product: React.FC = () => {
       <div className="px-4">
         <div className="flex space-x-2 py-4 overflow-x-auto">
           {images &&
-            images.map((image) => (
+            images.map((image, idx) => (
               <button
-                key={image.id}
+                // ensure key is a primitive: prefer id, fallback to url, then index
+                key={image.id ?? image.url ?? idx}
                 onClick={() => setSelectedImage(image.url)}
                 className={`h-[55px] w-[55px] flex-shrink-0 border-2 rounded-md ${
                   selectedImage === image.url
@@ -228,7 +230,7 @@ const Product: React.FC = () => {
         </div>
 
         {/* Accordions */}
-        <div className="mt-8">
+        <div className="mt-8 space-y-6">
           <Accordion
             icon={<TruckIcon className="h-6 w-6 text-gray-700" />}
             title="Gratis fragt | Gratis ombytning"
@@ -239,8 +241,95 @@ const Product: React.FC = () => {
             title="Fremragende | Trustpilot"
             content="Læs alle vores +500 anmeldelser på Trustpilot"
           />
+
+          {/* Product description shown under the two accordions */}
+          <div className="text-gray-700 whitespace-pre-line">
+            {product.description || "Ingen beskrivelse."}
+          </div>
+
+          {/* Two additional accordions under the description */}
+          <Accordion
+            icon={<ShieldCheckIcon className="h-6 w-6 text-gray-700" />}
+            title="Materialer"
+            content={
+              <ul className="list-none space-y-3 text-gray-700">
+                <li className="flex items-start gap-3">
+                  <CheckIcon className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
+                  <span>
+                    Vores T-shirts er fremstillet af 100% økologisk, langfibret
+                    bomuld, som giver en ekstra blød, åndbar og slidstærk
+                    kvalitet. Stoffet holder formen vask efter vask og føles
+                    behageligt mod huden hele dagen.
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckIcon className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
+                  <span>
+                    Den strikkede jersey-konstruktion gør stoffet naturligt
+                    fleksibelt, så T-shirten bevæger sig med kroppen uden at
+                    miste pasformen. Samtidig reducerer den højere tråd- og
+                    garnkvalitet risikoen for fnuldring.
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckIcon className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
+                  <span>
+                    Forstærkede syninger ved skuldre og hals sikrer bedre
+                    holdbarhed og gør, at T-shirten bevarer sin pasform over
+                    længere tid – selv ved hyppig brug.
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckIcon className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
+                  <span>
+                    Farveægtheden er optimeret gennem miljøvenlige
+                    farveprocesser, som giver dybere og mere holdbare farver
+                    uden brug af skadelige kemikalier.
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckIcon className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
+                  <span>
+                    Vores etiketter er vævet i blødt, hudvenligt materiale, som
+                    ikke kradser og gør T-shirten endnu mere behagelig at have
+                    på.
+                  </span>
+                </li>
+              </ul>
+            }
+          />
+
+          <Accordion
+            icon={<CheckIcon className="h-6 w-6 text-gray-700" />}
+            title="Størrelsesguide"
+            content={
+              <ul className="list-none space-y-3 text-gray-700">
+                <li className="flex items-start gap-3">
+                  <CheckIcon className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
+                  <span>
+                    Alle vores T-shirts er ”true to size”, og derfor anbefaler
+                    vi, at du vælger den størrelse, du normalt bruger.
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckIcon className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
+                  <div>
+                    <div className="font-medium">Hvad er min størrelse?</div>
+                    <div>
+                      Du kan nemt finde den rigtige størrelse ved at bruge vores
+                      størrelsesguide, hvor du kan sammenligne med T-shirts fra
+                      andre brands, du allerede kender. Guiden finder du længere
+                      oppe her på produktsiden.
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            }
+          />
         </div>
       </div>
     </div>
   );
 };
+
+export default Product;

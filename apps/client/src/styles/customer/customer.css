@@ -8,4 +8,15 @@
   .btn-primary {
     @apply bg-teal-600 text-white btn;
   }
+
+  /* Base styles for Embla Carousel */
+  .embla {
+    @apply overflow-hidden;
+  }
+  .embla__container {
+    @apply flex;
+  }
+  .embla__slide {
+    @apply relative flex-grow-0 flex-shrink-0;
+  }
 }

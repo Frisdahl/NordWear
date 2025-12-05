@@ -14,7 +14,7 @@ const Notification: React.FC<NotificationProps> = ({ message, type, onClose }) =
   const Icon = isSuccess ? CheckCircleIcon : XCircleIcon;
 
   return (
-    <div className={`fixed top-5 right-5 w-full max-w-sm rounded-md shadow-lg pointer-events-auto ${bgColor}`}>
+    <div className={`fixed top-5 right-5 w-full max-w-sm rounded-md shadow-lg pointer-events-auto z-50 ${bgColor}`}>
       <div className="rounded-md p-4">
         <div className="flex">
           <div className="flex-shrink-0">

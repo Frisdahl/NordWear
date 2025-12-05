@@ -16,6 +16,13 @@ export interface ProductQuantity {
   quantity?: number;
 }
 
+export interface ProductImage {
+  id: number;
+  url: string;
+  isThumbnail: boolean;
+  productId: number;
+}
+
 export interface Product {
   id?: number;
   name: string;
@@ -26,7 +33,9 @@ export interface Product {
   deleted_at?: Date;
   varenummer?: string;
   barkode?: string;
-  imageUrl?: string;
+  images?: ProductImage[];
+  imageUrl?: string | null;
+  colors?: string[];
   shipment_size?: ShipmentSize;
   product_quantity?: ProductQuantity[];
   description: string;

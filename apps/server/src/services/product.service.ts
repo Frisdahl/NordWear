@@ -9,20 +9,34 @@ export const getProducts = async () => {
     include: {
       category: true,
       product_quantity: {
-        select: {
-          quantity: true,
+        include: {
+          color: true, // Include the full color object
         },
+      },
+      images: {
+        where: { isThumbnail: true },
+        take: 1,
       },
     },
   });
 
-  // Calculate total_stock and num_variants for each product
+  // Calculate total_stock, num_variants, and unique colors for each product
   return products.map((product) => {
     const total_stock = product.product_quantity.reduce(
       (acc, item) => acc + item.quantity,
       0
     );
     const num_variants = product.product_quantity.length;
+    const imageUrl = product.images.length > 0 ? product.images[0].url : null;
+    
+    // Get unique colors
+    const colorMap = new Map<number, string>();
+    product.product_quantity.forEach(item => {
+      if (item.color) {
+        colorMap.set(item.color.id, item.color.name);
+      }
+    });
+    const colors = Array.from(colorMap.values());
 
     return {
       id: product.id,
@@ -31,10 +45,11 @@ export const getProducts = async () => {
       offer_price: product.offer_price,
       status: product.status,
       category_Id: product.category_Id,
-      deleted_at: product.deleted_at,
+      imageUrl: imageUrl,
       category: product.category,
       total_stock: total_stock,
       num_variants: num_variants,
+      colors: colors,
     };
   });
 };
@@ -48,6 +63,7 @@ export const getProduct = async (id: number) => {
       product_quantity: {
         include: {
           size: true,
+          color: true,
         },
       },
     },

@@ -5,7 +5,7 @@ import CustomerHeader from "../components/customer/CustomerHeader";
 const CustomerLayout: React.FC = () => (
   <>
     <CustomerHeader />
-    <main className="customer-container">
+    <main>
       <Outlet />
     </main>
   </>

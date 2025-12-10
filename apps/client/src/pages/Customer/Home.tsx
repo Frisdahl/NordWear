@@ -39,7 +39,7 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-50 text-[#1c1c1c]">
+    <div className="text-[#1c1c1c]">
       {notification.message && (
         <Notification
           message={notification.message}

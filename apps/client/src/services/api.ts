@@ -8,8 +8,25 @@ const apiClient = axios.create({
   },
 });
 
-export const fetchProducts = async () => {
-  const response = await apiClient.get("/products");
+export const fetchProducts = async (category?: string, filters?: any) => {
+  const params = new URLSearchParams();
+  if (category) {
+    params.append('category', category);
+  }
+  if (filters) {
+    if (filters.priceRange) {
+      params.append('minPrice', filters.priceRange[0]);
+      params.append('maxPrice', filters.priceRange[1]);
+    }
+    if (filters.categories) {
+      filters.categories.forEach((catId: number) => params.append('categories[]', catId.toString()));
+    }
+    if (filters.sizes) {
+      filters.sizes.forEach((sizeId: number) => params.append('sizes[]', sizeId.toString()));
+    }
+  }
+
+  const response = await apiClient.get("/products", { params });
   return response.data;
 };
 
@@ -36,6 +53,11 @@ export const uploadImage = async (base64Image: string) => {
 
 export const fetchCategories = async () => {
   const response = await apiClient.get("/categories");
+  return response.data;
+};
+
+export const fetchSizes = async () => {
+  const response = await apiClient.get("/sizes");
   return response.data;
 };
 

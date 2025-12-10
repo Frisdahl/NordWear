@@ -6,6 +6,7 @@ import {
   updateProduct,
   getCategories,
   deleteProducts,
+  getSizes,
 } from "../controllers/products.controller";
 import { uploadImage } from "../controllers/upload.controller";
 import { login } from "../controllers/auth.controller"; // Import the login controller
@@ -19,6 +20,7 @@ router.post("/products", createProduct);
 router.put("/products/:id", updateProduct);
 router.delete("/products", deleteProducts);
 router.get("/categories", getCategories);
+router.get("/sizes", getSizes);
 router.post("/upload", uploadImage);
 
 export default router;

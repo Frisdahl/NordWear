@@ -9,6 +9,7 @@ const AllProducts = lazy(() => import("./pages/Admin/all_products"));
 const AddProduct = lazy(() => import("./pages/Admin/AddProduct"));
 const Home = lazy(() => import("./pages/Customer/Home"));
 const Product = lazy(() => import("./pages/Customer/Product"));
+const Category = lazy(() => import("./pages/Customer/Category"));
 const Login = lazy(() => import("./pages/Auth/Login"));
 
 // ProtectedRoute Component
@@ -44,6 +45,7 @@ const App: React.FC = () => (
           <Route element={<CustomerLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/product/:id" element={<Product />} />
+            <Route path="/category/:categoryName" element={<Category />} />
             {/* Add more customer routes here */}
           </Route>
 

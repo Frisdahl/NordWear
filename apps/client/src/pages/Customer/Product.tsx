@@ -95,7 +95,7 @@ const Product: React.FC = () => {
 
   return (
     // add top padding to clear the (fixed) header — adjust pt-20 to match your header height
-    <div className="bg-white pt-20">
+    <div className="bg-white">
       {/* Main Image */}
       <div className="w-full aspect-square bg-gray-200">
         <img
@@ -132,7 +132,7 @@ const Product: React.FC = () => {
 
       <div className="px-4 py-6">
         {/* Product Info */}
-        <h1 className="text-2xl font-bold text-gray-800 font-['EB_Garamond']">
+        <h1 className="text-3xl text-gray-800 font-['EB_Garamond'] pb-3">
           {name}
         </h1>
         <div className="mt-2 flex items-center">

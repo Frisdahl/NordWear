@@ -6,6 +6,7 @@ import {
   deleteProducts as deleteProductsService,
   getProduct as getProductService,
   updateProduct as updateProductService,
+  getSizes as getSizesService,
 } from "../services/product.service";
 
 export const getProducts = async (
@@ -13,7 +14,21 @@ export const getProducts = async (
   res: Response
 ): Promise<void> => {
   try {
-    const products: any[] = await getProductsService();
+    const { category, minPrice, maxPrice, 'categories[]': categories, 'sizes[]': sizes } = req.query;
+
+    const minPriceNum = minPrice ? Number(minPrice) : undefined;
+    const maxPriceNum = maxPrice ? Number(maxPrice) : undefined;
+    
+    const categoryIds = categories ? (Array.isArray(categories) ? categories.map(Number) : [Number(categories)]) : undefined;
+    const sizeIds = sizes ? (Array.isArray(sizes) ? sizes.map(Number) : [Number(sizes)]) : undefined;
+
+    const products: any[] = await getProductsService(
+      category as string,
+      minPriceNum,
+      maxPriceNum,
+      categoryIds,
+      sizeIds
+    );
     res.status(200).json(products);
   } catch (error) {
     console.error("GET /api/products error:", error);
@@ -93,6 +108,22 @@ export const getCategories = async (
     res
       .status(500)
       .json({ message: "Error retrieving categories", error: msg });
+  }
+};
+
+export const getSizes = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const sizes = await getSizesService();
+    res.status(200).json(sizes);
+  } catch (error) {
+    console.error("GET /api/sizes error:", error);
+    const msg = error instanceof Error ? error.message : String(error);
+    res
+      .status(500)
+      .json({ message: "Error retrieving sizes", error: msg });
   }
 };
 

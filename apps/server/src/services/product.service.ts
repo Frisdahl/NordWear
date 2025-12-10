@@ -1,16 +1,54 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-export const getProducts = async () => {
+export const getProducts = async (
+  categoryName?: string,
+  minPrice?: number,
+  maxPrice?: number,
+  categoryIds?: number[],
+  sizeIds?: number[]
+) => {
+  const where: Prisma.productWhereInput = {
+    deleted_at: null,
+  };
+
+  if (categoryIds && categoryIds.length > 0) {
+    where.category_Id = { in: categoryIds };
+  } else if (categoryName) {
+    const capitalizedCategoryName = categoryName.charAt(0).toUpperCase() + categoryName.slice(1);
+    where.category = {
+      name: {
+        equals: capitalizedCategoryName,
+      },
+    };
+  }
+
+  if (minPrice !== undefined || maxPrice !== undefined) {
+    const priceFilter: Prisma.FloatFilter = {};
+    if (minPrice !== undefined) {
+      priceFilter.gte = minPrice;
+    }
+    if (maxPrice !== undefined) {
+      priceFilter.lte = maxPrice;
+    }
+    where.price = priceFilter;
+  }
+
+  if (sizeIds && sizeIds.length > 0) {
+    where.product_quantity = {
+      some: {
+        sizeId: { in: sizeIds },
+      },
+    };
+  }
+
   const products = await prisma.product.findMany({
-    where: {
-      deleted_at: null,
-    },
+    where,
     include: {
       category: true,
       product_quantity: {
         include: {
-          color: true, // Include the full color object
+          color: true,
         },
       },
       images: {
@@ -20,7 +58,6 @@ export const getProducts = async () => {
     },
   });
 
-  // Calculate total_stock, num_variants, and unique colors for each product
   return products.map((product) => {
     const total_stock = product.product_quantity.reduce(
       (acc, item) => acc + item.quantity,
@@ -185,6 +222,10 @@ export const updateProduct = async (id: number, data: any) => {
 
 export const getCategories = async () => {
   return await prisma.category.findMany();
+};
+
+export const getSizes = async () => {
+  return await prisma.size.findMany();
 };
 
 export const deleteProducts = async (ids: number[]) => {

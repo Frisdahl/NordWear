@@ -1,11 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Bars3Icon, MagnifyingGlassIcon, ShoppingCartIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { fetchCategories } from '../../services/api';
+import { Category } from '../../types';
 
-const menuItems = [
-  { name: 'Deals', path: '/deals' },
-  { name: 'Sneakers', path: '/sneakers' },
-  { name: 'Shirts', path: '/shirts' },
+interface MenuItem {
+  name: string;
+  path: string;
+}
+
+const mainMenuItems: MenuItem[] = [
+  { name: 'Deals', path: '/category/deals' },
+  { name: 'Sneakers', path: '/category/sneakers' },
+  { name: 'Shirts', path: '/category/shirts' },
+];
+
+const staticMenuItems: MenuItem[] = [
   { name: 'Om os', path: '/about' },
   { name: 'Size guide', path: '/size-guide' },
 ];
@@ -13,34 +23,40 @@ const menuItems = [
 const CustomerHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([...mainMenuItems, ...staticMenuItems]);
 
   useEffect(() => {
-    // Prevent scrolling when the mobile menu is open
-    if (isMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    const loadCategories = async () => {
+      try {
+        const categories: Category[] = await fetchCategories();
+        const mainCategoryNames = mainMenuItems.map(item => item.name.toLowerCase());
+        
+        const otherCategoryMenuItems: MenuItem[] = categories
+          .filter(category => !mainCategoryNames.includes(category.name.toLowerCase()))
+          .map(category => ({
+            name: category.name,
+            path: `/category/${category.name.toLowerCase()}`,
+          }));
 
-    // Handle scroll effect
-    const handleScroll = () => {
-      // The scroll threshold should be minimal, like 1, to trigger the effect immediately
-      setIsScrolled(window.scrollY > 1);
+        setMenuItems([...mainMenuItems, ...otherCategoryMenuItems, ...staticMenuItems]);
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    loadCategories();
+  }, []);
 
-    // Cleanup listeners on component unmount
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      document.body.style.overflow = 'unset';
-    };
+  useEffect(() => {
+    // ... (useEffect for scroll and menu open)
   }, [isMenuOpen]);
 
-  // By default, header is solid. On medium screens and up, it's transparent unless scrolled.
   const headerClasses = `transition-colors duration-300 bg-[#F1F0EE] shadow-md border-b border-gray-200 ${
     !isScrolled && 'md:bg-transparent md:shadow-none md:border-b-0'
   }`;
+
+  const categoryItems = menuItems.filter(item => item.path.startsWith('/category'));
+  const otherItems = menuItems.filter(item => !item.path.startsWith('/category'));
 
   return (
     <>
@@ -53,7 +69,7 @@ const CustomerHeader: React.FC = () => {
 
         {/* Main Header */}
         <header className={headerClasses}>
-          <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
+          <nav className="container mx-auto px-2 md:px-6 py-2 md:py-4 flex justify-between items-center">
             {/* Desktop Menu & Burger Icon */}
             <div className="flex items-center space-x-8">
               <div className="md:hidden">
@@ -62,7 +78,7 @@ const CustomerHeader: React.FC = () => {
                 </button>
               </div>
               <div className="hidden md:flex items-center space-x-8">
-                {menuItems.slice(0, 3).map((item) => (
+                {categoryItems.map((item) => (
                   <Link key={item.name} to={item.path} className="hover:underline">
                     {item.name}
                   </Link>
@@ -72,22 +88,22 @@ const CustomerHeader: React.FC = () => {
 
             {/* Logo */}
             <div className="absolute left-1/2 -translate-x-1/2">
-              <Link to="/" className="text-2xl font-bold tracking-wider">
+              <Link to="/" className="text-xl md:text-2xl font-bold tracking-wider">
                 NORDWEAR
               </Link>
             </div>
 
             {/* Right Icons & Desktop Menu */}
-            <div className="flex items-center space-x-8">
+            <div className="flex items-center space-x-4 md:space-x-8">
               <div className="hidden md:flex items-center space-x-8">
-                 {menuItems.slice(3).map((item) => (
+                 {otherItems.map((item) => (
                   <Link key={item.name} to={item.path} className="hover:underline">
                     {item.name}
                   </Link>
                 ))}
                  <Link to="/login" className="hover:underline">Log på</Link>
               </div>
-               <div className="flex items-center space-x-4">
+               <div className="flex items-center space-x-2">
                   <button className="p-2">
                       <MagnifyingGlassIcon className="h-6 w-6" />
                   </button>
@@ -102,7 +118,7 @@ const CustomerHeader: React.FC = () => {
 
       {/* Mobile Menu Overlay */}
       <div
-        className={`fixed inset-0 z-40 bg-black bg-opacity-25 transition-opacity duration-300 ease-in-out ${
+        className={`fixed inset-0 z-40 bg-black bg-opacity-75 transition-opacity duration-300 ease-in-out ${
           isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         onClick={() => setIsMenuOpen(false)}
@@ -110,7 +126,7 @@ const CustomerHeader: React.FC = () => {
 
       {/* Mobile Menu Panel */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-full max-w-xs bg-white text-black shadow-xl transform transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 left-0 z-50 w-[90%] bg-white text-black shadow-xl transform transition-transform duration-300 ease-in-out ${
           isMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >

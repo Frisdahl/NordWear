@@ -1,13 +1,13 @@
 import React, { useState, ReactNode } from 'react';
-import { PlusIcon, MinusIcon } from '@heroicons/react/24/solid';
+import Icon from './Icon';
+import arrowDownIcon from '@/assets/admin/svgs/arrow-down-icon.svg?raw';
 
 interface AccordionProps {
   title: string;
-  content: string;
-  icon: ReactNode;
+  content: ReactNode;
 }
 
-const Accordion: React.FC<AccordionProps> = ({ title, icon, content }) => {
+const Accordion: React.FC<AccordionProps> = ({ title, content }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -16,23 +16,19 @@ const Accordion: React.FC<AccordionProps> = ({ title, icon, content }) => {
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex justify-between items-center text-left"
       >
-        <div className="flex items-center">
-          <span className="mr-3">{icon}</span>
-          <span className="font-medium text-gray-800">{title}</span>
-        </div>
-        {isOpen ? (
-          <MinusIcon className="h-5 w-5 text-gray-500" />
-        ) : (
-          <PlusIcon className="h-5 w-5 text-gray-500" />
-        )}
+        <span className="font-serif text-lg">{title}</span>
+        <span className={`transform transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+          <Icon src={arrowDownIcon} className="h-[14px] w-[14px] text-[#1c1c1c]" />
+        </span>
       </button>
-      {isOpen && (
-        <div className="mt-3 pl-9 text-sm text-gray-600">
-          <p>{content}</p>
+      <div className={`overflow-hidden transition-max-height duration-500 ease-in-out ${isOpen ? 'max-h-screen' : 'max-h-0'}`}>
+        <div className="mt-3 text-sm text-gray-600">
+          {content}
         </div>
-      )}
+      </div>
     </div>
   );
 };
 
 export default Accordion;
+

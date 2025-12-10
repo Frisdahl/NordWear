@@ -39,16 +39,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAuthRequired }) =>
 
   return (
     <Link to={`/product/${id}`} className="group block overflow-hidden">
-      <div className="relative h-[250px] w-[250px] mx-auto">
+      <div className="relative w-full aspect-square">
         <img
-          src={imageUrl || "https://placehold.co/250x250?text=Nordwear"}
+          src={imageUrl || "https://placehold.co/400x400?text=Nordwear"}
           alt={name}
           className="absolute inset-0 h-full w-full object-cover opacity-100 group-hover:opacity-0 transition-opacity duration-300"
         />
         <img
           src={
             imageUrl ||
-            "https://placehold.co/250x250/1c1c1c/white?text=Nordwear"
+            "https://placehold.co/400x400/1c1c1c/white?text=Nordwear"
           }
           alt={name}
           className="absolute inset-0 h-full w-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -74,19 +74,19 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAuthRequired }) =>
         </button>
       </div>
 
-      <div className="relative  pt-3">
-        <h3 className="text-sm text-gray-700 group-hover:underline group-hover:underline-offset-4">
+      <div className="relative pt-3 text-center">
+        <h3 className="text-sm text-[#1c1c1c] group-hover:underline group-hover:underline-offset-4">
           {name}
         </h3>
 
-        <div className="mt-1.5 flex items-center justify-between text-gray-900">
-          <p className="tracking-wide">
+        <div className="mt-1.5 flex items-center justify-center text-black">
+          <p className="tracking-wide text-sm">
             {offer_price ? (
               <span className="flex items-center space-x-2">
-                <span className="text-[#2E7D32]">
+                <span>
                   kr. {offer_price.toFixed(2)}
                 </span>
-                <span className="line-through text-[#1c1c1ca6]">
+                <span className="line-through text-gray-500">
                   kr. {price.toFixed(2)}
                 </span>
               </span>
@@ -94,17 +94,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAuthRequired }) =>
               `kr. ${price.toFixed(2)}`
             )}
           </p>
-
-          <div className="flex items-center space-x-1">
-            {colors &&
-              colors.map((color) => (
-                <div
-                  key={color}
-                  className="h-4 w-4 rounded-full border border-gray-300"
-                  style={{ backgroundColor: color }}
-                />
-              ))}
-          </div>
         </div>
       </div>
     </Link>

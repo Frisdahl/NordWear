@@ -47,6 +47,8 @@ model customer {
   cart_item      cart_item[]
   customer_likes customer_likes[]
   order          order[]
+  user           User             @relation(fields: [userId], references: [id])
+  userId         Int              @unique
 }
 
 model customer_likes {
@@ -56,6 +58,7 @@ model customer_likes {
   customer   customer @relation(fields: [customerId], references: [id], map: "Customer_Likes_customerId_fkey")
   product    product  @relation(fields: [productId], references: [id], map: "Customer_Likes_productId_fkey")
 
+  @@unique([customerId, productId], name: "customerId_productId")
   @@index([customerId], map: "Customer_Likes_customerId_fkey")
   @@index([productId], map: "Customer_Likes_productId_fkey")
 }
@@ -148,12 +151,12 @@ model size {
 }
 
 model shipment_size {
-  id        Int      @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   weight    Float?
   height    Float?
   width     Float?
-  product   product  @relation(fields: [productId], references: [id])
-  productId Int      @unique
+  product   product @relation(fields: [productId], references: [id])
+  productId Int     @unique
 }
 
 enum ProductStatus {
@@ -168,8 +171,10 @@ enum Role {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
+  id       Int       @id @default(autoincrement())
+  name     String
+  email    String    @unique
   password String
-  role     Role   @default(USER)
+  role     Role      @default(USER)
+  customer customer?
 }

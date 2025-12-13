@@ -11,6 +11,7 @@ const Home = lazy(() => import("./pages/Customer/Home"));
 const Product = lazy(() => import("./pages/Customer/Product"));
 const Category = lazy(() => import("./pages/Customer/Category"));
 const Login = lazy(() => import("./pages/Auth/Login"));
+const CreateUser = lazy(() => import("./pages/Auth/CreateUser"));
 
 // ProtectedRoute Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedRoles?: ('ADMIN' | 'USER')[] }> = ({ children, allowedRoles }) => {
@@ -36,11 +37,11 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedRoles?: ('ADM
 
 const App: React.FC = () => (
   <Router>
-    <AuthProvider> {/* Wrap the entire app with AuthProvider */}
+    <AuthProvider> {/* Wrap the entire app with AuthProvider */} 
       <Suspense fallback={<div>Loading…</div>}>
         <Routes>
-          <Route path="/login" element={<Login />} /> {/* Login route is not protected */}
-
+          <Route path="/login" element={<Login />} /> {/* Login route is not protected */} 
+          <Route path="/create-user" element={<CreateUser />} />
           {/* Customer Routes */}
           <Route element={<CustomerLayout />}>
             <Route path="/" element={<Home />} />

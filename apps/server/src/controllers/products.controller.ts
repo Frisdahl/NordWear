@@ -7,7 +7,73 @@ import {
   getProduct as getProductService,
   updateProduct as updateProductService,
   getSizes as getSizesService,
+  likeProduct as likeProductService,
+  unlikeProduct as unlikeProductService,
+  getLikedProducts as getLikedProductsService,
+  getCustomerByUserId as getCustomerByUserIdService,
 } from "../services/product.service";
+
+// ... (existing controller functions)
+
+export const likeProduct = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { customerId, productId } = req.body;
+    await likeProductService(customerId, productId);
+    res.status(200).json({ message: "Product liked successfully." });
+  } catch (error) {
+    console.error("POST /api/products/like error:", error);
+    const msg = error instanceof Error ? error.message : String(error);
+    res.status(500).json({ message: "Error liking product", error: msg });
+  }
+};
+
+export const unlikeProduct = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { customerId, productId } = req.body;
+    await unlikeProductService(customerId, productId);
+    res.status(200).json({ message: "Product unliked successfully." });
+  } catch (error) {
+    console.error("DELETE /api/products/unlike error:", error);
+    const msg = error instanceof Error ? error.message : String(error);
+    res.status(500).json({ message: "Error unliking product", error: msg });
+  }
+};
+
+export const getLikedProducts = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const customerId = parseInt(req.params.customerId, 10);
+    if (isNaN(customerId)) {
+      res.status(400).json({ message: "Invalid customer ID." });
+      return;
+    }
+    const likedProducts = await getLikedProductsService(customerId);
+    res.status(200).json(likedProducts);
+  } catch (error) {
+    console.error(`GET /api/products/liked/:customerId error:`, error);
+    const msg = error instanceof Error ? error.message : String(error);
+    res.status(500).json({ message: "Error retrieving liked products", error: msg });
+  }
+};
+
+export const getCustomerByUserId = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = parseInt(req.params.userId, 10);
+    if (isNaN(userId)) {
+      res.status(400).json({ message: "Invalid user ID." });
+      return;
+    }
+    const customer = await getCustomerByUserIdService(userId);
+    if (!customer) {
+      res.status(404).json({ message: "Customer not found." });
+      return;
+    }
+    res.status(200).json(customer);
+  } catch (error) {
+    console.error(`GET /api/customer/by-user/:userId error:`, error);
+    const msg = error instanceof Error ? error.message : String(error);
+    res.status(500).json({ message: "Error retrieving customer", error: msg });
+  }
+};
 
 export const getProducts = async (
   req: Request,

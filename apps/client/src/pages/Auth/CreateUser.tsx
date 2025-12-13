@@ -1,54 +1,73 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { login as loginApi } from '../../services/api';
+import { register as registerApi } from '../../services/api';
+import Notification from '../../components/Notification';
 
-const Login: React.FC = () => {
+type NotificationState = {
+  message: string;
+  type: 'success' | 'error';
+} | null;
+
+const CreateUser: React.FC = () => {
+  const [navn, setNavn] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const { login } = useAuth();
+  const [notification, setNotification] = useState<NotificationState>(null);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null); // Clear previous errors
+    setNotification(null);
 
     try {
-      const response = await loginApi(email, password);
-      // Assuming response contains token and user object { id, email, role }
-      login(response.token, response.user);
-
-      if (response.user.role === 'ADMIN') {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/');
-      }
+      await registerApi(navn, email, password);
+      setNotification({ message: 'Bruger oprettet med succes!', type: 'success' });
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
     } catch (err: any) {
-      console.error('Login error:', err);
-      // Display a user-friendly error message
+      console.error('Registration error:', err);
       if (err.response && err.response.data && err.response.data.message) {
-        setError(err.response.data.message);
+        setNotification({ message: err.response.data.message, type: 'error' });
       } else {
-        setError('Login mislykkedes. Tjek dine loginoplysninger.');
+        setNotification({ message: 'Oprettelse af bruger mislykkedes.', type: 'error' });
       }
     }
   };
 
+  const handleCloseNotification = () => {
+    setNotification(null);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F0F0F0]">
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={handleCloseNotification}
+        />
+      )}
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mx-auto">
         <div className="text-center mb-6">
-          {/* Company Logo */}
           <h1 className="text-3xl font-bold text-[#1c1c1c] font-['EB_Garamond']">NORDWEAR</h1>
         </div>
 
         <form onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-              <span className="block sm:inline">{error}</span>
-            </div>
-          )}
+          <div className="mb-4">
+            <label htmlFor="navn" className="block text-sm font-medium text-gray-700 mb-1">
+              Navn
+            </label>
+            <input
+              type="text"
+              id="navn"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Dit navn"
+              value={navn}
+              onChange={(e) => setNavn(e.target.value)}
+              required
+            />
+          </div>
 
           <div className="mb-4">
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -78,13 +97,10 @@ const Login: React.FC = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <div className="flex justify-between mt-2">
-              <a href="#" className="text-sm text-black hover:opacity-75">
-                Glemt adgangskode?
-              </a>
-              <a href="/create-user" className="text-sm text-black hover:opacity-75">
-                Opret bruger
-              </a>
+             <div className="flex justify-between mt-2">
+                <a href="/login" className="text-sm text-black hover:opacity-75">
+                    Allerede bruger? Log ind
+                </a>
             </div>
           </div>
 
@@ -92,7 +108,7 @@ const Login: React.FC = () => {
             type="submit"
             className="w-full bg-[#1c1c1c] text-white py-2 px-4 rounded-md text-lg font-medium hover:bg-[#282828] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1c1c1c]"
           >
-            Fortsæt
+            Opret bruger
           </button>
         </form>
       </div>
@@ -100,4 +116,5 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default CreateUser;
+

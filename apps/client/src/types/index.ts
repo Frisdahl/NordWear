@@ -46,6 +46,7 @@ export interface Product {
     price: number;
     stock: number;
   }[];
+  selectedSize?: string;
 }
 
 export interface Category {

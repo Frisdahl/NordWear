@@ -65,3 +65,28 @@ export const login = async (email: string, password: string) => {
   const response = await apiClient.post("/login", { email, password });
   return response.data;
 };
+
+export const register = async (name: string, email:string, password: string) => {
+  const response = await apiClient.post("/register", { name, email, password });
+  return response.data;
+};
+
+export const likeProduct = async (customerId: number, productId: number) => {
+  const response = await apiClient.post("/products/like", { customerId, productId });
+  return response.data;
+};
+
+export const unlikeProduct = async (customerId: number, productId: number) => {
+  const response = await apiClient.delete("/products/unlike", { data: { customerId, productId } });
+  return response.data;
+};
+
+export const getLikedProducts = async (customerId: number) => {
+  const response = await apiClient.get(`/products/liked/${customerId}`);
+  return response.data;
+};
+
+export const getCustomerByUserId = async (userId: number) => {
+  const response = await apiClient.get(`/customer/by-user/${userId}`);
+  return response.data;
+};

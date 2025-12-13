@@ -263,3 +263,50 @@ export const deleteProducts = async (ids: number[]) => {
 
   return result;
 };
+
+export const likeProduct = async (customerId: number, productId: number) => {
+    return await prisma.customer_likes.create({
+        data: {
+            customerId,
+            productId,
+        },
+    });
+};
+
+export const unlikeProduct = async (customerId: number, productId: number) => {
+    const like = await prisma.customer_likes.findUnique({
+        where: {
+            customerId_productId: {
+                customerId,
+                productId,
+            }
+        },
+    });
+
+    if (like) {
+        return await prisma.customer_likes.delete({
+            where: {
+                id: like.id,
+            },
+        });
+    }
+};
+
+export const getLikedProducts = async (customerId: number) => {
+    return await prisma.customer_likes.findMany({
+        where: {
+            customerId,
+        },
+        include: {
+            product: true,
+        },
+    });
+};
+
+export const getCustomerByUserId = async (userId: number) => {
+    return await prisma.customer.findUnique({
+        where: {
+            userId,
+        },
+    });
+};

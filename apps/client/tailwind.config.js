@@ -12,11 +12,13 @@ module.exports = {
       },
 
       fontFamily: {
-        sans: ["Figtree", "sans-serif"],
+        sans: ["Figtree", "Montserrat", "sans-serif"],
         serif: ["EB Garamond", "serif"],
       },
 
       fontSize: {
+        "13": "13px",
+        "11.7": "11.7px",
         fluidTitle: "clamp(1.5rem, 3vw + 1rem, 2.5rem)",
         fluidSmall: "clamp(0.875rem, 0.5vw + 0.5rem, 1.125rem)",
         hero: "clamp(2rem, 3vw + 1rem, 4rem)",

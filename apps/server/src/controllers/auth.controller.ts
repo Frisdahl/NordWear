@@ -25,17 +25,16 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-// Placeholder for future registration endpoint
 export const register = async (req: Request, res: Response): Promise<void> => {
-  const { email, password } = req.body;
+  const { name, email, password } = req.body;
 
-  if (!email || !password) {
-    res.status(400).json({ message: 'Email and password are required.' });
+  if (!name || !email || !password) {
+    res.status(400).json({ message: 'Name, email and password are required.' });
     return;
   }
 
   try {
-    const newUser = await authService.register(email, password);
+    const newUser = await authService.register(name, email, password);
     res.status(201).json({ message: 'User registered successfully.', user: newUser });
   } catch (error) {
     console.error('Registration error:', error);

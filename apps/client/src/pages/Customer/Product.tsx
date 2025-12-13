@@ -9,6 +9,9 @@ import {
   ShieldCheckIcon,
 } from "@heroicons/react/24/solid";
 import Accordion from "../../components/Accordion";
+import { formatPrice } from "../../utils/formatPrice";
+import useCart from "../../hooks/useCart";
+import Notification from "../../components/Notification";
 
 // Mock Rating
 const rating = { value: 4.7, count: 128 };
@@ -25,6 +28,11 @@ const Product: React.FC = () => {
   const [product, setProduct] = useState<ProductType | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
+  const { addToCart } = useCart();
 
   // State for selections
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -85,6 +93,19 @@ const Product: React.FC = () => {
     }
   }, [availableColors, availableSizes, selectedColor, selectedSize]);
 
+  const handleAddToCart = () => {
+    if (product) {
+      addToCart({ ...product, selectedSize, imageUrl: selectedImage });
+      setNotification({
+        message: "Produkt tilføjet til kurv!",
+        type: "success",
+      });
+      setTimeout(() => {
+        setNotification(null);
+      }, 2000);
+    }
+  };
+
   if (loading) return <div className="text-center py-20">Loading...</div>;
   if (error)
     return <div className="text-center py-20 text-red-500">{error}</div>;
@@ -95,7 +116,14 @@ const Product: React.FC = () => {
 
   return (
     // add top padding to clear the (fixed) header — adjust pt-20 to match your header height
-    <div className="bg-white">
+    <div className="bg-[#f2f1f0]">
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
       {/* Main Image */}
       <div className="w-full aspect-square bg-gray-200">
         <img
@@ -152,7 +180,6 @@ const Product: React.FC = () => {
             {rating.value.toFixed(1)} ({rating.count} anmeldelser)
           </p>
         </div>
-
         {/* Key Sales Points */}
         <ul className="mt-4 space-y-2 text-sm text-gray-600">
           {salesPoints.map((point) => (
@@ -162,27 +189,25 @@ const Product: React.FC = () => {
             </li>
           ))}
         </ul>
-
         {/* Price */}
         <div className="mt-6">
           <p className="font-['EB_Garamond']">
             {offer_price ? (
               <span className="flex items-baseline gap-3">
                 <span className="text-[1.3125rem] font-bold text-[rgb(48,122,7)]">
-                  kr. {offer_price.toFixed(2)}
+                  {formatPrice(offer_price)}
                 </span>
                 <span className="line-through text-lg text-[#1c1c1ca6]">
-                  kr. {price.toFixed(2)}
+                  {formatPrice(price)}
                 </span>
               </span>
             ) : (
               <span className="text-[1.3125rem] font-bold text-gray-900">
-                kr. {price.toFixed(2)}
+                {formatPrice(price)}
               </span>
             )}
           </p>
         </div>
-
         {/* Color Swatches */}
         <div className="mt-6">
           <h3 className="text-sm font-medium text-gray-900">Farve</h3>
@@ -205,7 +230,6 @@ const Product: React.FC = () => {
             ))}
           </div>
         </div>
-
         {/* Size Dropdown */}
         <div className="mt-6">
           <h3 className="text-sm font-medium text-gray-900">Størrelse</h3>
@@ -221,14 +245,15 @@ const Product: React.FC = () => {
             ))}
           </select>
         </div>
-
         {/* Add to Cart Button */}
         <div className="mt-8">
-          <button className="w-full bg-[#282828] text-white py-3 rounded-md text-lg font-medium hover:bg-opacity-90">
+          <button
+            onClick={handleAddToCart}
+            className="w-full bg-[#1c1c1c] text-white text-[1rem] py-3 rounded-md text-lg  hover:bg-opacity-90"
+          >
             Føj til indkøbskurv
           </button>
         </div>
-
         {/* Accordions */}
         <div className="mt-8 space-y-6">
           <Accordion

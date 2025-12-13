@@ -1,40 +1,79 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Product } from "../../types";
 import { HeartIcon as HeartIconOutline } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
+import { useAuth } from "../../contexts/AuthContext";
+import { likeProduct, unlikeProduct, getLikedProducts, getCustomerByUserId } from "../../services/api";
 
 interface ProductCardProps {
   product: Product;
   onAuthRequired?: () => void;
 }
 
-// Mock auth hook for demonstration. In a real app, this would come from a context or global state.
-const useAuth = () => {
-  // To test the "logged in" state, you could temporarily change this to:
-  // return { user: { name: 'Test User' } };
-  return { user: null };
-};
-
 const ProductCard: React.FC<ProductCardProps> = ({ product, onAuthRequired }) => {
   const { id, name, price, offer_price, imageUrl, colors } = product;
   const [isLiked, setIsLiked] = useState(false);
   const { user } = useAuth();
+  const [customerId, setCustomerId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchCustomer = async () => {
+      if (user) {
+        try {
+          const customer = await getCustomerByUserId(user.id);
+          setCustomerId(customer.id);
+        } catch (error) {
+          console.error("Error fetching customer data:", error);
+        }
+      }
+    };
+
+    fetchCustomer();
+  }, [user]);
+
+  useEffect(() => {
+    const checkIfLiked = async () => {
+      if (customerId) {
+        try {
+          const likedProducts = await getLikedProducts(customerId);
+          const isProductLiked = likedProducts.some((likedProduct: any) => likedProduct.productId === id);
+          setIsLiked(isProductLiked);
+        } catch (error) {
+          console.error("Error checking if product is liked:", error);
+        }
+      }
+    };
+
+    checkIfLiked();
+  }, [customerId, id]);
 
   const discountPercent =
     offer_price && price
       ? Math.round(((price - offer_price) / price) * 100)
       : 0;
 
-  const handleLikeClick = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent navigation when clicking the heart
+  const handleLikeClick = async (e: React.MouseEvent) => {
+    e.preventDefault(); 
     if (!user) {
       if (onAuthRequired) {
         onAuthRequired();
       }
       return;
     }
-    setIsLiked(!isLiked);
+
+    if (customerId) {
+      try {
+        if (isLiked) {
+          await unlikeProduct(customerId, id);
+        } else {
+          await likeProduct(customerId, id);
+        }
+        setIsLiked(!isLiked);
+      } catch (error) {
+        console.error("Error liking/unliking product:", error);
+      }
+    }
   };
 
   return (

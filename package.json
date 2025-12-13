@@ -23,6 +23,7 @@
   "dependencies": {
     "@prisma/client": "^4.16.2",
     "express": "^4.17.1",
-    "mysql2": "^2.2.5"
+    "mysql2": "^2.2.5",
+    "zustand": "^5.0.9"
   }
 }

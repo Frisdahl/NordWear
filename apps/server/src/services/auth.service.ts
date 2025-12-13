@@ -40,18 +40,25 @@ export const login = async (email: string, password: string): Promise<{ token: s
   };
 };
 
-export const register = async (email: string, password: string): Promise<User> => {
-    // Hash the password
+export const register = async (name: string, email: string, password: string): Promise<User> => {
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create the user in the database
-    const user = await prisma.user.create({
+  
+    return prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.create({
         data: {
-            email,
-            password: hashedPassword,
-            role: Role.USER, // Default to USER role for registration
+          name,
+          email,
+          password: hashedPassword,
+          role: Role.USER,
         },
+      });
+  
+      await prisma.customer.create({
+        data: {
+          userId: user.id,
+        },
+      });
+  
+      return user;
     });
-
-    return user;
-};
+  };

@@ -11,6 +11,7 @@ import {
   unlikeProduct,
   getLikedProducts,
   getCustomerByUserId,
+  searchProducts,
 } from "../controllers/products.controller";
 import { uploadImage } from "../controllers/upload.controller";
 import { login, register } from "../controllers/auth.controller"; // Import the login controller
@@ -20,6 +21,7 @@ const router = Router();
 router.post("/login", login); // Add the login route
 router.post("/register", register);
 router.get("/products", getProducts);
+router.get("/products/search", searchProducts);
 router.get("/products/:id", getProduct);
 router.post("/products", createProduct);
 router.put("/products/:id", updateProduct);

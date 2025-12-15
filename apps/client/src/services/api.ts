@@ -8,7 +8,7 @@ const apiClient = axios.create({
   },
 });
 
-export const fetchProducts = async (category?: string, filters?: any) => {
+export const fetchProducts = async (category?: string, filters?: any, limit?: number) => {
   const params = new URLSearchParams();
   if (category) {
     params.append('category', category);
@@ -25,8 +25,17 @@ export const fetchProducts = async (category?: string, filters?: any) => {
       filters.sizes.forEach((sizeId: number) => params.append('sizes[]', sizeId.toString()));
     }
   }
+  if (limit) {
+    params.append('limit', limit.toString());
+  }
 
   const response = await apiClient.get("/products", { params });
+  return response.data;
+};
+
+
+export const searchProducts = async (query: string) => {
+  const response = await apiClient.get(`/products/search?q=${query}`);
   return response.data;
 };
 

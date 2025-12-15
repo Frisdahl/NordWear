@@ -11,7 +11,27 @@ import {
   unlikeProduct as unlikeProductService,
   getLikedProducts as getLikedProductsService,
   getCustomerByUserId as getCustomerByUserIdService,
+  searchProducts as searchProductsService,
 } from "../services/product.service";
+
+export const searchProducts = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { q } = req.query;
+    if (typeof q !== "string") {
+      res.status(400).json({ message: "Invalid search query." });
+      return;
+    }
+    const products = await searchProductsService(q);
+    res.status(200).json(products);
+  } catch (error) {
+    console.error("GET /api/products/search error:", error);
+    const msg = error instanceof Error ? error.message : String(error);
+    res.status(500).json({ message: "Error searching for products", error: msg });
+  }
+};
 
 // ... (existing controller functions)
 
@@ -80,10 +100,11 @@ export const getProducts = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { category, minPrice, maxPrice, 'categories[]': categories, 'sizes[]': sizes } = req.query;
+    const { category, minPrice, maxPrice, 'categories[]': categories, 'sizes[]': sizes, limit } = req.query;
 
     const minPriceNum = minPrice ? Number(minPrice) : undefined;
     const maxPriceNum = maxPrice ? Number(maxPrice) : undefined;
+    const limitNum = limit ? Number(limit) : undefined;
     
     const categoryIds = categories ? (Array.isArray(categories) ? categories.map(Number) : [Number(categories)]) : undefined;
     const sizeIds = sizes ? (Array.isArray(sizes) ? sizes.map(Number) : [Number(sizes)]) : undefined;
@@ -93,7 +114,8 @@ export const getProducts = async (
       minPriceNum,
       maxPriceNum,
       categoryIds,
-      sizeIds
+      sizeIds,
+      limitNum
     );
     res.status(200).json(products);
   } catch (error) {

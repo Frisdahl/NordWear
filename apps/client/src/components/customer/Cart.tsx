@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { XMarkIcon, TrashIcon } from "@heroicons/react/24/outline";
 import useCart from "../../hooks/useCart";
 import CustomerCartIcon from "../../assets/customer/customer-cart.svg";
@@ -129,16 +130,21 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
               jeg accepterer handelsbetingelserne.
             </label>
           </div>
-          <button
-            className={`w-full mt-4 py-3 rounded-md ${
-              termsAccepted
-                ? "bg-[#1c1c1c] text-white"
-                : "bg-gray-200 text-white"
-            }`}
-            disabled={!termsAccepted}
-          >
-            Gå til betaling
-          </button>
+          {termsAccepted ? (
+            <Link
+              to="/checkout"
+              className="w-full block text-center mt-4 py-3 rounded-md bg-[#1c1c1c] text-white"
+            >
+              Gå til betaling
+            </Link>
+          ) : (
+            <button
+              className={`w-full mt-4 py-3 rounded-md bg-gray-200 text-white`}
+              disabled
+            >
+              Gå til betaling
+            </button>
+          )}
         </div>
       </div>
     </>

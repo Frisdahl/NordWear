@@ -6,7 +6,8 @@ export const getProducts = async (
   minPrice?: number,
   maxPrice?: number,
   categoryIds?: number[],
-  sizeIds?: number[]
+  sizeIds?: number[],
+  limit?: number
 ) => {
   const where: Prisma.productWhereInput = {
     deleted_at: null,
@@ -56,6 +57,7 @@ export const getProducts = async (
         take: 1,
       },
     },
+    take: limit, // Apply the limit here
   });
 
   return products.map((product) => {
@@ -120,6 +122,48 @@ export const getProduct = async (id: number) => {
 
   return { ...product, variants };
 };
+
+export const searchProducts = async (query: string) => {
+  const products = await prisma.product.findMany({
+    where: {
+      OR: [
+        {
+          name: {
+            contains: query,
+          },
+        },
+        {
+          description: {
+            contains: query,
+          },
+        },
+      ],
+      deleted_at: null,
+    },
+    include: {
+      category: true,
+      images: {
+        where: { isThumbnail: true },
+        take: 1,
+      },
+    },
+  });
+
+  return products.map((product) => {
+    const imageUrl = product.images.length > 0 ? product.images[0].url : null;
+    return {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      offer_price: product.offer_price,
+      status: product.status,
+      category_Id: product.category_Id,
+      imageUrl: imageUrl,
+      category: product.category,
+    };
+  });
+};
+
 
 export const createProduct = async (data: any) => {
   const { shipment_size, variants, images, ...productData } = data;
@@ -293,13 +337,33 @@ export const unlikeProduct = async (customerId: number, productId: number) => {
 };
 
 export const getLikedProducts = async (customerId: number) => {
-    return await prisma.customer_likes.findMany({
+    const likedProducts = await prisma.customer_likes.findMany({
         where: {
             customerId,
         },
         include: {
-            product: true,
+            product: {
+                include: {
+                    images: {
+                        where: { isThumbnail: true },
+                        take: 1,
+                    },
+                    category: true,
+                },
+            },
         },
+    });
+
+    return likedProducts.map(lp => {
+        const product = lp.product;
+        const imageUrl = product.images.length > 0 ? product.images[0].url : null;
+        return {
+            ...lp,
+            product: {
+                ...product,
+                imageUrl,
+            },
+        };
     });
 };
 

@@ -84,12 +84,16 @@ const Category: React.FC = () => {
       case 'deals':
         return "Gør et kup! Her finder du vores bedste tilbud på udvalgte varer. Skynd dig, før det er for sent.";
       default:
-        return `Udforsk vores udvalg af ${categoryName} i høj kvalitet. Designet i Danmark og produceret i Europa.`;
+        if (categoryName) {
+          return `Udforsk vores udvalg af ${categoryName} i høj kvalitet. Designet i Danmark og produceret i Europa.`;
+        }
+        return 'Udforsk vores store udvalg af produkter i høj kvalitet. Designet i Danmark og produceret i Europa.';
     }
   };
 
   const capitalizedCategoryName =
-    categoryName?.charAt(0).toUpperCase() + categoryName?.slice(1);
+    categoryName?.charAt(0).toUpperCase() + categoryName?.slice(1) || 'Alle Produkter';
+
 
   return (
     <div className="py-8">

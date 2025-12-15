@@ -4,14 +4,22 @@ import { Product } from "../../types";
 import { HeartIcon as HeartIconOutline } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
 import { useAuth } from "../../contexts/AuthContext";
-import { likeProduct, unlikeProduct, getLikedProducts, getCustomerByUserId } from "../../services/api";
+import {
+  likeProduct,
+  unlikeProduct,
+  getLikedProducts,
+  getCustomerByUserId,
+} from "../../services/api";
 
 interface ProductCardProps {
   product: Product;
   onAuthRequired?: () => void;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, onAuthRequired }) => {
+const ProductCard: React.FC<ProductCardProps> = ({
+  product,
+  onAuthRequired,
+}) => {
   const { id, name, price, offer_price, imageUrl, colors } = product;
   const [isLiked, setIsLiked] = useState(false);
   const { user } = useAuth();
@@ -37,7 +45,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAuthRequired }) =>
       if (customerId) {
         try {
           const likedProducts = await getLikedProducts(customerId);
-          const isProductLiked = likedProducts.some((likedProduct: any) => likedProduct.productId === id);
+          const isProductLiked = likedProducts.some(
+            (likedProduct: any) => likedProduct.productId === id
+          );
           setIsLiked(isProductLiked);
         } catch (error) {
           console.error("Error checking if product is liked:", error);
@@ -54,7 +64,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAuthRequired }) =>
       : 0;
 
   const handleLikeClick = async (e: React.MouseEvent) => {
-    e.preventDefault(); 
+    e.preventDefault();
     if (!user) {
       if (onAuthRequired) {
         onAuthRequired();
@@ -77,20 +87,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAuthRequired }) =>
   };
 
   return (
-    <Link to={`/product/${id}`} className="group block overflow-hidden">
+    <Link to={`/product/${id}`} className="block overflow-hidden w-full">
       <div className="relative w-full aspect-square">
+        {}
         <img
-          src={imageUrl || "https://placehold.co/400x400?text=Nordwear"}
+          src={imageUrl || "https://placehold.co/450x450?text=Nordwear"}
           alt={name}
-          className="absolute inset-0 h-full w-full object-cover opacity-100 group-hover:opacity-0 transition-opacity duration-300"
-        />
-        <img
-          src={
-            imageUrl ||
-            "https://placehold.co/400x400/1c1c1c/white?text=Nordwear"
-          }
-          alt={name}
-          className="absolute inset-0 h-full w-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          className="  h-full w-full object-cover opacity-100"
         />
 
         {/* Discount Badge */}
@@ -114,23 +117,19 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAuthRequired }) =>
       </div>
 
       <div className="relative pt-3 text-center">
-        <h3 className="text-sm text-[#1c1c1c] group-hover:underline group-hover:underline-offset-4">
-          {name}
-        </h3>
+        <h3 className="text-[1rem] text-[#1c1c1c] ">{name}</h3>
 
-        <div className="mt-1.5 flex items-center justify-center text-black">
-          <p className="tracking-wide text-sm">
+        <div className="mt-1.5 flex items-center justify-center">
+          <p className="tracking-wide text-[1rem] text-[#1c1c1ca6]">
             {offer_price ? (
               <span className="flex items-center space-x-2">
-                <span>
-                  kr. {offer_price.toFixed(2)}
-                </span>
-                <span className="line-through text-gray-500">
-                  kr. {price.toFixed(2)}
+                <span>{offer_price} kr.</span>
+                <span className="line-through text-[#1c1c1ca6]">
+                  {price} kr.
                 </span>
               </span>
             ) : (
-              `kr. ${price.toFixed(2)}`
+              `${price} kr.`
             )}
           </p>
         </div>

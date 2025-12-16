@@ -118,7 +118,7 @@ const Home: React.FC = () => {
             Til den moderne eventyrer. Kompromisløs kvalitet inspireret af
             naturen.
           </p>
-          <button className="bg-white text-[#1c1c1c] font-bold py-3 px-8 hover:bg-opacity-90 transition-transform transform">
+          <button className="bg-[#f2f1f0] text-[#1c1c1c] font-normal py-3 px-8 hover:bg-opacity-90 transition-transform transform">
             Se alle produkter
           </button>
         </div>

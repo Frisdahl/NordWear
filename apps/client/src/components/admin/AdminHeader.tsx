@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import clockSvg from "@/assets/admin/svgs/clock-icon.svg?raw";
-import loopSvg from "@/assets/admin/svgs/loop-icon.svg?raw";
+import loopSvg from "@/assets/loop-icon.svg?raw";
 import ArrowSvg from "@/assets/admin/svgs/arrow-down-icon.svg?raw";
 import Icon from "../Icon";
 

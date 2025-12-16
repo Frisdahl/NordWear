@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import CustomerCartIcon from "../../assets/customer/customer-cart.svg";
-import { fetchCategories } from "../../services/api";
-import { Category } from "../../types";
+// remove next two imports
+// import { fetchCategories } from "../../services/api";
+// import { Category } from "../../types";
 import { useAuth } from "../../contexts/AuthContext";
 import useCart from "../../hooks/useCart";
 import Notification from "../Notification";
@@ -16,9 +17,10 @@ interface MenuItem {
 }
 
 const mainMenuItems: MenuItem[] = [
-  { name: "Deals", path: "/category/deals" },
   { name: "Sneakers", path: "/category/sneakers" },
   { name: "Shirts", path: "/category/shirts" },
+  { name: "Hoodies", path: "/category/hoodies" },
+  { name: "Jackets", path: "/category/jackets" },
 ];
 
 const staticMenuItems: MenuItem[] = [
@@ -45,58 +47,9 @@ const CustomerHeader: React.FC = () => {
   const location = useLocation();
   const headerRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
-  // const lastNonSearchPathRef = React.useRef<string>("/");
-
-  // // Remember the last non-search route
-  // useEffect(() => {
-  //   const current = location.pathname + location.search;
-  //   if (location.pathname !== "/search") {
-  //     lastNonSearchPathRef.current = current;
-  //   }
-  // }, [location]);
 
   const handleSearchClick = () => {
-    setIsSearchOverlayOpen(true);
-  };
-
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const categories: Category[] = await fetchCategories();
-        const mainCategoryNames = mainMenuItems.map((item) =>
-          item.name.toLowerCase()
-        );
-
-        const otherCategoryMenuItems: MenuItem[] = categories
-          .filter(
-            (category) =>
-              !mainCategoryNames.includes(category.name.toLowerCase())
-          )
-          .map((category) => ({
-            name: category.name,
-            path: `/category/${category.name.toLowerCase()}`,
-          }));
-
-        setMenuItems([
-          ...mainMenuItems,
-          ...otherCategoryMenuItems,
-          ...staticMenuItems,
-        ]);
-      } catch (error) {
-        console.error("Failed to fetch categories:", error);
-      }
-    };
-
-    loadCategories();
-  }, []);
-
-  const handleLogout = () => {
-    logout();
-    setNotification({ message: "Du er nu logget ud.", type: "success" });
-    setTimeout(() => {
-      setNotification(null);
-      navigate("/");
-    }, 2000);
+    setIsSearchOverlayOpen(!isSearchOverlayOpen);
   };
 
   useEffect(() => {
@@ -123,16 +76,12 @@ const CustomerHeader: React.FC = () => {
 
   const headerClasses = `transition-colors duration-300 ${
     isScrolled
-      ? "bg-[#f2f1f0] border-b border-[#D1D0CE] shadow-md"
+      ? "bg-[#f2f1f0] border-b border-[#D1D0CE]"
       : "bg-[#f2f1f0] border-b border-[#D1D0CE]"
   }`;
 
-  const categoryItems = menuItems.filter((item) =>
-    item.path.startsWith("/category")
-  );
-  const otherItems = menuItems.filter(
-    (item) => !item.path.startsWith("/category")
-  );
+  // Show all (main + static) links on the left
+  const leftItems = menuItems;
 
   const authLink = isAuthenticated ? (
     <Link to="/customer/orders">Konto</Link>
@@ -143,6 +92,11 @@ const CustomerHeader: React.FC = () => {
   return (
     <>
       <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      <SearchOverlay
+        isOpen={isSearchOverlayOpen}
+        onClose={() => setIsSearchOverlayOpen(false)}
+        headerHeight={headerHeight}
+      />
       {notification && (
         <Notification
           message={notification.message}
@@ -165,12 +119,12 @@ const CustomerHeader: React.FC = () => {
                   <Bars3Icon className="h-6 w-6" />
                 </button>
               </div>
-              <div className="hidden md:flex items-center space-x-8">
-                {categoryItems.map((item) => (
+              <div className="hidden md:flex items-center space-x-4 text-[0.875rem]">
+                {leftItems.map((item) => (
                   <Link
                     key={item.name}
                     to={item.path}
-                    className="group/link relative"
+                    className="group/link relative uppercase tracking-wide"
                   >
                     {item.name}
                     <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
@@ -186,26 +140,19 @@ const CustomerHeader: React.FC = () => {
                 NORDWEAR
               </Link>
             </div>
-            <div className="flex items-center space-x-4 md:space-x-8">
+            <div className="flex items-center space-x-4 md:space-x-4">
               <div className="hidden md:flex items-center space-x-8">
-                {otherItems.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.path}
-                    className="group/link relative"
-                  >
-                    {item.name}
-                    <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
-                  </Link>
-                ))}
-                <div className="group/link relative inline-block">
+                <div className="group/link relative inline-block text-[#1c1c1ca6]">
                   {authLink}
                   <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
                 </div>
               </div>
 
               <div className="flex items-center space-x-2">
-                <button onClick={handleSearchClick} className="p-2">
+                <button
+                  onClick={handleSearchClick}
+                  className="p-2 text-[#1c1c1ca6]"
+                >
                   Søg
                 </button>
                 <button
@@ -225,7 +172,7 @@ const CustomerHeader: React.FC = () => {
                 </button>
                 <button
                   onClick={() => setIsCartOpen(true)}
-                  className="p-2 hidden md:block"
+                  className="p-2 hidden md:block text-[#1c1c1ca6]"
                 >
                   Indkøbskurv {cartCount > 0 && `(${cartCount})`}
                 </button>

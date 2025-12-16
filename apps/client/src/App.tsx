@@ -22,7 +22,6 @@ const Login = lazy(() => import("./pages/Auth/Login"));
 const CreateUser = lazy(() => import("./pages/Auth/CreateUser"));
 const CheckoutLayout = lazy(() => import("./layouts/CheckoutLayout"));
 const Checkout = lazy(() => import("./pages/Customer/Checkout"));
-const Search = lazy(() => import("./pages/Customer/Search"));
 
 // ProtectedRoute Component
 const ProtectedRoute: React.FC<{
@@ -64,7 +63,6 @@ const App: React.FC = () => (
             <Route path="/" element={<Home />} />
             <Route path="/product/:id" element={<Product />} />
             <Route path="/category/:categoryName?" element={<Category />} />
-            <Route path="/search" element={<Search />} />
             {/* Add more customer routes here */}
           </Route>
           <Route

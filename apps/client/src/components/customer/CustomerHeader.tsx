@@ -1,18 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import {
-  Bars3Icon,
-  MagnifyingGlassIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import CustomerCartIcon from "../../assets/customer/customer-cart.svg";
-import { searchProducts, fetchCategories } from "../../services/api";
-import { Category, Product } from "../../types";
+import { fetchCategories } from "../../services/api";
+import { Category } from "../../types";
 import { useAuth } from "../../contexts/AuthContext";
 import useCart from "../../hooks/useCart";
 import Notification from "../Notification";
 import Cart from "./Cart";
-import ProductCard from "./ProductCard";
+import SearchOverlay from "./SearchOverlay";
 
 interface MenuItem {
   name: string;
@@ -31,11 +27,9 @@ const staticMenuItems: MenuItem[] = [
 ];
 
 const CustomerHeader: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Product[]>([]);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([
     ...mainMenuItems,
@@ -48,16 +42,22 @@ const CustomerHeader: React.FC = () => {
   const { isAuthenticated, logout } = useAuth();
   const { cartCount } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  // const lastNonSearchPathRef = React.useRef<string>("/");
 
-  useEffect(() => {
-    if (searchQuery.trim() !== "") {
-      searchProducts(searchQuery).then((products) => {
-        setSearchResults(products);
-      });
-    } else {
-      setSearchResults([]);
-    }
-  }, [searchQuery]);
+  // // Remember the last non-search route
+  // useEffect(() => {
+  //   const current = location.pathname + location.search;
+  //   if (location.pathname !== "/search") {
+  //     lastNonSearchPathRef.current = current;
+  //   }
+  // }, [location]);
+
+  const handleSearchClick = () => {
+    setIsSearchOverlayOpen(true);
+  };
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -100,6 +100,12 @@ const CustomerHeader: React.FC = () => {
   };
 
   useEffect(() => {
+    if (headerRef.current) {
+      setHeaderHeight(headerRef.current.offsetHeight);
+    }
+  }, [headerRef]);
+
+  useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 0) {
         setIsScrolled(true);
@@ -116,9 +122,9 @@ const CustomerHeader: React.FC = () => {
   }, []);
 
   const headerClasses = `transition-colors duration-300 ${
-    isScrolled || isSearchOpen
+    isScrolled
       ? "bg-[#f2f1f0] border-b border-[#D1D0CE] shadow-md"
-      : "md:bg-transparent md:shadow-none md:border-b-0"
+      : "bg-[#f2f1f0] border-b border-[#D1D0CE]"
   }`;
 
   const categoryItems = menuItems.filter((item) =>
@@ -144,13 +150,10 @@ const CustomerHeader: React.FC = () => {
           onClose={() => setNotification(null)}
         />
       )}
-      {isSearchOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50"
-          onClick={() => setIsSearchOpen(false)}
-        ></div>
-      )}
-      <div className="fixed top-0 left-0 right-0 z-30 text-[#1c1c1c] group">
+      <div
+        ref={headerRef}
+        className="fixed top-0 left-0 right-0 z-50 text-[#1c1c1c] group"
+      >
         <div className="bg-[#630D0D] text-[#Fff] text-[1rem] text-center py-2 text-sm">
           Faste lave priser. Begrænset lager. Forlænget retur.
         </div>
@@ -201,12 +204,8 @@ const CustomerHeader: React.FC = () => {
                 </div>
               </div>
 
-              
               <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => setIsSearchOpen(!isSearchOpen)}
-                  className="p-2"
-                >
+                <button onClick={handleSearchClick} className="p-2">
                   Søg
                 </button>
                 <button
@@ -234,83 +233,13 @@ const CustomerHeader: React.FC = () => {
             </div>
           </nav>
         </header>
-        {isSearchOpen && (
-          <div className="py-6 bg-[#f2f1f0] flex items-center px-12">
-            <MagnifyingGlassIcon
-              className="text-[#050608] h-8 w-8 mr-4 cursor-pointer"
-              onClick={() => setIsSearchOpen(false)}
-            />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Søg efter..."
-              className="bg-transparent text-3xl font-normal font-[EB-Garamond] w-full focus:outline-none"
-            />
-          </div>
-        )}
-        {searchResults.length > 0 && (
-          <div className="bg-[#f2f1f0] px-12 pb-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-              {searchResults.slice(0, 4).map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-            {searchResults.length > 4 && (
-              <div className="text-center mt-8">
-                <Link
-                  to={`/search?q=${searchQuery}`}
-                  className="inline-block bg-[#1c1c1c] text-white px-6 py-3 rounded-md"
-                >
-                  Vis alle resultater
-                </Link>
-              </div>
-            )}
-          </div>
-        )}
       </div>
-      <div
-        className={`fixed inset-0 z-40 bg-black bg-opacity-75 transition-opacity duration-300 ease-in-out ${
-          isMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-        onClick={() => setIsMenuOpen(false)}
-      ></div>
-      <div
-        className={`fixed inset-y-0 left-0 z-50 w-[90%] bg-white text-black shadow-xl transform transition-transform duration-300 ease-in-out ${
-          isMenuOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-xl font-semibold">Menu</h2>
-            <button onClick={() => setIsMenuOpen(false)}>
-              <XMarkIcon className="h-6 w-6" />
-            </button>
-          </div>
-          <nav className="flex flex-col space-y-4 text-decoration-none">
-            {[
-              ...menuItems,
-              {
-                name: isAuthenticated ? "Konto" : "Log på",
-                path: isAuthenticated ? "/customer/orders" : "/login",
-              },
-            ].map((item) => (
-              <div key={item.name} className="group/link relative inline-block">
-                <Link
-                  to={item.path}
-                  className="text-lg"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-                <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
-              </div>
-            ))}
-          </nav>
-        </div>
-      </div>
+      <SearchOverlay
+        isOpen={isSearchOverlayOpen}
+        onClose={() => setIsSearchOverlayOpen(false)}
+        headerHeight={headerHeight}
+      />
     </>
   );
 };
-
 export default CustomerHeader;

@@ -5,6 +5,7 @@ import {
   createProduct,
   updateProduct,
   getCategories,
+  getCategory,
   deleteProducts,
   getSizes,
   likeProduct,
@@ -31,6 +32,7 @@ router.delete("/products/unlike", unlikeProduct);
 router.get("/products/liked/:customerId", getLikedProducts);
 router.get("/customer/by-user/:userId", getCustomerByUserId);
 router.get("/categories", getCategories);
+router.get("/categories/:id", getCategory);
 router.get("/sizes", getSizes);
 router.post("/upload", uploadImage);
 

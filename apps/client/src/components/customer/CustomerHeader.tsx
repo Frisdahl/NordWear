@@ -28,7 +28,11 @@ const staticMenuItems: MenuItem[] = [
   { name: "Size guide", path: "/size-guide" },
 ];
 
-const CustomerHeader: React.FC = () => {
+interface CustomerHeaderProps {
+  headerRef: React.RefObject<HTMLDivElement>;
+}
+
+const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
@@ -45,7 +49,6 @@ const CustomerHeader: React.FC = () => {
   const { cartCount } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
-  const headerRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
 
   const handleSearchClick = () => {
@@ -57,7 +60,7 @@ const CustomerHeader: React.FC = () => {
       setHeaderHeight(headerRef.current.offsetHeight);
     }
   }, [headerRef]);
-
+  
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 0) {
@@ -108,7 +111,7 @@ const CustomerHeader: React.FC = () => {
         ref={headerRef}
         className="fixed top-0 left-0 right-0 z-50 text-[#1c1c1c] group"
       >
-        <div className="bg-[#630D0D] text-[#Fff] text-[1rem] text-center py-2 text-sm">
+        <div className="bg-[#630D0D] text-[#Fff] text-[1rem] text-center py-2">
           Faste lave priser. Begrænset lager. Forlænget retur.
         </div>
         <header className={`${headerClasses} group-hover:bg-[#f2f1f0]`}>

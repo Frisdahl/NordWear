@@ -268,6 +268,12 @@ export const getCategories = async () => {
   return await prisma.category.findMany();
 };
 
+export const getCategory = async (id: number) => {
+  return await prisma.category.findUnique({
+    where: { id },
+  });
+};
+
 export const getSizes = async () => {
   return await prisma.size.findMany();
 };

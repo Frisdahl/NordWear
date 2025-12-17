@@ -65,6 +65,11 @@ export const fetchCategories = async () => {
   return response.data;
 };
 
+export const fetchCategory = async (id: number) => {
+  const response = await apiClient.get(`/categories/${id}`);
+  return response.data;
+};
+
 export const fetchSizes = async () => {
   const response = await apiClient.get("/sizes");
   return response.data;

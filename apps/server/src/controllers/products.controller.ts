@@ -3,6 +3,7 @@ import {
   getProducts as getProductsService,
   createProduct as createProductService,
   getCategories as getCategoriesService,
+  getCategory as getCategoryService,
   deleteProducts as deleteProductsService,
   getProduct as getProductService,
   updateProduct as updateProductService,
@@ -196,6 +197,29 @@ export const getCategories = async (
     res
       .status(500)
       .json({ message: "Error retrieving categories", error: msg });
+  }
+};
+
+export const getCategory = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      res.status(400).json({ message: "Invalid category ID." });
+      return;
+    }
+    const category = await getCategoryService(id);
+    if (!category) {
+      res.status(404).json({ message: "Category not found." });
+      return;
+    }
+    res.status(200).json(category);
+  } catch (error) {
+    console.error(`GET /api/categories/${req.params.id} error:`, error);
+    const msg = error instanceof Error ? error.message : String(error);
+    res.status(500).json({ message: "Error retrieving category", error: msg });
   }
 };
 

@@ -214,8 +214,8 @@ const Home: React.FC = () => {
           </div>
 
           {/* White box overlapping in center */}
-          <div className="relative px-6 md:px-0 md:ml-[-64px] z-10">
-            <div className="bg-white text-center py-16 px-8 md:px-12 shadow-lg relative">
+          <div className="relative pr-12 md:ml-[-64px] z-10">
+            <div className="bg-white text-center py-16 px-12 shadow-lg relative">
               <h1 className="text-[2.25rem] md:text-4xl font-['EB_Garamond'] mb-6">
                 Dansk design - Håndlavet i Portugal
               </h1>

@@ -24,6 +24,7 @@
     "@prisma/client": "^4.16.2",
     "express": "^4.17.1",
     "mysql2": "^2.2.5",
+    "react-icons": "^5.5.0",
     "react-router-dom": "^7.10.1",
     "swiper": "^12.0.3",
     "zustand": "^5.0.9"

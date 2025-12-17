@@ -84,7 +84,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
       ></div>
 
       <div
-        className={`fixed top-0 right-0 h-full w-[90%] bg-white z-50 shadow-lg transform transition-transform duration-300 ${
+        className={`fixed top-0 right-0 h-full w-[90%] md:w-[30%] bg-white z-50 shadow-lg transform transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -98,7 +98,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
           <Accordion
             title="Pris"
             content={
-              <div className="pt-4 px-4">
+              <div className="pt-8 px-4">
                 <Slider
                   getAriaLabel={() => "Price range"}
                   value={priceRange}

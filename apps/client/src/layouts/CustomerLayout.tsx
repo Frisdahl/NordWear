@@ -19,7 +19,7 @@ const CustomerLayout: React.FC = () => {
       <CustomerHeader headerRef={headerRef} />
       <HeaderSpacer height={headerHeight} />
       <main className="flex-grow">
-        <Outlet />
+        <Outlet context={{ headerHeight }} />
       </main>
       <Footer />
     </div>

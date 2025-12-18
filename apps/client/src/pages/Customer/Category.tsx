@@ -207,8 +207,8 @@ const Category: React.FC = () => {
 
   const gridClasses: { [key: string]: string } = {
     "grid-1": "grid-cols-1",
-    "grid-2": "grid-cols-2",
-    "grid-3": "grid-cols-3",
+    "grid-2": "grid-cols-2 md:grid-cols-3",
+    "grid-3": "grid-cols-3 md:grid-cols-4",
     "grid-4": "grid-cols-4",
     "grid-5": "grid-cols-5",
     "grid-6": "grid-cols-6",
@@ -267,7 +267,7 @@ const Category: React.FC = () => {
             ? "fixed left-0 right-0 z-10 bg-white shadow-md border-t-0"
             : "relative border-t"
         }`}
-        style={{ top: isFilterSticky ? `${headerHeight}px` : "auto" }}
+        style={{ top: isFilterSticky ? headerHeight : 'auto' }}
       >
         <div className="mx-auto pl-3 md:pr-12 ">
           <div className="flex justify-between items-stretch">
@@ -356,11 +356,12 @@ const Category: React.FC = () => {
             <div
               className={`grid gap-x-4 gap-y-[4rem] ${gridClasses[viewMode]}`}
             >
-              {currentProducts.map((product) => (
+              {currentProducts.map((product, index) => (
                 <ProductCard
-                  key={product.id}
+                  key={`${product.id}-${viewMode}`}
                   product={product}
                   onAuthRequired={handleAuthRequired}
+                  index={index}
                 />
               ))}
             </div>

@@ -84,7 +84,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
       ></div>
 
       <div
-        className={`fixed top-0 right-0 h-full w-[90%] md:w-[30%] bg-white z-50 shadow-lg transform transition-transform duration-300 ${
+        className={`fixed top-0 right-0 h-full w-[90%] md:w-[30%] bg-[#f2f1f0] z-50 shadow-lg transform transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >

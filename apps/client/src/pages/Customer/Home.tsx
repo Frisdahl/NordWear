@@ -118,7 +118,7 @@ const Home: React.FC = () => {
             Til den moderne eventyrer. Kompromisløs kvalitet inspireret af
             naturen.
           </p>
-          <button className="bg-[#f2f1f0] text-[#1c1c1c] font-normal py-3 px-8 hover:bg-opacity-90 transition-transform transform">
+          <button className="bg-[#f2f1f0] text-[#1c1c1c] font-semibold py-3 px-8 hover:bg-opacity-90 transition-transform transform">
             Se alle produkter
           </button>
         </div>
@@ -135,7 +135,7 @@ const Home: React.FC = () => {
           ) : error ? (
             <div className="text-center text-red-500">{error}</div>
           ) : (
-            <div className="relative px-8">
+            <div className="relative px-12">
               <div
                 className="embla overflow-hidden group relative"
                 ref={emblaRef}
@@ -143,7 +143,7 @@ const Home: React.FC = () => {
                 <div className="embla__container flex relative flex-row items-stretch">
                   {products.map((product) => (
                     <div
-                      className="embla__slide flex-none w-full sm:w-1/2 md:w-1/2 lg:w-1/4 flex items-center h-full px-2"
+                      className="embla__slide flex-none sm:w-1/2 md:w-1/2 lg:w-1/4 flex items-center w-fit-content"
                       key={product.id}
                     >
                       <ProductCard
@@ -183,7 +183,7 @@ const Home: React.FC = () => {
           <div className="text-center mt-12">
             <Link
               to="/category"
-              className="bg-[#1c1c1c] text-white py-3 px-8 transition-transform transform hover:scale-105"
+              className="bg-[#181c2e] text-white py-3 font-semibold px-8 transition-transform transform hover:scale-105"
             >
               Se alle
             </Link>

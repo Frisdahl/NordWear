@@ -8,10 +8,9 @@ import { formatPrice } from "../../utils/formatPrice";
 interface CartProps {
   isOpen: boolean;
   onClose: () => void;
-  headerHeight?: number;
 }
 
-const Cart: React.FC<CartProps> = ({ isOpen, onClose, headerHeight }) => {
+const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
   const { cart, cartCount, removeFromCart, addToCart, decreaseQuantity } =
     useCart();
   const [termsAccepted, setTermsAccepted] = useState(false);

@@ -134,7 +134,7 @@ const Footer: React.FC = () => {
               />
               <button
                 type="submit"
-                className="bg-[#1c1c1c] text-white p-2 rounded-md"
+                className="bg-[#1c1c1c] text-white p-2 font-semibold rounded-md"
               >
                 Abonnér
               </button>

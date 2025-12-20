@@ -4,6 +4,8 @@ import { formatPrice } from "../../utils/formatPrice";
 
 import { useEffect } from "react";
 
+import { GetShipmentOptions } from "../../services/api";
+
 import { Link } from "react-router-dom";
 import MobilepayIcon from "../../assets/customer/mobilepay.svg";
 import VisaIcon from "../../assets/customer/visa.svg";
@@ -17,6 +19,7 @@ const Checkout: React.FC = () => {
   const [shippingRates, setShippingRates] = useState<any[]>([]);
   const [billingMethod, setBillingMethod] = useState("same");
   const [paymentMethod, setPaymentMethod] = useState("card");
+  const [shipment, setShipment] = useState<any | null>(null);
 
   const paymentMessages: { [key: string]: string } = {
     mobilepay:
@@ -37,27 +40,24 @@ const Checkout: React.FC = () => {
 
   const [shippingCost, setShippingCost] = useState(0);
 
+  const country_code = "DK";
+  const product_code = "GLSDK_SD";
+  const zipcode = "5220";
+  const address = "Hvilehøjvej 25";
+  const city = "Odense SØ";
+
   useEffect(() => {
     const fetchShippingRates = async () => {
       try {
-        const response = await fetch(
-          "https://api.homerunner.com/v3/rates/dk?service=coolrunner",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${import.meta.env.SHIPMONDO_API_KEY}`,
-              "X-Coolrunner-Account": `${import.meta.env.SHIPMONDO_USER_ID}`,
-            },
-          }
+        const response = await GetShipmentOptions(
+          country_code,
+          product_code,
+          zipcode,
+          address,
+          city
         );
-
-        if (response.ok) {
-          const data = await response.json();
-          setShippingRates(data.result);
-        } else {
-          console.error("Failed to fetch shipping rates");
-        }
+        setShippingRates(response);
+        console.log(response);
       } catch (error) {
         console.error("Error fetching shipping rates:", error);
       }
@@ -160,14 +160,19 @@ const Checkout: React.FC = () => {
                       type="radio"
                       id={rate.id}
                       name="shippingRate"
-                      value={rate.price.DKK.incl_tax}
                       onChange={(e) => setShippingCost(Number(e.target.value))}
                       className="h-4 w-4"
                     />
-                    <label htmlFor={rate.id} className="ml-2">
-                      {rate.carrier} {rate.service} -{" "}
-                      {formatPrice(rate.price.DKK.incl_tax)}
-                    </label>
+                    <div className="flex flex-col">
+                      <label htmlFor={rate.id} className="ml-2 text-black">
+                        {rate.carrier_code.charAt(0).toUpperCase() +
+                          rate.carrier_code.slice(1)}{" "}
+                        - {(rate.distance / 1000).toFixed(2)}km - {rate.name}
+                      </label>
+                      <label htmlFor={rate.id} className="ml-2 text-[#707070]">
+                        {rate.address}
+                      </label>
+                    </div>
                   </div>
                 ))
               ) : (

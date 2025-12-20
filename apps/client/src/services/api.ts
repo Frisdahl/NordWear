@@ -8,31 +8,38 @@ const apiClient = axios.create({
   },
 });
 
-export const fetchProducts = async (category?: string, filters?: any, limit?: number) => {
+export const fetchProducts = async (
+  category?: string,
+  filters?: any,
+  limit?: number
+) => {
   const params = new URLSearchParams();
   if (category) {
-    params.append('category', category);
+    params.append("category", category);
   }
   if (filters) {
     if (filters.priceRange) {
-      params.append('minPrice', filters.priceRange[0]);
-      params.append('maxPrice', filters.priceRange[1]);
+      params.append("minPrice", filters.priceRange[0]);
+      params.append("maxPrice", filters.priceRange[1]);
     }
     if (filters.categories) {
-      filters.categories.forEach((catId: number) => params.append('categories[]', catId.toString()));
+      filters.categories.forEach((catId: number) =>
+        params.append("categories[]", catId.toString())
+      );
     }
     if (filters.sizes) {
-      filters.sizes.forEach((sizeId: number) => params.append('sizes[]', sizeId.toString()));
+      filters.sizes.forEach((sizeId: number) =>
+        params.append("sizes[]", sizeId.toString())
+      );
     }
   }
   if (limit) {
-    params.append('limit', limit.toString());
+    params.append("limit", limit.toString());
   }
 
   const response = await apiClient.get("/products", { params });
   return response.data;
 };
-
 
 export const searchProducts = async (query: string) => {
   const response = await apiClient.get(`/products/search?q=${query}`);
@@ -49,7 +56,10 @@ export const addProduct = async (productData: Partial<Product>) => {
   return response.data;
 };
 
-export const updateProduct = async (id: number | string, productData: Partial<Product>) => {
+export const updateProduct = async (
+  id: number | string,
+  productData: Partial<Product>
+) => {
   const response = await apiClient.put(`/products/${id}`, productData);
   return response.data;
 };
@@ -58,7 +68,6 @@ export const uploadImage = async (base64Image: string) => {
   const response = await apiClient.post("/upload", { image: base64Image });
   return response.data;
 };
-
 
 export const fetchCategories = async () => {
   const response = await apiClient.get("/categories");
@@ -80,18 +89,27 @@ export const login = async (email: string, password: string) => {
   return response.data;
 };
 
-export const register = async (name: string, email:string, password: string) => {
+export const register = async (
+  name: string,
+  email: string,
+  password: string
+) => {
   const response = await apiClient.post("/register", { name, email, password });
   return response.data;
 };
 
 export const likeProduct = async (customerId: number, productId: number) => {
-  const response = await apiClient.post("/products/like", { customerId, productId });
+  const response = await apiClient.post("/products/like", {
+    customerId,
+    productId,
+  });
   return response.data;
 };
 
 export const unlikeProduct = async (customerId: number, productId: number) => {
-  const response = await apiClient.delete("/products/unlike", { data: { customerId, productId } });
+  const response = await apiClient.delete("/products/unlike", {
+    data: { customerId, productId },
+  });
   return response.data;
 };
 
@@ -102,5 +120,24 @@ export const getLikedProducts = async (customerId: number) => {
 
 export const getCustomerByUserId = async (userId: number) => {
   const response = await apiClient.get(`/customer/by-user/${userId}`);
+  return response.data;
+};
+
+export const GetShipmentOptions = async (
+  country_code: string,
+  product_code: string,
+  zipcode: string,
+  address: string,
+  city: string
+) => {
+  const response = await apiClient.get("/shipment-options", {
+    params: {
+      country_code,
+      product_code,
+      zipcode,
+      address,
+      city,
+    },
+  });
   return response.data;
 };

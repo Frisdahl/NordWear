@@ -68,9 +68,7 @@ const App: React.FC = () => (
           <Route
             path="/checkout"
             element={
-              <ProtectedRoute>
-                <CheckoutLayout />
-              </ProtectedRoute>
+              <CheckoutLayout />
             }
           >
             <Route index element={<Checkout />} />

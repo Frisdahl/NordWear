@@ -264,10 +264,10 @@ const Category: React.FC = () => {
         ref={filterRef}
         className={`border-b mb-8 transition-all duration-300 ${
           isFilterSticky
-            ? "fixed left-0 right-0 z-10 bg-white shadow-md border-t-0"
+            ? "fixed left-0 right-0 z-10 bg-[#f2f1f0] shadow-md border-t-0"
             : "relative border-t"
         }`}
-        style={{ top: isFilterSticky ? headerHeight : 'auto' }}
+        style={{ top: isFilterSticky ? headerHeight : "auto" }}
       >
         <div className="mx-auto pl-3 md:pr-12 ">
           <div className="flex justify-between items-stretch">

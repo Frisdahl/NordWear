@@ -14,6 +14,7 @@ import {
   getCustomerByUserId,
   searchProducts,
 } from "../controllers/products.controller";
+import { getShipmentOptions } from "../controllers/shipping.controller";
 import { uploadImage } from "../controllers/upload.controller";
 import { login, register } from "../controllers/auth.controller"; // Import the login controller
 
@@ -35,5 +36,9 @@ router.get("/categories", getCategories);
 router.get("/categories/:id", getCategory);
 router.get("/sizes", getSizes);
 router.post("/upload", uploadImage);
+
+// shipment routes
+
+router.get("/shipment-options", getShipmentOptions);
 
 export default router;

@@ -141,3 +141,27 @@ export const GetShipmentOptions = async (
   });
   return response.data;
 };
+
+export const GetShipmentRates = async (
+  sender_country_code: string,
+  sender_zipcode: string,
+  receiver_country_code: string,
+  receiver_zipcode: string,
+  product_codes: string[],
+  weight: number
+) => {
+  const response = await apiClient.post("/quotes", {
+    sender_country_code,
+    sender_zipcode,
+    receiver_country_code,
+    receiver_zipcode,
+    product_codes,
+    weight,
+  });
+  return response.data;
+};
+
+export const getShipmondoProducts = async () => {
+  const response = await apiClient.get("/shipmondo/products");
+  return response.data;
+};

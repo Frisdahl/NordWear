@@ -1,10 +1,12 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import useCart from "../../hooks/useCart";
 import { formatPrice } from "../../utils/formatPrice";
 
-import { useEffect } from "react";
-
-import { GetShipmentOptions } from "../../services/api";
+import {
+  getShipmondoProducts,
+  GetShipmentOptions,
+  GetShipmentRates,
+} from "../../services/api";
 
 import { Link } from "react-router-dom";
 import MobilepayIcon from "../../assets/customer/mobilepay.svg";
@@ -14,12 +16,34 @@ import ViabillIcon from "../../assets/customer/viabill.svg";
 import AnydayIcon from "../../assets/customer/anyday.svg";
 import PaymentIcon from "../../assets/customer/payment.svg";
 
+import useGoogleMaps from "../../hooks/useGoogleMaps";
+
 const Checkout: React.FC = () => {
   const { cart, cartCount } = useCart();
-  const [shippingRates, setShippingRates] = useState<any[]>([]);
   const [billingMethod, setBillingMethod] = useState("same");
   const [paymentMethod, setPaymentMethod] = useState("card");
+
+  // shipmondo states
+  const [shipmondoProducts, setShipmondoProducts] = useState<any[]>([]);
+  const [shippingRates, setShippingRates] = useState<any[]>([]);
   const [shipment, setShipment] = useState<any | null>(null);
+  const [shippingOptions, setShippingOptions] = useState<any[]>([]);
+
+  const [shippingInfo, setShippingInfo] = useState({
+    country: "Danmark",
+    firstName: "",
+    lastName: "",
+    address: "",
+    apartment: "",
+    zipcode: "",
+    city: "",
+    phone: "",
+  });
+
+  const google = useGoogleMaps(import.meta.env.VITE_GOOGLE_MAPS_API_KEY);
+  const [autocomplete, setAutocomplete] = useState<any>(null);
+  const [placesService, setPlacesService] = useState<any>(null);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
 
   const paymentMessages: { [key: string]: string } = {
     mobilepay:
@@ -40,33 +64,93 @@ const Checkout: React.FC = () => {
 
   const [shippingCost, setShippingCost] = useState(0);
 
-  const country_code = "DK";
-  const product_code = "GLSDK_SD";
-  const zipcode = "5220";
-  const address = "Hvilehøjvej 25";
-  const city = "Odense SØ";
-
   useEffect(() => {
-    const fetchShippingRates = async () => {
+    const fetchShipmondoProducts = async () => {
       try {
-        const response = await GetShipmentOptions(
-          country_code,
-          product_code,
-          zipcode,
-          address,
-          city
-        );
-        setShippingRates(response);
-        console.log(response);
+        const products = await getShipmondoProducts();
+        setShipmondoProducts(products);
       } catch (error) {
-        console.error("Error fetching shipping rates:", error);
+        console.error("Error fetching shipmondo products:", error);
       }
     };
 
-    if (cart.length > 0) {
-      fetchShippingRates();
+    fetchShipmondoProducts();
+  }, []);
+
+  useEffect(() => {
+    const fetchShippingInfo = async () => {
+      if (
+        shippingInfo.address &&
+        shippingInfo.zipcode &&
+        shippingInfo.city &&
+        shipmondoProducts.length > 0
+      ) {
+        try {
+          const filteredProducts = shipmondoProducts.filter(
+            (p) =>
+              p.available &&
+              p.sender_country_code === "DK" &&
+              p.receiver_country_code === "DK"
+          );
+
+          console.log(filteredProducts, "filtered");
+
+          const servicePointProducts = filteredProducts.filter((p) =>
+            p.available_services.some((s: any) => s.code === "service_point")
+          );
+
+          const rates = await GetShipmentRates(
+            sender_country_code,
+            zip_code,
+            receiver_country_code,
+            receiver_zipcode
+          );
+
+          if (servicePointProducts.length > 0) {
+            const options = await GetShipmentOptions(
+              "DK",
+              servicePointProducts.map((p: any) => p.code)[0],
+              shippingInfo.zipcode,
+              shippingInfo.address,
+              shippingInfo.city
+            );
+            setShippingOptions(options);
+            console.log("shippingOptions", options);
+          }
+        } catch (error) {
+          console.error("Error fetching shipping info:", error);
+        }
+      }
+    };
+
+    fetchShippingInfo();
+  }, [shippingInfo, shipmondoProducts]);
+
+  useEffect(() => {
+    if (google) {
+      setAutocomplete(new google.maps.places.AutocompleteService());
+      setPlacesService(
+        new google.maps.places.PlacesService(document.createElement("div"))
+      );
     }
-  }, [cart]);
+  }, [google]);
+
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setShippingInfo({ ...shippingInfo, address: e.target.value });
+    if (autocomplete) {
+      autocomplete.getPlacePredictions(
+        {
+          input: e.target.value,
+          componentRestrictions: { country: "dk" },
+          language: "da",
+        },
+        (predictions: any) => {
+          setSuggestions(predictions || []);
+        }
+      );
+    }
+  };
+
   const taxes = subtotal * 0.2; // 25% VAT is 20% of the total price (subtotal is inclusive of VAT)
   const total = subtotal + shippingCost;
 
@@ -97,7 +181,13 @@ const Checkout: React.FC = () => {
           <div className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">Levering</h2>
             <div className="grid grid-cols-2 gap-4">
-              <select className="col-span-2 w-full border border-gray-300 rounded-md p-2">
+              <select
+                className="col-span-2 w-full border border-gray-300 rounded-md p-2"
+                value={shippingInfo.country}
+                onChange={(e) =>
+                  setShippingInfo({ ...shippingInfo, country: e.target.value })
+                }
+              >
                 <option>Danmark</option>
                 <option>Belgien</option>
                 <option>Frankrig</option>
@@ -110,36 +200,121 @@ const Checkout: React.FC = () => {
                 type="text"
                 placeholder="Fornavn"
                 className="w-full border border-gray-300 rounded-md p-2"
+                value={shippingInfo.firstName}
+                onChange={(e) =>
+                  setShippingInfo({
+                    ...shippingInfo,
+                    firstName: e.target.value,
+                  })
+                }
               />
               <input
                 type="text"
                 placeholder="Efternavn"
                 className="w-full border border-gray-300 rounded-md p-2"
+                value={shippingInfo.lastName}
+                onChange={(e) =>
+                  setShippingInfo({
+                    ...shippingInfo,
+                    lastName: e.target.value,
+                  })
+                }
               />
               <input
                 type="text"
                 placeholder="Adresse"
                 className="col-span-2 w-full border border-gray-300 rounded-md p-2"
+                value={shippingInfo.address}
+                onChange={handleAddressChange}
               />
+              {suggestions.length > 0 && (
+                <div className="col-span-2 bg-white border border-gray-300 rounded-md">
+                  {suggestions.map((suggestion) => (
+                    <div
+                      key={suggestion.place_id}
+                      className="p-2 cursor-pointer hover:bg-gray-100"
+                      onClick={() => {
+                        placesService.getDetails(
+                          {
+                            placeId: suggestion.place_id,
+                            fields: ["address_components"],
+                          },
+                          (place: any) => {
+                            const address = place.address_components;
+                            const street =
+                              address.find((c: any) =>
+                                c.types.includes("route")
+                              )?.long_name || "";
+                            const streetNumber =
+                              address.find((c: any) =>
+                                c.types.includes("street_number")
+                              )?.long_name || "";
+                            const city =
+                              address.find((c: any) =>
+                                c.types.includes("locality")
+                              )?.long_name || "";
+                            const zipcode =
+                              address.find((c: any) =>
+                                c.types.includes("postal_code")
+                              )?.long_name || "";
+
+                            setShippingInfo({
+                              ...shippingInfo,
+                              address: `${street} ${streetNumber}`,
+                              city,
+                              zipcode,
+                            });
+                            setSuggestions([]);
+                          }
+                        );
+                      }}
+                    >
+                      {suggestion.description}
+                    </div>
+                  ))}
+                </div>
+              )}
               <input
                 type="text"
                 placeholder="Lejlighed, suite, etc."
                 className="col-span-2 w-full border border-gray-300 rounded-md p-2"
+                value={shippingInfo.apartment}
+                onChange={(e) =>
+                  setShippingInfo({
+                    ...shippingInfo,
+                    apartment: e.target.value,
+                  })
+                }
               />
               <input
                 type="text"
                 placeholder="Postnummer"
                 className="w-full border border-gray-300 rounded-md p-2"
+                value={shippingInfo.zipcode}
+                onChange={(e) =>
+                  setShippingInfo({
+                    ...shippingInfo,
+                    zipcode: e.target.value,
+                  })
+                }
               />
               <input
                 type="text"
                 placeholder="By"
                 className="w-full border border-gray-300 rounded-md p-2"
+                value={shippingInfo.city}
+                onChange={(e) =>
+                  setShippingInfo({ ...shippingInfo, city: e.target.value })
+                }
               />
               <input
                 type="text"
                 placeholder="Telefon"
                 className="col-span-2 w-full border border-gray-300 rounded-md p-2"
+                value={shippingInfo.phone}
+                onChange={(e) =>
+                  setShippingInfo({ ...shippingInfo, phone: e.target.value })
+                }
               />
             </div>
             <div className="flex items-center mt-4">
@@ -153,25 +328,30 @@ const Checkout: React.FC = () => {
           <div className="mb-8">
             <h2 className="text-lg font-medium mb-4">Leveringsmetode</h2>
             <div className="border border-gray-300 rounded-md p-4 text-sm text-gray-500">
-              {shippingRates.length > 0 ? (
-                shippingRates.map((rate) => (
-                  <div key={rate.id} className="flex items-center mb-2">
+              {shippingOptions.length > 0 ? (
+                shippingOptions.map((option: any) => (
+                  <div key={option.id} className="flex items-center mb-2">
                     <input
                       type="radio"
-                      id={rate.id}
+                      id={option.id}
                       name="shippingRate"
+                      value={option.price}
                       onChange={(e) => setShippingCost(Number(e.target.value))}
                       className="h-4 w-4"
                     />
-                    <div className="flex flex-col">
-                      <label htmlFor={rate.id} className="ml-2 text-black">
-                        {rate.carrier_code.charAt(0).toUpperCase() +
-                          rate.carrier_code.slice(1)}{" "}
-                        - {(rate.distance / 1000).toFixed(2)}km - {rate.name}
-                      </label>
-                      <label htmlFor={rate.id} className="ml-2 text-[#707070]">
-                        {rate.address}
-                      </label>
+                    <div className="flex flex-col w-full">
+                      <div className="w-full flex justify-between">
+                        <label htmlFor={option.id} className="ml-2 text-black">
+                          {option.name}
+                        </label>
+
+                        <label
+                          htmlFor={option.id}
+                          className="ml-2 text-black font-semibold"
+                        >
+                          {option.price}
+                        </label>
+                      </div>
                     </div>
                   </div>
                 ))

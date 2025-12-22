@@ -14,7 +14,11 @@ import {
   getCustomerByUserId,
   searchProducts,
 } from "../controllers/products.controller";
-import { getShipmentOptions } from "../controllers/shipping.controller";
+import {
+  getShipmondoProducts,
+  getShipmentOptions,
+  getShipmentRates,
+} from "../controllers/shipping.controller";
 import { uploadImage } from "../controllers/upload.controller";
 import { login, register } from "../controllers/auth.controller"; // Import the login controller
 
@@ -39,6 +43,8 @@ router.post("/upload", uploadImage);
 
 // shipment routes
 
+router.get("/shipmondo/products", getShipmondoProducts);
 router.get("/shipment-options", getShipmentOptions);
+router.post("/quotes", getShipmentRates);
 
 export default router;

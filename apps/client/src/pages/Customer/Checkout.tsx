@@ -63,6 +63,9 @@ const Checkout: React.FC = () => {
   }, [cart]);
 
   const [shippingCost, setShippingCost] = useState(0);
+  const [selectedShippingId, setSelectedShippingId] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     const fetchShipmondoProducts = async () => {
@@ -93,29 +96,52 @@ const Checkout: React.FC = () => {
               p.receiver_country_code === "DK"
           );
 
-          console.log(filteredProducts, "filtered");
-
-          const servicePointProducts = filteredProducts.filter((p) =>
-            p.available_services.some((s: any) => s.code === "service_point")
-          );
-
-          const rates = await GetShipmentRates(
-            sender_country_code,
-            zip_code,
-            receiver_country_code,
-            receiver_zipcode
-          );
-
-          if (servicePointProducts.length > 0) {
-            const options = await GetShipmentOptions(
-              "DK",
-              servicePointProducts.map((p: any) => p.code)[0],
-              shippingInfo.zipcode,
-              shippingInfo.address,
-              shippingInfo.city
+          if (filteredProducts.length > 0) {
+            const productCodes = filteredProducts.map((p) => p.code);
+            const totalWeight = cart.reduce(
+              (acc, item) => acc + (item.weight || 1000) * item.quantity,
+              0
             );
-            setShippingOptions(options);
-            console.log("shippingOptions", options);
+
+            const rates = await GetShipmentRates(
+              "DK",
+              "5220",
+              "DK",
+              shippingInfo.zipcode,
+              productCodes,
+              totalWeight
+            );
+
+            const optionsWithRates = await Promise.all(
+              filteredProducts.map(async (product) => {
+                const rate = rates.find(
+                  (r: any) => r.product_code === product.code
+                );
+                if (!rate) return null;
+
+                let servicePoints: any[] = [];
+                if (product.service_point_available) {
+                  const options = await GetShipmentOptions(
+                    "DK",
+                    product.code,
+                    shippingInfo.zipcode,
+                    shippingInfo.address,
+                    shippingInfo.city
+                  );
+                  servicePoints = options || [];
+                }
+
+                return {
+                  ...product,
+                  price: rate.price,
+                  carrier_name:
+                    rate.carrier?.name || product.carrier?.name || "",
+                  service_points: servicePoints,
+                };
+              })
+            );
+
+            setShippingOptions(optionsWithRates.filter(Boolean));
           }
         } catch (error) {
           console.error("Error fetching shipping info:", error);
@@ -124,7 +150,7 @@ const Checkout: React.FC = () => {
     };
 
     fetchShippingInfo();
-  }, [shippingInfo, shipmondoProducts]);
+  }, [shippingInfo, shipmondoProducts, cart]);
 
   useEffect(() => {
     if (google) {
@@ -276,7 +302,7 @@ const Checkout: React.FC = () => {
               )}
               <input
                 type="text"
-                placeholder="Lejlighed, suite, etc."
+                placeholder="Lejlighed, etage osv."
                 className="col-span-2 w-full border border-gray-300 rounded-md p-2"
                 value={shippingInfo.apartment}
                 onChange={(e) =>
@@ -327,36 +353,130 @@ const Checkout: React.FC = () => {
 
           <div className="mb-8">
             <h2 className="text-lg font-medium mb-4">Leveringsmetode</h2>
-            <div className="border border-gray-300 rounded-md p-4 text-sm text-gray-500">
+            <div className="space-y-[-1px]">
               {shippingOptions.length > 0 ? (
-                shippingOptions.map((option: any) => (
-                  <div key={option.id} className="flex items-center mb-2">
-                    <input
-                      type="radio"
-                      id={option.id}
-                      name="shippingRate"
-                      value={option.price}
-                      onChange={(e) => setShippingCost(Number(e.target.value))}
-                      className="h-4 w-4"
-                    />
-                    <div className="flex flex-col w-full">
-                      <div className="w-full flex justify-between">
-                        <label htmlFor={option.id} className="ml-2 text-black">
-                          {option.name}
-                        </label>
+                (() => {
+                  const allOptions: any[] = [];
+                  shippingOptions.forEach((option: any) => {
+                    if (
+                      option.service_points &&
+                      option.service_points.length > 0
+                    ) {
+                      option.service_points.forEach((sp: any) => {
+                        allOptions.push({
+                          id: sp.id,
+                          name: `${option.carrier_name
+                            .replace(" (DK)", "")
+                            .replace(" Denmark", "")} - ${(
+                            sp.distance / 1000
+                          ).toFixed(2)}km - ${sp.name}`,
+                          address: sp.address,
+                          price: option.price,
+                          isServicePoint: true,
+                        });
+                      });
+                    } else {
+                      allOptions.push({
+                        id: option.id,
+                        name: option.name,
+                        address: "",
+                        price: option.price,
+                        isServicePoint: false,
+                        carrier_name: option.carrier_name,
+                      });
+                      console.log("home delivery option", option);
+                    }
+                  });
 
-                        <label
-                          htmlFor={option.id}
-                          className="ml-2 text-black font-semibold"
+                  const unwantedHomeDelivery = [
+                    "Return Drop Off",
+                    "Parcel",
+                    "Business Parcel",
+                  ];
+                  const homeDeliveryOptions = allOptions.filter(
+                    (option) =>
+                      !option.isServicePoint &&
+                      !unwantedHomeDelivery.some((unwanted) =>
+                        option.name.includes(unwanted)
+                      )
+                  );
+                  const servicePointOptions = allOptions.filter(
+                    (option) => option.isServicePoint
+                  );
+
+                  const postNordOptions = servicePointOptions.filter((option) =>
+                    option.name.startsWith("PostNord")
+                  );
+                  const glsOptions = servicePointOptions.filter((option) =>
+                    option.name.startsWith("GLS -")
+                  );
+
+                  const finalOptions = [
+                    ...postNordOptions.slice(0, 3),
+                    ...glsOptions.slice(0, 3),
+                    ...homeDeliveryOptions,
+                  ];
+
+                  return finalOptions.map((option: any, index: number) => {
+                    const carrierName = option.name.split(" - ")[0];
+                    return (
+                      <label
+                        key={option.id}
+                        className={`p-4 cursor-pointer border relative flex items-center ${
+                          selectedShippingId === option.id
+                            ? "border-black z-10 bg-[#f5f5f5]"
+                            : "border-gray-300"
+                        } ${
+                          index === 0
+                            ? "rounded-t-md"
+                            : index === finalOptions.length - 1
+                            ? "rounded-b-md"
+                            : ""
+                        }`}
+                        onClick={() => {
+                          setShippingCost(option.price);
+                          setSelectedShippingId(option.id);
+                        }}
+                      >
+                        <div
+                          className={`h-5 w-5 rounded-full border-2 flex items-center justify-center mr-3 ${
+                            selectedShippingId === option.id
+                              ? "border-black"
+                              : "border-gray-400"
+                          }`}
                         >
-                          {option.price}
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                ))
+                          {selectedShippingId === option.id && (
+                            <div className="h-2 w-2 rounded-full bg-black"></div>
+                          )}
+                        </div>
+                        <div className="flex w-full mr-4">
+                          <div className="w-full flex flex-col">
+                            <span className="text-black font-normal">
+                              {!option.isServicePoint
+                                ? `${carrierName} - Hjemmelevering`
+                                : option.name}
+                            </span>
+                            {option.address && (
+                              <span className="text-gray-500">
+                                {option.address}
+                              </span>
+                            )}
+                            {!option.isServicePoint && (
+                              <span className="text-gray-500">
+                                Levering direkte til døren
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-black font-semibold mt-1 ml-auto">
+                            {formatPrice(option.price)}
+                          </span>
+                        </div>
+                      </label>
+                    );
+                  });
+                })()
               ) : (
-                <p>
+                <p className="border border-gray-300 rounded-md p-4 text-sm text-gray-500">
                   Angiv din leveringsadresse for at se de tilgængelige
                   leveringsmetoder.
                 </p>

@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import useCart from "../../hooks/useCart";
 import { formatPrice } from "../../utils/formatPrice";
+import { loadStripe } from "@stripe/stripe-js";
 
 import {
   getShipmondoProducts,
@@ -175,6 +176,26 @@ const Checkout: React.FC = () => {
         }
       );
     }
+  };
+
+  const handleCheckout = async () => {
+    const response = await fetch(
+      "http://localhost:5000/api/create-checkout-session",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cart }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!data?.url) {
+      console.error("No checkout url returned", data);
+      return;
+    }
+
+    window.location.href = data.url; // <- redirect direkte
   };
 
   const taxes = subtotal * 0.2; // 25% VAT is 20% of the total price (subtotal is inclusive of VAT)
@@ -384,7 +405,6 @@ const Checkout: React.FC = () => {
                         isServicePoint: false,
                         carrier_name: option.carrier_name,
                       });
-                      console.log("home delivery option", option);
                     }
                   });
 
@@ -453,7 +473,7 @@ const Checkout: React.FC = () => {
                           <div className="w-full flex flex-col">
                             <span className="text-black font-normal">
                               {!option.isServicePoint
-                                ? `${carrierName} - Hjemmelevering`
+                                ? `${option.carrier_name} - Hjemmelevering`
                                 : option.name}
                             </span>
                             {option.address && (
@@ -697,7 +717,10 @@ const Checkout: React.FC = () => {
             </div>
           </div>
 
-          <button className="w-full bg-[#1c1c1c] text-white py-3 rounded-md">
+          <button
+            onClick={handleCheckout}
+            className="w-full bg-[#1c1c1c] text-white py-3 rounded-md"
+          >
             Betal nu
           </button>
         </div>

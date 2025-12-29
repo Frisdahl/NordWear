@@ -22,6 +22,8 @@ import {
 import { uploadImage } from "../controllers/upload.controller";
 import { login, register } from "../controllers/auth.controller"; // Import the login controller
 
+import { createCheckoutSession } from "../controllers/stripe.controller";
+
 const router = Router();
 
 router.post("/login", login); // Add the login route
@@ -46,5 +48,6 @@ router.post("/upload", uploadImage);
 router.get("/shipmondo/products", getShipmondoProducts);
 router.get("/shipment-options", getShipmentOptions);
 router.post("/quotes", getShipmentRates);
+router.post("/create-checkout-session", createCheckoutSession);
 
 export default router;

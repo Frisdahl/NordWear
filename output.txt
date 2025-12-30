@@ -1,0 +1,15 @@
+I have added an `overrides` section to your **root `package.json`** to explicitly force `react`, `react-dom`, `@types/react`, and `@types/react-dom` to version `18.2.0` across all dependencies in your monorepo. This is the most effective way to resolve persistent React version conflicts.
+
+To ensure these `overrides` take full effect and to provide the cleanest possible dependency tree, please perform the following crucial steps **manually**:
+
+1.  **Close all applications related to this project.** This includes your IDE/code editor (e.g., VS Code), any terminals where the application might have been running (e.g., `npm run dev`), and any browser tabs displaying the application.
+2.  **Navigate to the root directory of your project:** `C:\Users\afris\Desktop\Github\NordWear\`
+3.  **Manually delete the entire `node_modules` folder.**
+4.  **Manually delete the `package-lock.json` file.**
+5.  **Navigate into the `apps/client` directory:** `C:\Users\afris\Desktop\Github\NordWear\apps\client\`
+6.  **Manually delete the entire `node_modules` folder.**
+7.  **Manually delete the `package-lock.json` file.**
+
+Once you have successfully deleted all `node_modules` folders and `package-lock.json` files from both the root and `apps/client` directories, please let me know. I will then provide the command to perform a fresh `npm install` from the root, which will apply the overrides.
+
+I am paused until you confirm the manual deletion is complete.

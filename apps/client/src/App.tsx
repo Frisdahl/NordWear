@@ -22,6 +22,8 @@ const Login = lazy(() => import("./pages/Auth/Login"));
 const CreateUser = lazy(() => import("./pages/Auth/CreateUser"));
 const CheckoutLayout = lazy(() => import("./layouts/CheckoutLayout"));
 const Checkout = lazy(() => import("./pages/Customer/Checkout"));
+const Success = lazy(() => import("./pages/Customer/Success"));
+const Cancel = lazy(() => import("./pages/Customer/Cancel"));
 
 // ProtectedRoute Component
 const ProtectedRoute: React.FC<{
@@ -58,6 +60,8 @@ const App: React.FC = () => (
           <Route path="/login" element={<Login />} />{" "}
           {/* Login route is not protected */}
           <Route path="/create-user" element={<CreateUser />} />
+          <Route path="/success" element={<Success />} />
+          <Route path="/cancel" element={<Cancel />} />
           {/* Customer Routes */}
           <Route element={<CustomerLayout />}>
             <Route path="/" element={<Home />} />

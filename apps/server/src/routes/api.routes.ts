@@ -22,7 +22,11 @@ import {
 import { uploadImage } from "../controllers/upload.controller";
 import { login, register } from "../controllers/auth.controller"; // Import the login controller
 
-import { createCheckoutSession } from "../controllers/stripe.controller";
+import {
+  createCheckoutSession,
+  getCheckoutSession,
+} from "../controllers/stripe.controller";
+import { sendOrderConfirmation } from "../controllers/email.controller";
 
 const router = Router();
 
@@ -49,5 +53,7 @@ router.get("/shipmondo/products", getShipmondoProducts);
 router.get("/shipment-options", getShipmentOptions);
 router.post("/quotes", getShipmentRates);
 router.post("/create-checkout-session", createCheckoutSession);
+router.get("/checkout-session", getCheckoutSession);
+router.post("/send-order-confirmation", sendOrderConfirmation);
 
 export default router;

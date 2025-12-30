@@ -1,7 +1,21 @@
 import { Request, Response } from "express";
 import Stripe from "stripe";
+import "dotenv/config";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+export const getCheckoutSession = async (req: Request, res: Response) => {
+  const { session_id } = req.query;
+
+  try {
+    const session = await stripe.checkout.sessions.retrieve(session_id as string, {
+      expand: ["line_items.data.price.product"],
+    });
+    res.json(session);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to retrieve session" });
+  }
+};
 
 export const createCheckoutSession = async (req: Request, res: Response) => {
   const { cart } = req.body;
@@ -15,7 +29,7 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
     quantity: item.quantity,
   }));
 
-  const clientUrl = process.env.CLIENT_URL!;
+  const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",

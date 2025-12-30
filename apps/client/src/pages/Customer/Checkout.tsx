@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import useCart from "../../hooks/useCart";
 import { formatPrice } from "../../utils/formatPrice";
 import { loadStripe } from "@stripe/stripe-js";
+import parsePhoneNumber, { AsYouType } from "libphonenumber-js";
 
 import {
   getShipmondoProducts,
@@ -23,6 +24,8 @@ const Checkout: React.FC = () => {
   const { cart, cartCount } = useCart();
   const [billingMethod, setBillingMethod] = useState("same");
   const [paymentMethod, setPaymentMethod] = useState("card");
+  const [saveInfo, setSaveInfo] = useState(false);
+  const [newsletter, setNewsletter] = useState(false);
 
   // shipmondo states
   const [shipmondoProducts, setShipmondoProducts] = useState<any[]>([]);
@@ -39,12 +42,48 @@ const Checkout: React.FC = () => {
     zipcode: "",
     city: "",
     phone: "",
+    email: "",
   });
+
+  const [errors, setErrors] = useState({
+    email: "",
+    firstName: "",
+    lastName: "",
+    address: "",
+    zipcode: "",
+    city: "",
+    phone: "",
+  });
+
+  const [phoneCountry, setPhoneCountry] = useState<string | null>(null);
 
   const google = useGoogleMaps(import.meta.env.VITE_GOOGLE_MAPS_API_KEY);
   const [autocomplete, setAutocomplete] = useState<any>(null);
   const [placesService, setPlacesService] = useState<any>(null);
   const [suggestions, setSuggestions] = useState<any[]>([]);
+
+  useEffect(() => {
+    const savedShippingInfo = localStorage.getItem("shippingInfo");
+    if (savedShippingInfo) {
+      const parsedInfo = JSON.parse(savedShippingInfo);
+      setShippingInfo(parsedInfo);
+      setSaveInfo(true);
+      if (parsedInfo.phone) {
+        const phoneNumber = parsePhoneNumber(parsedInfo.phone, "DK");
+        if (phoneNumber) {
+          setPhoneCountry(phoneNumber.country);
+        }
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (saveInfo) {
+      localStorage.setItem("shippingInfo", JSON.stringify(shippingInfo));
+    } else {
+      localStorage.removeItem("shippingInfo");
+    }
+  }, [shippingInfo, saveInfo]);
 
   const paymentMessages: { [key: string]: string } = {
     mobilepay:
@@ -67,6 +106,52 @@ const Checkout: React.FC = () => {
   const [selectedShippingId, setSelectedShippingId] = useState<string | null>(
     null
   );
+
+  const validateField = (name: string, value: string) => {
+    let error = "";
+    if (!value) {
+      error = "Dette felt er påkrævet";
+    }
+
+    if (name === "phone") {
+      const phoneNumber = parsePhoneNumber(value, "DK");
+      if (!phoneNumber || !phoneNumber.isValid()) {
+        error = "Angiv et gyldigt telefonnummer";
+      }
+    }
+    if (name === "email") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(value)) {
+        error = "Angiv en gyldig email";
+      }
+    }
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: error,
+    }));
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    if (name === "phone") {
+      const asYouType = new AsYouType("DK");
+      const formatted = asYouType.input(value);
+      setShippingInfo({ ...shippingInfo, phone: formatted });
+
+      const phoneNumber = parsePhoneNumber(formatted, "DK");
+      if (phoneNumber && phoneNumber.country) {
+        setPhoneCountry(phoneNumber.country);
+      } else {
+        setPhoneCountry(null);
+      }
+    } else {
+      setShippingInfo({ ...shippingInfo, [name]: value });
+    }
+
+    validateField(name, value);
+  };
 
   useEffect(() => {
     const fetchShipmondoProducts = async () => {
@@ -164,6 +249,7 @@ const Checkout: React.FC = () => {
 
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setShippingInfo({ ...shippingInfo, address: e.target.value });
+    validateField("address", e.target.value);
     if (autocomplete) {
       autocomplete.getPlacePredictions(
         {
@@ -179,6 +265,22 @@ const Checkout: React.FC = () => {
   };
 
   const handleCheckout = async () => {
+    let hasErrors = false;
+    Object.keys(errors).forEach((key) => {
+      validateField(
+        key,
+        shippingInfo[key as keyof typeof shippingInfo] as string
+      );
+      if (errors[key as keyof typeof errors]) {
+        hasErrors = true;
+      }
+    });
+
+    if (hasErrors) {
+      console.log("Form has errors", errors);
+      return;
+    }
+
     const response = await fetch(
       "http://localhost:5000/api/create-checkout-session",
       {
@@ -214,11 +316,27 @@ const Checkout: React.FC = () => {
             </div>
             <input
               type="email"
+              name="email"
               placeholder="Mail"
-              className="w-full border border-gray-300 rounded-md p-2"
+              className={`w-full border ${
+                errors.email ? "border-red-500" : "border-gray-300"
+              } rounded-md p-2`}
+              value={shippingInfo.email}
+              onChange={handleInputChange}
+              onBlur={() => validateField("email", shippingInfo.email)}
+              required
             />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+            )}
             <div className="flex items-center mt-2">
-              <input type="checkbox" id="newsletter" className="h-4 w-4" />
+              <input
+                type="checkbox"
+                id="newsletter"
+                className="h-4 w-4"
+                checked={newsletter}
+                onChange={(e) => setNewsletter(e.target.checked)}
+              />
               <label htmlFor="newsletter" className="ml-2 text-sm">
                 Send mails til mig om nyheder og tilbud
               </label>
@@ -243,37 +361,64 @@ const Checkout: React.FC = () => {
                 <option>Sverige</option>
                 <option>Tyskland</option>
               </select>
-              <input
-                type="text"
-                placeholder="Fornavn"
-                className="w-full border border-gray-300 rounded-md p-2"
-                value={shippingInfo.firstName}
-                onChange={(e) =>
-                  setShippingInfo({
-                    ...shippingInfo,
-                    firstName: e.target.value,
-                  })
-                }
-              />
-              <input
-                type="text"
-                placeholder="Efternavn"
-                className="w-full border border-gray-300 rounded-md p-2"
-                value={shippingInfo.lastName}
-                onChange={(e) =>
-                  setShippingInfo({
-                    ...shippingInfo,
-                    lastName: e.target.value,
-                  })
-                }
-              />
-              <input
-                type="text"
-                placeholder="Adresse"
-                className="col-span-2 w-full border border-gray-300 rounded-md p-2"
-                value={shippingInfo.address}
-                onChange={handleAddressChange}
-              />
+              <div>
+                <input
+                  type="text"
+                  name="firstName"
+                  placeholder="Fornavn"
+                  className={`w-full border ${
+                    errors.firstName ? "border-red-500" : "border-gray-300"
+                  } rounded-md p-2`}
+                  value={shippingInfo.firstName}
+                  onChange={handleInputChange}
+                  onBlur={() =>
+                    validateField("firstName", shippingInfo.firstName)
+                  }
+                  required
+                />
+                {errors.firstName && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.firstName}
+                  </p>
+                )}
+              </div>
+              <div>
+                <input
+                  type="text"
+                  name="lastName"
+                  placeholder="Efternavn"
+                  className={`w-full border ${
+                    errors.lastName ? "border-red-500" : "border-gray-300"
+                  } rounded-md p-2`}
+                  value={shippingInfo.lastName}
+                  onChange={handleInputChange}
+                  onBlur={() =>
+                    validateField("lastName", shippingInfo.lastName)
+                  }
+                  required
+                />
+                {errors.lastName && (
+                  <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>
+                )}
+              </div>
+              <div className="col-span-2">
+                <input
+                  type="text"
+                  name="address"
+                  placeholder="Adresse"
+                  className={`w-full border ${
+                    errors.address ? "border-red-500" : "border-gray-300"
+                  } rounded-md p-2`}
+                  value={shippingInfo.address}
+                  onChange={handleAddressChange}
+                  onBlur={() => validateField("address", shippingInfo.address)}
+                  required
+                />
+                {errors.address && (
+                  <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+                )}
+              </div>
+
               {suggestions.length > 0 && (
                 <div className="col-span-2 bg-white border border-gray-300 rounded-md">
                   {suggestions.map((suggestion) => (
@@ -323,49 +468,84 @@ const Checkout: React.FC = () => {
               )}
               <input
                 type="text"
+                name="apartment"
                 placeholder="Lejlighed, etage osv."
                 className="col-span-2 w-full border border-gray-300 rounded-md p-2"
                 value={shippingInfo.apartment}
-                onChange={(e) =>
-                  setShippingInfo({
-                    ...shippingInfo,
-                    apartment: e.target.value,
-                  })
-                }
+                onChange={handleInputChange}
               />
-              <input
-                type="text"
-                placeholder="Postnummer"
-                className="w-full border border-gray-300 rounded-md p-2"
-                value={shippingInfo.zipcode}
-                onChange={(e) =>
-                  setShippingInfo({
-                    ...shippingInfo,
-                    zipcode: e.target.value,
-                  })
-                }
-              />
-              <input
-                type="text"
-                placeholder="By"
-                className="w-full border border-gray-300 rounded-md p-2"
-                value={shippingInfo.city}
-                onChange={(e) =>
-                  setShippingInfo({ ...shippingInfo, city: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                placeholder="Telefon"
-                className="col-span-2 w-full border border-gray-300 rounded-md p-2"
-                value={shippingInfo.phone}
-                onChange={(e) =>
-                  setShippingInfo({ ...shippingInfo, phone: e.target.value })
-                }
-              />
+              <div>
+                <input
+                  type="text"
+                  name="zipcode"
+                  placeholder="Postnummer"
+                  className={`w-full border ${
+                    errors.zipcode ? "border-red-500" : "border-gray-300"
+                  } rounded-md p-2`}
+                  value={shippingInfo.zipcode}
+                  onChange={handleInputChange}
+                  onBlur={() => validateField("zipcode", shippingInfo.zipcode)}
+                  required
+                />
+                {errors.zipcode && (
+                  <p className="text-red-500 text-sm mt-1">{errors.zipcode}</p>
+                )}
+              </div>
+              <div>
+                <input
+                  type="text"
+                  name="city"
+                  placeholder="By"
+                  className={`w-full border ${
+                    errors.city ? "border-red-500" : "border-gray-300"
+                  } rounded-md p-2`}
+                  value={shippingInfo.city}
+                  onChange={handleInputChange}
+                  onBlur={() => validateField("city", shippingInfo.city)}
+                  required
+                />
+                {errors.city && (
+                  <p className="text-red-500 text-sm mt-1">{errors.city}</p>
+                )}
+              </div>
+
+              <div className="col-span-2">
+                <div className="relative">
+                  <input
+                    type="tel"
+                    name="phone"
+                    placeholder="Telefon"
+                    className={`w-full border ${
+                      errors.phone ? "border-red-500" : "border-gray-300"
+                    } rounded-md p-2 pr-10`}
+                    value={shippingInfo.phone}
+                    onChange={handleInputChange}
+                    onBlur={() => validateField("phone", shippingInfo.phone)}
+                    required
+                  />
+
+                  {phoneCountry && (
+                    <img
+                      src={`https://flagcdn.com/w20/${phoneCountry.toLowerCase()}.png`}
+                      alt={phoneCountry}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 h-5 pointer-events-none"
+                    />
+                  )}
+                </div>
+
+                {errors.phone && (
+                  <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+                )}
+              </div>
             </div>
             <div className="flex items-center mt-4">
-              <input type="checkbox" id="save-info" className="h-4 w-4" />
+              <input
+                type="checkbox"
+                id="save-info"
+                className="h-4 w-4"
+                checked={saveInfo}
+                onChange={(e) => setSaveInfo(e.target.checked)}
+              />
               <label htmlFor="save-info" className="ml-2 text-sm">
                 Gem denne information for hurtigere udtjekning næste gang
               </label>

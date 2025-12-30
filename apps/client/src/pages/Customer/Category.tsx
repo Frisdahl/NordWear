@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams, Link, useOutletContext } from "react-router-dom";
+import { useParams, Link, useOutletContext, useSearchParams } from "react-router-dom";
 import { Product } from "../../types";
-import { fetchProducts } from "../../services/api";
+import { fetchProducts, searchProducts } from "../../services/api";
 import FilterMenu from "../../components/customer/FilterMenu";
 import ProductCard from "../../components/customer/ProductCard";
 import Notification from "../../components/Notification";
@@ -23,6 +23,9 @@ interface OutletContextType {
 const Category: React.FC = () => {
   const { headerHeight } = useOutletContext<OutletContextType>();
   const { categoryName } = useParams<{ categoryName: string }>();
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get("search");
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +43,10 @@ const Category: React.FC = () => {
   const productsPerPage = 18;
 
   const getCategoryInfo = (categoryName: string | undefined) => {
+    if (searchQuery) {
+       return [];
+    }
+
     switch (categoryName) {
       case "sneakers":
         return [
@@ -129,26 +136,33 @@ const Category: React.FC = () => {
     const loadProducts = async () => {
       setLoading(true);
       try {
-        const fetchedProducts = await fetchProducts(categoryName, filters);
+        let fetchedProducts: Product[] = [];
+        
+        if (searchQuery) {
+            fetchedProducts = await searchProducts(searchQuery);
+        } else {
+            fetchedProducts = await fetchProducts(categoryName, filters);
+        }
+
         const productArray = Array.isArray(fetchedProducts)
           ? fetchedProducts
           : [];
         setProducts(productArray);
         setTotalPages(Math.ceil(productArray.length / productsPerPage));
       } catch (err) {
-        setError(`Failed to load products for ${categoryName}`);
+        setError(`Failed to load products for ${searchQuery ? "search" : categoryName}`);
       } finally {
         setLoading(false);
       }
     };
 
     loadProducts();
-  }, [categoryName, filters]);
+  }, [categoryName, filters, searchQuery]);
 
-  // Reset to page 1 when filters change
+  // Reset to page 1 when filters or search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters, categoryName]);
+  }, [filters, categoryName, searchQuery]);
 
   // Get current products for the page
   const indexOfLastProduct = currentPage * productsPerPage;
@@ -170,6 +184,9 @@ const Category: React.FC = () => {
   };
 
   const getCategoryDescription = (categoryName: string | undefined) => {
+    if (searchQuery) {
+        return `${products.length} resultater for "${searchQuery}"`;
+    }
     switch (categoryName) {
       case "sneakers":
         return "Alt vores footwear - sneakers, dress sko, loafers og støvler er udviklet i et stilrent og klassisk design, hvilket gør at de passer til ethvert outfit. Komfort og kvalitet er noget vi ikke vil gå på kompromis med og derfor er alle produkter håndlavet i Portugal.";
@@ -186,6 +203,7 @@ const Category: React.FC = () => {
   };
 
   const categoryNameToDanish = (categoryName: string | undefined): string => {
+    if (searchQuery) return "SØG";
     const translations: { [key: string]: string } = {
       sneakers: "Sneakers",
       shirts: "Shirts",
@@ -201,9 +219,10 @@ const Category: React.FC = () => {
     );
   };
 
-  const capitalizedCategoryName =
-    categoryName?.charAt(0).toUpperCase() + categoryName?.slice(1) ||
-    "Alle Produkter";
+  const capitalizedCategoryName = searchQuery
+    ? "Søg"
+    : categoryName?.charAt(0).toUpperCase() + categoryName?.slice(1) ||
+      "Alle Produkter";
 
   const gridClasses: { [key: string]: string } = {
     "grid-1": "grid-cols-1",

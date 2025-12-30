@@ -32,7 +32,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
         onClick={onClose}
       />
       <div
-        className={`fixed right-0 h-full bg-[#f2f1f0] w-[90vw] md:w-[30vw] shadow-xl transform transition-transform duration-500 ease-in-out flex flex-col ${
+        className={`fixed right-0 h-full bg-[#f2f1f0] w-[90vw] md:w-[25vw] shadow-xl transform transition-transform duration-500 ease-in-out flex flex-col ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
         style={{ zIndex: 9999 }}
@@ -72,36 +72,36 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
             </div>
           ) : (
             <div className="mt-6 h-full">
-              <div className="-mx-6 px-6">
+              <div className="-mx-6">
                 {cart.map((product) => (
                   <div
                     key={`${product.id}-${product.selectedSize}`}
-                    className="border-b border-[#00000026] py-4"
+                    className="border-b border-[#00000026] py-4 px-6"
                   >
-                    <div className="grid grid-cols-3 gap-4 items-center">
-                      <div className="col-span-1">
+                    <div className="grid grid-cols-[100px_1fr_auto] gap-4 items-center">
+                      <div className="flex justify-center items-center">
                         <img
                           src={product.imageUrl}
                           alt={product.name}
-                          className="w-full"
+                          className="max-w-[100px] max-h-[100px] w-auto h-auto object-contain"
                         />
                       </div>
-                      <div className="col-span-1 flex flex-col h-full justify-between font-sans">
-                        <div>
-                          <span className="font-bold text-13">
+                      <div className="flex flex-col h-full justify-between font-sans overflow-hidden">
+                        <div className="min-w-0">
+                          <span className="font-bold block truncate text-[clamp(13px,1.5vw,14px)]">
                             {product.name}
                           </span>
-                          <span className="text-11.7 block">
+                          <span className="block text-[clamp(10px,1.2vw,11.7px)]">
                             {formatPrice(product.price)}
                           </span>
                         </div>
-                        <div className="text-[0.75rem] text-[#181c2d]">
-                          <span className="font-semibold text-[#181c2d] text-[0.75rem]">
+                        <div className="text-[clamp(10px,1.2vw,11.7px)] text-[#181c2d]">
+                          <span className="font-semibold">
                             Størrelse:
                           </span>{" "}
                           {product.selectedSize || "N/A"}
                         </div>
-                        <div className="flex items-center">
+                        <div className="flex items-center text-[clamp(12px,1.3vw,13px)]">
                           <button
                             onClick={() =>
                               decreaseQuantity(product.id, product.selectedSize)
@@ -109,13 +109,13 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                           >
                             -
                           </button>
-                          <span className="mx-2 text-[0.85rem]">
+                          <span className="mx-2">
                             {product.quantity}
                           </span>
                           <button onClick={() => addToCart(product)}>+</button>
                         </div>
                       </div>
-                      <div className="col-span-1 flex flex-col items-end h-full justify-between">
+                      <div className="flex flex-col items-end h-full justify-between">
                         <button
                           onClick={() =>
                             removeFromCart(product.id, product.selectedSize)
@@ -126,7 +126,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                             style={{ color: "#00000055" }}
                           />
                         </button>
-                        <span className="text-[0.813rem] font-semibold mt-2">
+                        <span className="font-semibold mt-2 text-[clamp(12px,1.3vw,13px)]">
                           {formatPrice(product.price * product.quantity)}
                         </span>
                       </div>

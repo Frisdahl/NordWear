@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import { json } from "body-parser";
 import apiRoutes from "./routes/api.routes";
+import { stripeWebhookHandler } from "./controllers/stripe.controller"; // Import the new handler
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -16,7 +17,11 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-app.use(json());
+
+// Stripe webhook must come BEFORE body-parser, to get the raw body
+app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), stripeWebhookHandler);
+
+app.use(json()); // General JSON body parser for other routes
 
 app.use("/api", apiRoutes);
 

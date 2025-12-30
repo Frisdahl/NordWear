@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../contexts/AuthContext';
 import { login as loginApi } from '../../services/api';
 
@@ -36,7 +37,13 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F0F0F0]">
+    <div className="min-h-screen flex items-center justify-center bg-[#F0F0F0] relative">
+      <button 
+        onClick={() => navigate(-1)}
+        className="absolute top-4 left-4 md:top-8 md:left-8 p-2 text-gray-600 hover:text-black transition-colors"
+      >
+        <ArrowLeftIcon className="h-6 w-6" />
+      </button>
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mx-auto">
         <div className="text-center mb-6">
           {/* Company Logo */}

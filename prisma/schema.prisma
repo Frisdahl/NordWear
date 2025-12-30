@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider          = "mysql"
-  url               = env("DATABASE_URL")
-  shadowDatabaseUrl = env("DEV_DATABASE_URL")
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 model cart_item {
@@ -64,30 +63,46 @@ model customer_likes {
 }
 
 model order {
-  id         Int          @id @default(autoincrement())
-  customerId Int
-  subtotal   Float
-  created_at DateTime     @default(now())
-  deleted_at DateTime?
-  customer   customer     @relation(fields: [customerId], references: [id], map: "Order_customerId_fkey")
-  order_item order_item[]
+  id              Int         @id @default(autoincrement())
+  customerId      Int?
+  amount          Int         // Total amount in cents
+  currency        String
+  status          OrderStatus @default(PENDING)
+  paymentIntentId String      @unique
+  customerDetails Json?       // Store Stripe customer_details JSON
+  shippingDetails Json?       // Store Stripe shipping JSON
+  created_at      DateTime    @default(now())
+  deleted_at      DateTime?
+  customer        customer?   @relation(fields: [customerId], references: [id], map: "Order_customerId_fkey")
+  order_item      order_item[]
+  discountAmount  Int         @default(0)
+  giftCardCode    String?
 
   @@index([customerId], map: "Order_customerId_fkey")
 }
 
+model GiftCard {
+  id            Int       @id @default(autoincrement())
+  code          String    @unique
+  balance       Int       // Remaining balance in cents
+  initialAmount Int       // Original amount in cents
+  isEnabled     Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
 model order_item {
-  id          Int     @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   orderId     Int
   productId   Int
-  sizeId      Int
-  colorId     Int
+  sizeId      Int?    // Made nullable
+  colorId     Int?    // Made nullable
   quantity    Int
-  price_each  Float
-  total_price Float
-  color       color   @relation(fields: [colorId], references: [id], map: "Order_Item_colorId_fkey")
-  order       order   @relation(fields: [orderId], references: [id], map: "Order_Item_orderId_fkey")
-  product     product @relation(fields: [productId], references: [id], map: "Order_Item_productId_fkey")
-  size        size    @relation(fields: [sizeId], references: [id], map: "Order_Item_sizeId_fkey")
+  price       Int     // Store item price in cents
+  order       order    @relation(fields: [orderId], references: [id], map: "Order_Item_orderId_fkey")
+  product     product  @relation(fields: [productId], references: [id], map: "Order_Item_productId_fkey")
+  color       color?   @relation(fields: [colorId], references: [id], map: "Order_Item_colorId_fkey") // Relation can be nullable
+  size        size?    @relation(fields: [sizeId], references: [id], map: "Order_Item_sizeId_fkey") // Relation can be nullable
 
   @@index([colorId], map: "Order_Item_colorId_fkey")
   @@index([orderId], map: "Order_Item_orderId_fkey")
@@ -163,6 +178,13 @@ enum ProductStatus {
   ONLINE
   OFFLINE
   DRAFT
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELED
 }
 
 enum Role {

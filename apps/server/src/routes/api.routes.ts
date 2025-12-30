@@ -27,6 +27,9 @@ import {
   getCheckoutSession,
 } from "../controllers/stripe.controller";
 import { sendOrderConfirmation } from "../controllers/email.controller";
+import { validateGiftCard, createGiftCard } from "../controllers/giftcard.controller";
+import { createFreeOrder } from "../controllers/order.controller";
+import { subscribeNewsletter } from "../controllers/newsletter.controller";
 
 const router = Router();
 
@@ -55,5 +58,11 @@ router.post("/quotes", getShipmentRates);
 router.post("/create-checkout-session", createCheckoutSession);
 router.get("/checkout-session", getCheckoutSession);
 router.post("/send-order-confirmation", sendOrderConfirmation);
+
+// Gift card routes
+router.post("/gift-cards/validate", validateGiftCard);
+router.post("/gift-cards", createGiftCard);
+router.post("/orders/create-free", createFreeOrder);
+router.post("/newsletter/subscribe", subscribeNewsletter);
 
 export default router;

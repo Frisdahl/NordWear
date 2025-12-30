@@ -66,3 +66,35 @@ export const sendOrderConfirmation = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to send email" });
   }
 };
+
+export const sendGiftCardEmail = async (email: string, code: string, amount: number) => {
+  try {
+    const msg = {
+      to: email,
+      from: "nordwear.kundeservice@gmail.com",
+      subject: "Her er dit gavekort!",
+      html: `
+        <div style="font-family: Arial, sans-serif; text-align: center; color: #1c1c1c;">
+          <h1>Velkommen til NordWear!</h1>
+          <p>Tak fordi du tilmeldte dig vores nyhedsbrev.</p>
+          <p>Som lovet er her dit gavekort, som giver dig en rabat på din næste ordre:</p>
+          
+          <div style="background-color: #f2f1f0; padding: 20px; margin: 20px 0; border-radius: 8px;">
+            <h2 style="margin: 0; font-size: 24px;">${amount} DKK</h2>
+            <p style="margin: 10px 0 0; font-weight: bold; font-size: 18px; letter-spacing: 2px;">${code}</p>
+          </div>
+
+          <p>Brug koden ved betaling for at indløse din rabat.</p>
+          <a href="${process.env.CLIENT_URL || 'http://localhost:3000'}" style="display: inline-block; background-color: #1c1c1c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; margin-top: 20px;">Shop Nu</a>
+        </div>
+      `,
+    };
+
+    await sgMail.send(msg);
+    console.log(`Gift card email sent to ${email}`);
+    return true;
+  } catch (error) {
+    console.error("Error sending gift card email:", error);
+    return false;
+  }
+};

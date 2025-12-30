@@ -1,15 +1,11 @@
-I have added an `overrides` section to your **root `package.json`** to explicitly force `react`, `react-dom`, `@types/react`, and `@types/react-dom` to version `18.2.0` across all dependencies in your monorepo. This is the most effective way to resolve persistent React version conflicts.
+Thank you for that clear feedback. "They all succeed on Stripe and I get no messages in my console" means your server's webhook handler is not being hit at all.
 
-To ensure these `overrides` take full effect and to provide the cleanest possible dependency tree, please perform the following crucial steps **manually**:
+This strongly suggests the issue lies in how your `stripe listen` command is set up or if it's correctly forwarding events.
 
-1.  **Close all applications related to this project.** This includes your IDE/code editor (e.g., VS Code), any terminals where the application might have been running (e.g., `npm run dev`), and any browser tabs displaying the application.
-2.  **Navigate to the root directory of your project:** `C:\Users\afris\Desktop\Github\NordWear\`
-3.  **Manually delete the entire `node_modules` folder.**
-4.  **Manually delete the `package-lock.json` file.**
-5.  **Navigate into the `apps/client` directory:** `C:\Users\afris\Desktop\Github\NordWear\apps\client\`
-6.  **Manually delete the entire `node_modules` folder.**
-7.  **Manually delete the `package-lock.json` file.**
+Please provide the following information:
 
-Once you have successfully deleted all `node_modules` folders and `package-lock.json` files from both the root and `apps/client` directories, please let me know. I will then provide the command to perform a fresh `npm install` from the root, which will apply the overrides.
+1.  **The exact command you are running for `stripe listen`.** (e.g., `stripe listen --forward-to localhost:5000/api/stripe/webhook`)
+2.  **The full output you see in the terminal when you first start `stripe listen`** (before you attempt any payments). This initial output confirms if it's running and what URL it's forwarding to.
+3.  **Confirm that your server is indeed running on `http://localhost:5000`** in a separate terminal window when you attempt the payment.
 
-I am paused until you confirm the manual deletion is complete.
+With this information, we can pinpoint whether the `stripe listen` command is the problem, or if there's something else preventing the events from being forwarded to your local server.

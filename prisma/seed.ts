@@ -56,6 +56,7 @@ async function main() {
   await prisma.$executeRawUnsafe('TRUNCATE TABLE `shipment_size`;');
   await prisma.$executeRawUnsafe('TRUNCATE TABLE `User`;');
   await prisma.$executeRawUnsafe('TRUNCATE TABLE `ProductImage`;');
+  await prisma.$executeRawUnsafe('TRUNCATE TABLE `GiftCard`;');
   await prisma.$executeRawUnsafe('SET FOREIGN_KEY_CHECKS = 1;');
   console.log('Tables cleared.');
 
@@ -141,6 +142,17 @@ async function main() {
   }
   await prisma.product_quantity.createMany({ data: quantitiesToSeed, skipDuplicates: true });
   console.log('Product quantities seeded.');
+
+  // 7. Seed Gift Cards
+  await prisma.giftCard.createMany({
+    data: [
+      { code: 'GIFT500', balance: 50000, initialAmount: 50000, isEnabled: true }, // 500 DKK
+      { code: 'GIFT100', balance: 10000, initialAmount: 10000, isEnabled: true }, // 100 DKK
+      { code: 'GIFTFREE', balance: 1000000, initialAmount: 1000000, isEnabled: true }, // 10,000 DKK
+    ],
+    skipDuplicates: true,
+  });
+  console.log('Gift cards seeded.');
 
   console.log('Seeding finished.');
 }

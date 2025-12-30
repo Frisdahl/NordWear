@@ -87,12 +87,16 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      setShowAllResults(true);
+      navigate(`/category?search=${encodeURIComponent(searchQuery)}`);
+      onClose();
     }
   };
 
   const handleViewAllProducts = () => {
-    setShowAllResults(true);
+    if (searchQuery.trim()) {
+      navigate(`/category?search=${encodeURIComponent(searchQuery)}`);
+      onClose();
+    }
   };
 
   if (!isRendered) return null;

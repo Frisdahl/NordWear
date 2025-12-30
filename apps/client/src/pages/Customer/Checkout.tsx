@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import useCart from "../../hooks/useCart";
+import { useAuth } from "../../contexts/AuthContext"; // Import useAuth
 import { formatPrice } from "../../utils/formatPrice";
 import { loadStripe } from "@stripe/stripe-js";
 import parsePhoneNumber, { AsYouType } from "libphonenumber-js";
@@ -22,6 +23,7 @@ import useGoogleMaps from "../../hooks/useGoogleMaps";
 
 const Checkout: React.FC = () => {
   const { cart, cartCount } = useCart();
+  const { user } = useAuth(); // Use the useAuth hook
   const [billingMethod, setBillingMethod] = useState("same");
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [saveInfo, setSaveInfo] = useState(false);
@@ -61,6 +63,13 @@ const Checkout: React.FC = () => {
   const [autocomplete, setAutocomplete] = useState<any>(null);
   const [placesService, setPlacesService] = useState<any>(null);
   const [suggestions, setSuggestions] = useState<any[]>([]);
+
+  const [appliedGiftCard, setAppliedGiftCard] = useState<{
+    code: string;
+    balance: number;
+  } | null>(null);
+  const [giftCardInput, setGiftCardInput] = useState("");
+  const [giftCardError, setGiftCardError] = useState("");
 
   useEffect(() => {
     const savedShippingInfo = localStorage.getItem("shippingInfo");
@@ -264,6 +273,25 @@ const Checkout: React.FC = () => {
     }
   };
 
+  const handleApplyGiftCard = async () => {
+    setGiftCardError("");
+    setAppliedGiftCard(null);
+    if (!giftCardInput) return;
+
+    try {
+      const res = await fetch("http://localhost:5000/api/gift-cards/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: giftCardInput }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Invalid code");
+      setAppliedGiftCard(data);
+    } catch (e: any) {
+      setGiftCardError(e.message);
+    }
+  };
+
   const handleCheckout = async () => {
     let hasErrors = false;
     Object.keys(errors).forEach((key) => {
@@ -286,11 +314,56 @@ const Checkout: React.FC = () => {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cart }),
+        body: JSON.stringify({
+          cart,
+          customerId: user?.id,
+          giftCardCode: appliedGiftCard?.code,
+        }), // Pass user?.id which can be null
       }
     );
 
     const data = await response.json();
+
+    if (data.freeOrder) {
+      // Handle free order
+      const freeRes = await fetch(
+        "http://localhost:5000/api/orders/create-free",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            cart,
+            customerId: user?.id,
+            giftCardCode: appliedGiftCard?.code,
+            shippingDetails: {
+              name: `${shippingInfo.firstName} ${shippingInfo.lastName}`,
+              phone: shippingInfo.phone,
+              address: {
+                line1: shippingInfo.address,
+                line2: shippingInfo.apartment,
+                city: shippingInfo.city,
+                postal_code: shippingInfo.zipcode,
+                country: "DK", // Fixed for now
+              },
+            },
+            customerDetails: {
+              email: shippingInfo.email,
+              name: `${shippingInfo.firstName} ${shippingInfo.lastName}`,
+              phone: shippingInfo.phone,
+            },
+          }),
+        }
+      );
+      const freeData = await freeRes.json();
+      if (freeData.success) {
+        window.location.href = `/success?orderId=${freeData.orderId}`;
+        return;
+      } else {
+        console.error("Free order failed", freeData);
+        alert("Failed to process free order: " + freeData.message);
+        return;
+      }
+    }
 
     if (!data?.url) {
       console.error("No checkout url returned", data);
@@ -301,7 +374,15 @@ const Checkout: React.FC = () => {
   };
 
   const taxes = subtotal * 0.2; // 25% VAT is 20% of the total price (subtotal is inclusive of VAT)
-  const total = subtotal + shippingCost;
+  const discountAmount = useMemo(() => {
+    if (!appliedGiftCard) return 0;
+    // balance is in cents, subtotal in DKK units
+    const subtotalCents = Math.round(subtotal * 100);
+    const discountCents = Math.min(appliedGiftCard.balance, subtotalCents);
+    return discountCents / 100;
+  }, [subtotal, appliedGiftCard]);
+
+  const total = subtotal + shippingCost - discountAmount;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2">
@@ -941,15 +1022,31 @@ const Checkout: React.FC = () => {
           </div>
 
           <div className="py-4">
-            <div className="flex">
-              <input
-                type="text"
-                placeholder="Rabatkode eller gavekort"
-                className="w-full border border-gray-300 rounded-l-md p-2"
-              />
-              <button className="bg-gray-300 text-gray-700 px-4 rounded-r-md">
-                Brug
-              </button>
+            <div className="flex flex-col">
+              <div className="flex">
+                <input
+                  type="text"
+                  placeholder="Rabatkode eller gavekort"
+                  className="w-full border border-gray-300 rounded-l-md p-2"
+                  value={giftCardInput}
+                  onChange={(e) => setGiftCardInput(e.target.value)}
+                />
+                <button
+                  onClick={handleApplyGiftCard}
+                  className="bg-gray-300 text-gray-700 px-4 rounded-r-md hover:bg-gray-400 transition"
+                >
+                  Brug
+                </button>
+              </div>
+              {giftCardError && (
+                <p className="text-red-500 text-sm mt-1">{giftCardError}</p>
+              )}
+              {appliedGiftCard && (
+                <p className="text-green-600 text-sm mt-1">
+                  Gavekort anvendt: {formatPrice(appliedGiftCard.balance / 100)}{" "}
+                  tilbage
+                </p>
+              )}
             </div>
           </div>
 
@@ -958,7 +1055,7 @@ const Checkout: React.FC = () => {
               <p>Subtotal - {cartCount} varer</p>
               <p className="font-medium">{formatPrice(subtotal)}</p>
             </div>
-            <div className="flex justify-between items-center text-sm">
+            <div className="flex justify-between items-center text-sm mb-2">
               <p>Levering</p>
               <p className="text-gray-500">
                 {shippingCost > 0
@@ -966,6 +1063,12 @@ const Checkout: React.FC = () => {
                   : "Angiv leveringsadresse"}
               </p>
             </div>
+            {discountAmount > 0 && (
+              <div className="flex justify-between items-center text-sm text-green-600">
+                <p>Rabat (Gavekort)</p>
+                <p className="font-medium">-{formatPrice(discountAmount)}</p>
+              </div>
+            )}
           </div>
 
           <div className="py-4">

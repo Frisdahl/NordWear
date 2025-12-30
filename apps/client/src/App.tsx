@@ -11,6 +11,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext"; // Import AuthPr
 import CustomerPanelLayout from "./layouts/CustomerPanelLayout";
 import CustomerOrders from "./pages/Customer/CustomerOrders";
 import CustomerFavorites from "./pages/Customer/CustomerFavorites";
+import ScrollToTop from "./components/ScrollToTop";
 
 const Dashboard = lazy(() => import("./pages/Admin/Dashboard"));
 const AllProducts = lazy(() => import("./pages/Admin/all_products"));
@@ -24,6 +25,7 @@ const CheckoutLayout = lazy(() => import("./layouts/CheckoutLayout"));
 const Checkout = lazy(() => import("./pages/Customer/Checkout"));
 const Success = lazy(() => import("./pages/Customer/Success"));
 const Cancel = lazy(() => import("./pages/Customer/Cancel"));
+const About = lazy(() => import("./pages/Customer/About"));
 
 // ProtectedRoute Component
 const ProtectedRoute: React.FC<{
@@ -52,6 +54,7 @@ const ProtectedRoute: React.FC<{
 
 const App: React.FC = () => (
   <Router>
+    <ScrollToTop />
     <AuthProvider>
       {" "}
       {/* Wrap the entire app with AuthProvider */}
@@ -67,6 +70,7 @@ const App: React.FC = () => (
             <Route path="/" element={<Home />} />
             <Route path="/product/:id" element={<Product />} />
             <Route path="/category/:categoryName?" element={<Category />} />
+            <Route path="/about" element={<About />} />
             {/* Add more customer routes here */}
           </Route>
           <Route

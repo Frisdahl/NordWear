@@ -7,7 +7,8 @@ export const getProducts = async (
   maxPrice?: number,
   categoryIds?: number[],
   sizeIds?: number[],
-  limit?: number
+  limit?: number,
+  sort?: string
 ) => {
   const where: Prisma.productWhereInput = {
     deleted_at: null,
@@ -43,8 +44,34 @@ export const getProducts = async (
     };
   }
 
+  let orderBy: Prisma.productOrderByWithRelationInput | undefined;
+
+  switch (sort) {
+    case 'price-asc':
+      orderBy = { price: 'asc' };
+      break;
+    case 'price-desc':
+      orderBy = { price: 'desc' };
+      break;
+    case 'name-asc':
+      orderBy = { name: 'asc' };
+      break;
+    case 'name-desc':
+      orderBy = { name: 'desc' };
+      break;
+    case 'newest':
+      orderBy = { id: 'desc' };
+      break;
+    case 'oldest':
+      orderBy = { id: 'asc' };
+      break;
+    default:
+      orderBy = undefined;
+  }
+
   const products = await prisma.product.findMany({
     where,
+    orderBy,
     include: {
       category: true,
       product_quantity: {
@@ -374,9 +401,17 @@ export const getLikedProducts = async (customerId: number) => {
 };
 
 export const getCustomerByUserId = async (userId: number) => {
-    return await prisma.customer.findUnique({
+    // Upsert ensures we either find the existing customer or create a new one safely
+    // This handles the race condition where multiple requests try to create the customer at once
+    const customer = await prisma.customer.upsert({
         where: {
-            userId,
+            userId: userId,
+        },
+        update: {}, // No updates needed if found
+        create: {
+            userId: userId,
         },
     });
+
+    return customer;
 };

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { register as registerApi } from '../../services/api';
 import Notification from '../../components/Notification';
 
@@ -40,7 +41,13 @@ const CreateUser: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F0F0F0]">
+    <div className="min-h-screen flex items-center justify-center bg-[#F0F0F0] relative">
+      <button 
+        onClick={() => navigate(-1)}
+        className="absolute top-4 left-4 md:top-8 md:left-8 p-2 text-gray-600 hover:text-black transition-colors"
+      >
+        <ArrowLeftIcon className="h-6 w-6" />
+      </button>
       {notification && (
         <Notification
           message={notification.message}

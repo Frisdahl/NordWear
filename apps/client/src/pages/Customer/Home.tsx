@@ -46,6 +46,41 @@ const Home: React.FC = () => {
 
   const [prevBtnEnabled, setPrevBtnEnabled] = useState(false);
   const [nextBtnEnabled, setNextBtnEnabled] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [emailInput, setEmailInput] = useState("");
+  const [subscribeStatus, setSubscribeStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  useEffect(() => {
+    const popupShown = sessionStorage.getItem("popupShown");
+    if (popupShown) return;
+
+    const timer = setTimeout(() => {
+      setShowPopup(true);
+      sessionStorage.setItem("popupShown", "true");
+    }, 12000); // 12 seconds delay
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleSubscribe = async () => {
+    if (!emailInput || !emailInput.includes("@")) return;
+    setSubscribeStatus("loading");
+    try {
+      const res = await fetch("http://localhost:5000/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: emailInput }),
+      });
+      if (res.ok) {
+        setSubscribeStatus("success");
+        setTimeout(() => setShowPopup(false), 3000);
+      } else {
+        setSubscribeStatus("error");
+      }
+    } catch (e) {
+      setSubscribeStatus("error");
+    }
+  };
 
   const scrollPrev = useCallback(() => {
     emblaApi?.scrollPrev(4);
@@ -143,7 +178,7 @@ const Home: React.FC = () => {
                 <div className="embla__container flex relative flex-row items-stretch">
                   {products.map((product) => (
                     <div
-                      className="embla__slide flex-none sm:w-1/2 md:w-1/2 lg:w-1/4 flex items-center w-fit-content"
+                      className="embla__slide flex-none w-full sm:w-1/2 md:w-1/2 lg:w-1/4 flex items-center justify-center p-2"
                       key={product.id}
                     >
                       <ProductCard
@@ -153,30 +188,6 @@ const Home: React.FC = () => {
                     </div>
                   ))}
                 </div>
-
-                {/* Prev button */}
-                <button
-                  className={`absolute top-1/2 left-12 -translate-y-1/2 bg-white hover:bg-opacity-100 text-gray-800 rounded-full p-4 shadow-lg transition-opacity ${
-                    !prevBtnEnabled ? "display-hidden" : ""
-                  }`}
-                  onClick={scrollPrev}
-                  disabled={!prevBtnEnabled}
-                  aria-label="Previous"
-                >
-                  &#8592;
-                </button>
-
-                {/* Next button */}
-                <button
-                  className={`absolute top-1/2 right-0 -translate-y-1/2 bg-white bg-opacity-75 hover:bg-opacity-100 text-gray-800 rounded-full p-2 shadow-lg transition-opacity ${
-                    !nextBtnEnabled ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                  onClick={scrollNext}
-                  disabled={!nextBtnEnabled}
-                  aria-label="Next"
-                >
-                  &#8594;
-                </button>
               </div>
             </div>
           )}
@@ -280,6 +291,62 @@ const Home: React.FC = () => {
       </div>
 
       <RatingSlider />
+
+      {/* Gift Card Popup */}
+      {showPopup && (
+        <div className="fixed bottom-8 right-8 z-50 animate-bounce-in">
+          <div className="bg-[#1c1c1c] text-white p-8 rounded-lg shadow-2xl max-w-sm relative">
+            <button
+              onClick={() => setShowPopup(false)}
+              className="absolute top-2 right-4 text-2xl text-gray-400 hover:text-white"
+            >
+              &times;
+            </button>
+            <h3 className="text-2xl font-['EB_Garamond'] mb-4">
+              Få 15% rabat!
+            </h3>
+            <p className="text-sm text-gray-300 mb-6">
+              Tilmeld dig vores nyhedsbrev og modtag et gavekort på 15% til dit
+              næste køb.
+            </p>
+            <div className="flex flex-col gap-3">
+              {subscribeStatus === "success" ? (
+                <p className="text-green-400 font-medium text-center">
+                  Tak! Tjek din indbakke for dit gavekort.
+                </p>
+              ) : (
+                <>
+                  <input
+                    type="email"
+                    placeholder="Din email adresse"
+                    className="bg-transparent border border-gray-600 p-2 text-sm focus:outline-none focus:border-white transition-colors text-white"
+                    value={emailInput}
+                    onChange={(e) => setEmailInput(e.target.value)}
+                    disabled={subscribeStatus === "loading"}
+                  />
+                  <button
+                    onClick={handleSubscribe}
+                    disabled={subscribeStatus === "loading"}
+                    className="bg-[#f2f1f0] text-[#1c1c1c] font-semibold py-2 px-4 hover:bg-white transition-colors disabled:opacity-70"
+                  >
+                    {subscribeStatus === "loading"
+                      ? "Tilmelder..."
+                      : "Tilmeld nu"}
+                  </button>
+                  {subscribeStatus === "error" && (
+                    <p className="text-red-500 text-xs">
+                      Der skete en fejl. Prøv igen.
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+            <p className="text-[10px] text-gray-500 mt-4 text-center">
+              Ved at tilmelde dig accepterer du vores privatlivspolitik.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

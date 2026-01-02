@@ -331,7 +331,7 @@ const AddProduct = () => {
         description,
         price: parseFloat(price) || 0,
         offer_price: offerPrice ? parseFloat(offerPrice) : undefined,
-        status,
+        status: status as any,
         category_Id: parseInt(category),
         varenummer: sku,
         barkode: barcode,

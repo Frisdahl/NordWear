@@ -86,7 +86,7 @@ const Success: React.FC = () => {
                 >
                   <div className="flex items-center">
                     <img
-                      src={cartItem?.imageUrl}
+                      src={cartItem?.imageUrl || ""}
                       alt={item.description}
                       className="w-16 h-16 object-cover rounded-md mr-4"
                     />

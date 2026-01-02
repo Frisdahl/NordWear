@@ -32,6 +32,7 @@ export interface Product {
   offer_price?: number;
   status: ProductStatus;
   category_Id: number;
+  category?: Category;
   deleted_at?: Date;
   varenummer?: string;
   barkode?: string;

@@ -151,7 +151,7 @@ const Checkout: React.FC = () => {
 
       const phoneNumber = parsePhoneNumber(formatted, "DK");
       if (phoneNumber && phoneNumber.country) {
-        setPhoneCountry(phoneNumber.country);
+        setPhoneCountry(phoneNumber.country || null);
       } else {
         setPhoneCountry(null);
       }
@@ -194,7 +194,7 @@ const Checkout: React.FC = () => {
           if (filteredProducts.length > 0) {
             const productCodes = filteredProducts.map((p) => p.code);
             const totalWeight = cart.reduce(
-              (acc, item) => acc + (item.weight || 1000) * item.quantity,
+              (acc, item) => acc + (item.shipment_size?.weight || 1000) * item.quantity,
               0
             );
 

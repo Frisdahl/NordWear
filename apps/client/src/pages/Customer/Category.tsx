@@ -266,8 +266,10 @@ const Category: React.FC = () => {
       />
       {notification.message && (
         <Notification
-          message={notification.message}
+          heading={notification.type === "success" ? "Success" : "Fejl"}
+          subtext={notification.message}
           type={notification.type as "success" | "error"}
+          show={true}
           onClose={() => setNotification({ message: "", type: "" })}
         />
       )}

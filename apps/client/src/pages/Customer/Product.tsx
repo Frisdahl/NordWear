@@ -196,8 +196,10 @@ const Product: React.FC = () => {
     <div className="bg-[#f2f1f0] mt-12">
       {notification && (
         <Notification
-          message={notification.message}
+          heading={notification.type === "success" ? "Success" : "Fejl"}
+          subtext={notification.message}
           type={notification.type}
+          show={true}
           onClose={() => setNotification(null)}
         />
       )}

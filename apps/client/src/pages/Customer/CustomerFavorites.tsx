@@ -57,7 +57,7 @@ const CustomerFavorites: React.FC = () => {
               <div key={product.id}>
                 <div className="flex items-center space-x-8">
                   <img
-                    src={product.imageUrl}
+                    src={product.imageUrl || ""}
                     alt={product.name}
                     className="w-40 h-40 object-cover"
                   />
@@ -65,7 +65,7 @@ const CustomerFavorites: React.FC = () => {
                     <h2 className="font-semibold text-xl">{product.name}</h2>
                     <p className="text-md text-gray-500">
                       <span className="font-semibold">{"Kategori: "}</span>
-                      {product.category.name}
+                      {product.category?.name}
                     </p>
                     <p className="text-md">
                       {product.offer_price ? (

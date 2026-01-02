@@ -50,8 +50,10 @@ const CreateUser: React.FC = () => {
       </button>
       {notification && (
         <Notification
-          message={notification.message}
+          heading={notification.type === 'success' ? 'Success' : 'Fejl'}
+          subtext={notification.message}
           type={notification.type}
+          show={true}
           onClose={handleCloseNotification}
         />
       )}

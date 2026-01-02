@@ -81,7 +81,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                     <div className="grid grid-cols-[100px_1fr_auto] gap-4 items-center">
                       <div className="flex justify-center items-center">
                         <img
-                          src={product.imageUrl}
+                          src={product.imageUrl || ""}
                           alt={product.name}
                           className="max-w-[100px] max-h-[100px] w-auto h-auto object-contain"
                         />
@@ -92,7 +92,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                             {product.name}
                           </span>
                           <span className="block text-[clamp(10px,1.2vw,11.7px)]">
-                            {formatPrice(product.price)}
+                            {formatPrice(product.price || 0)}
                           </span>
                         </div>
                         <div className="text-[clamp(10px,1.2vw,11.7px)] text-[#181c2d]">
@@ -127,7 +127,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                           />
                         </button>
                         <span className="font-semibold mt-2 text-[clamp(12px,1.3vw,13px)]">
-                          {formatPrice(product.price * product.quantity)}
+                          {formatPrice((product.price || 0) * product.quantity)}
                         </span>
                       </div>
                     </div>

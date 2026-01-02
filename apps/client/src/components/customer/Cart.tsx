@@ -81,7 +81,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                     <div className="grid grid-cols-[100px_1fr_auto] gap-4 items-center">
                       <div className="flex justify-center items-center">
                         <img
-                          src={product.imageUrl || ""}
+                          src={product.imageUrl || undefined}
                           alt={product.name}
                           className="max-w-[100px] max-h-[100px] w-auto h-auto object-contain"
                         />

@@ -394,8 +394,8 @@ const Category: React.FC = () => {
           </div>
         </div>
       </div>
-      {isFilterSticky && (
-        <div style={{ height: filterRef.current?.offsetHeight }} />
+      {isFilterSticky && filterRef.current && (
+        <div style={{ height: filterRef.current.offsetHeight }} />
       )}
 
       <div className="mx-auto px-6 sm:px-12">

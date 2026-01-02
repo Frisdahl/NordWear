@@ -335,7 +335,7 @@ const AddProduct = () => {
         category_Id: parseInt(category),
         varenummer: sku,
         barkode: barcode,
-        images: imagesPayload,
+        images: imagesPayload as any,
         shipment_size: {
           weight: weight ? parseFloat(weight) : undefined,
           height: height ? parseFloat(height) : undefined,

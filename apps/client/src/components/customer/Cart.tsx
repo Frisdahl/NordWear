@@ -104,7 +104,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                         <div className="flex items-center text-[clamp(12px,1.3vw,13px)]">
                           <button
                             onClick={() =>
-                              decreaseQuantity(product.id, product.selectedSize)
+                              decreaseQuantity(product.id || 0, product.selectedSize)
                             }
                           >
                             -
@@ -118,7 +118,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                       <div className="flex flex-col items-end h-full justify-between">
                         <button
                           onClick={() =>
-                            removeFromCart(product.id, product.selectedSize)
+                            removeFromCart(product.id || 0, product.selectedSize)
                           }
                         >
                           <TrashIcon

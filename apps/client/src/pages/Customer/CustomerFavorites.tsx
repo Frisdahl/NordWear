@@ -78,7 +78,7 @@ const CustomerFavorites: React.FC = () => {
                       )}
                     </p>
                   </div>
-                  <button onClick={() => handleRemoveFavorite(product.id)}>
+                  <button onClick={() => handleRemoveFavorite(product.id || 0)}>
                     <TrashIcon className="h-6 w-6 text-gray-500" />
                   </button>
                 </div>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import useEmblaCarousel, { EmblaCarouselType } from "embla-carousel-react";
+import useEmblaCarousel from "embla-carousel-react";
+import { EmblaCarouselType } from "embla-carousel";
 import { Product } from "../../types";
 import { fetchProducts } from "../../services/api";
 import ProductCard from "../../components/customer/ProductCard";
@@ -83,11 +84,11 @@ const Home: React.FC = () => {
   };
 
   const scrollPrev = useCallback(() => {
-    emblaApi?.scrollPrev(4);
+    emblaApi?.scrollPrev();
   }, [emblaApi]);
 
   const scrollNext = useCallback(() => {
-    emblaApi?.scrollNext(4);
+    emblaApi?.scrollNext();
   }, [emblaApi]);
 
   const onSelect = useCallback((emblaApi: EmblaCarouselType) => {
@@ -129,7 +130,9 @@ const Home: React.FC = () => {
     <div className="text-[#1c1c1c]">
       {notification.message && (
         <Notification
-          message={notification.message}
+          show={!!notification.message}
+          heading={notification.type === 'error' ? 'Fejl' : 'Success'}
+          subtext={notification.message}
           type={notification.type as "success" | "error"}
           onClose={() => setNotification({ message: "", type: "" })}
         />
@@ -176,13 +179,14 @@ const Home: React.FC = () => {
                 ref={emblaRef}
               >
                 <div className="embla__container flex relative flex-row items-stretch">
-                  {products.map((product) => (
+                  {products.map((product, index) => (
                     <div
                       className="embla__slide flex-none w-full sm:w-1/2 md:w-1/2 lg:w-1/4 flex items-center justify-center p-2"
                       key={product.id}
                     >
                       <ProductCard
                         product={product}
+                        index={index}
                         onAuthRequired={handleAuthRequired}
                       />
                     </div>

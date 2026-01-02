@@ -14,7 +14,7 @@ import CustomerFavorites from "./pages/Customer/CustomerFavorites";
 import ScrollToTop from "./components/ScrollToTop";
 
 const Dashboard = lazy(() => import("./pages/Admin/Dashboard"));
-const AllProducts = lazy(() => import("./pages/Admin/all_products"));
+const AllProducts = lazy(() => import("./pages/Admin/AllProducts"));
 const AddProduct = lazy(() => import("./pages/Admin/AddProduct"));
 const Orders = lazy(() => import("./pages/Admin/Orders"));
 const OrderDetails = lazy(() => import("./pages/Admin/OrderDetails"));

@@ -109,13 +109,13 @@ const AdminNav: React.FC = () => {
                       <li key={sub.path}>
                         <NavLink
                           to={sub.path}
-                          className={({ isActive }) =>
+                          className={({ isActive }: { isActive: boolean }) =>
                             `flex items-center gap-2 pl-8 pr-2 py-2 rounded-lg transition-colors text-[clamp(11px,1.2vw,13px)] group relative ${
                               isActive ? "bg-[#1a1a1a] text-[#f2f2f2]" : "text-[#303030] hover:bg-[#f2f2f2]"
                             }`
                           }
                         >
-                          {({ isActive }) => (
+                          {({ isActive }: { isActive: boolean }) => (
                             <>
                               <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
                                 <div
@@ -150,7 +150,7 @@ const AdminNav: React.FC = () => {
                 <NavLink
                   to={item.path}
                   end={item.path === "/admin"}
-                  className={({ isActive }) =>
+                  className={({ isActive }: { isActive: boolean }) =>
                     `flex gap-2 items-center px-6 py-2 rounded-lg transition-colors font-bold text-[clamp(11px,1.2vw,13px)] ${
                       isActive
                         ? "bg-[#fafafa] text-[#303030]"
@@ -158,7 +158,7 @@ const AdminNav: React.FC = () => {
                     }`
                   }
                 >
-                  {({ isActive }) => (
+                  {({ isActive }: { isActive: boolean }) => (
                     <>
                       <Icon
                         src={

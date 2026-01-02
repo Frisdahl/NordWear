@@ -16,6 +16,7 @@
     "antd": "^6.0.0",
     "axios": "^0.21.1",
     "country-flag-icons": "^1.6.4",
+    "embla-carousel": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "libphonenumber-js": "^1.12.33",
     "react": "^18.2.0",

@@ -81,7 +81,7 @@ export default function OrderTable({
   sortOrder,
 }: Props) {
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLTableCellElement>(null);
   const navigate = useNavigate();
 
   // Filter and Sort Logic

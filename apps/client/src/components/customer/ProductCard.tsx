@@ -17,7 +17,7 @@ interface ProductCardProps {
   onAuthRequired?: () => void;
   className?: string;
   style?: React.CSSProperties;
-  index: number;
+  index?: number;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
@@ -25,7 +25,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   onAuthRequired,
   className,
   style,
-  index,
+  index = 0,
 }) => {
   const { id, name, price, offer_price, imageUrl, colors } = product;
   const [isLiked, setIsLiked] = useState(false);
@@ -56,7 +56,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   useEffect(() => {
     const checkIfLiked = async () => {
-      if (customerId) {
+      if (customerId && id) {
         try {
           const likedProducts = await getLikedProducts(customerId);
           const isProductLiked = likedProducts.some(
@@ -86,7 +86,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       return;
     }
 
-    if (customerId) {
+    if (customerId && id) {
       try {
         if (isLiked) {
           await unlikeProduct(customerId, id);

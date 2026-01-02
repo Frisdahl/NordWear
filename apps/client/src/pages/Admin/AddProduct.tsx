@@ -330,16 +330,16 @@ const AddProduct = () => {
         name,
         description,
         price: parseFloat(price) || 0,
-        offer_price: offerPrice ? parseFloat(offerPrice) : null,
+        offer_price: offerPrice ? parseFloat(offerPrice) : undefined,
         status,
         category_Id: parseInt(category),
         varenummer: sku,
         barkode: barcode,
         images: imagesPayload,
         shipment_size: {
-          weight: weight ? parseFloat(weight) : null,
-          height: height ? parseFloat(height) : null,
-          width: width ? parseFloat(width) : null,
+          weight: weight ? parseFloat(weight) : undefined,
+          height: height ? parseFloat(height) : undefined,
+          width: width ? parseFloat(width) : undefined,
         },
         variants: variants.map((size) => ({
           size: size,
@@ -375,7 +375,9 @@ const AddProduct = () => {
     <div className="container mx-auto px-3 pt-8 min-h-screen relative pb-16">
       {notification.message && (
         <Notification
-          message={notification.message}
+          show={!!notification.message}
+          heading={notification.type === 'success' ? 'Success' : 'Fejl'}
+          subtext={notification.message}
           type={notification.type as "success" | "error"}
           onClose={() => setNotification({ message: "", type: "" })}
         />

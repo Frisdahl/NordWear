@@ -223,8 +223,9 @@ const Category: React.FC = () => {
 
   const capitalizedCategoryName = searchQuery
     ? "Søg"
-    : categoryName?.charAt(0).toUpperCase() + categoryName?.slice(1) ||
-      "Alle Produkter";
+    : categoryName
+    ? categoryName.charAt(0).toUpperCase() + categoryName.slice(1)
+    : "Alle Produkter";
 
   const gridClasses: { [key: string]: string } = {
     "grid-1": "grid-cols-1",

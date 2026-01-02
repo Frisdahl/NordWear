@@ -173,7 +173,11 @@ const Product: React.FC = () => {
 
   const handleAddToCart = () => {
     if (product) {
-      addToCart({ ...product, selectedSize, imageUrl: selectedImage || undefined });
+      addToCart({ 
+        ...product, 
+        selectedSize: selectedSize || undefined, 
+        imageUrl: (selectedImage || undefined) as string | undefined 
+      });
       setNotification({
         message: "Produkt tilføjet til kurv!",
         type: "success",

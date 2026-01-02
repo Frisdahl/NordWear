@@ -79,8 +79,8 @@ const Checkout: React.FC = () => {
       setSaveInfo(true);
       if (parsedInfo.phone) {
         const phoneNumber = parsePhoneNumber(parsedInfo.phone, "DK");
-        if (phoneNumber) {
-          setPhoneCountry(phoneNumber.country);
+        if (phoneNumber && phoneNumber.country) {
+          setPhoneCountry(phoneNumber.country as string);
         }
       }
     }
@@ -151,7 +151,7 @@ const Checkout: React.FC = () => {
 
       const phoneNumber = parsePhoneNumber(formatted, "DK");
       if (phoneNumber && phoneNumber.country) {
-        setPhoneCountry(phoneNumber.country || null);
+        setPhoneCountry(phoneNumber.country as string);
       } else {
         setPhoneCountry(null);
       }

@@ -9,6 +9,7 @@ type ProductItem = {
   status?: "ONLINE" | "OFFLINE" | "DRAFT";
   category?: { id: number; name: string } | null;
   type?: string;
+  imageUrl?: string | null;
 };
 
 type Props = {
@@ -17,6 +18,9 @@ type Props = {
   refreshKey?: number;
   onTotalChange?: (n: number) => void;
   onDeleteSelected: () => void;
+  activeTab: string;
+  sortField: string;
+  sortOrder: string;
 };
 
 const StatusDisplay = ({
@@ -28,12 +32,9 @@ const StatusDisplay = ({
 
   if (status === "ONLINE") {
     return (
-      <div className="flex items-center gap-2">
-        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-        <span className={`${baseClasses} bg-green-100 text-green-800`}>
-          Aktiv
-        </span>
-      </div>
+      <span className={`${baseClasses} bg-[#b0ffc0] text-[#105949]`}>
+        Aktiv
+      </span>
     );
   }
   if (status === "OFFLINE") {
@@ -65,6 +66,9 @@ export default function ProductTable({
   refreshKey = 0,
   onTotalChange,
   onDeleteSelected,
+  activeTab,
+  sortField,
+  sortOrder,
 }: Props) {
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,10 +86,7 @@ export default function ProductTable({
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
         const data: ProductItem[] = await res.json();
         setProducts(data);
-        console.log(data);
-        // report total count to parent if provided
         if (onTotalChange) onTotalChange(data.length);
-        // remove any selected ids that no longer exist
         onSelectedChange((prev) =>
           prev.filter((id) => data.some((p) => p.id === id))
         );
@@ -96,7 +97,57 @@ export default function ProductTable({
         setLoading(false);
       }
     })();
-  }, [refreshKey]); // refetch when parent increments refreshKey
+  }, [refreshKey]);
+
+  // Filter and Sort Logic
+  const filteredProducts = React.useMemo(() => {
+    let result = [...products];
+
+    // Filter
+    if (activeTab === "Aktive") {
+      result = result.filter((p) => p.status === "ONLINE");
+    } else if (activeTab === "Draft") {
+      result = result.filter((p) => p.status === "DRAFT");
+    } else if (activeTab === "Arkiveret") {
+      result = result.filter((p) => p.status === "OFFLINE");
+    }
+
+    // Sort
+    const isAscending = sortOrder === "Ældste først" || sortOrder === "Ældste";
+    const multiplier = isAscending ? 1 : -1;
+
+    result.sort((a, b) => {
+      let valA: any = "";
+      let valB: any = "";
+
+      switch (sortField) {
+        case "Product title":
+          valA = a.name?.toLowerCase() ?? "";
+          valB = b.name?.toLowerCase() ?? "";
+          break;
+        case "Lager":
+          valA = a.total_stock ?? 0;
+          valB = b.total_stock ?? 0;
+          break;
+        case "Type":
+          valA = a.category?.name?.toLowerCase() ?? "";
+          valB = b.category?.name?.toLowerCase() ?? "";
+          break;
+        case "Lavet":
+        case "Opdateret":
+        default:
+          valA = a.id;
+          valB = b.id;
+          break;
+      }
+
+      if (valA < valB) return -1 * multiplier;
+      if (valA > valB) return 1 * multiplier;
+      return 0;
+    });
+
+    return result;
+  }, [products, activeTab, sortField, sortOrder]);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -112,12 +163,12 @@ export default function ProductTable({
   }, []);
 
   const allSelected =
-    products.length > 0 && selected.length === products.length;
+    filteredProducts.length > 0 && selected.length === filteredProducts.length;
   const someSelected = selected.length > 0 && !allSelected;
 
   const toggleSelectAll = () => {
     if (allSelected) onSelectedChange([]);
-    else onSelectedChange(products.map((p) => p.id));
+    else onSelectedChange(filteredProducts.map((p) => p.id));
   };
 
   const toggleSingle = (id: number) => {
@@ -129,13 +180,15 @@ export default function ProductTable({
   if (loading) return <div>Loading products…</div>;
   if (error)
     return <div className="text-red-600">Error loading products: {error}</div>;
+  if (filteredProducts.length === 0 && products.length > 0)
+    return <div className="p-4 text-gray-500">Ingen produkter matcher filteret.</div>;
   if (products.length === 0) return <div>No products found.</div>;
 
   return (
     <table className="w-full text-left border-collapse">
       <thead>
-        <tr className="text-gray-500 font-medium">
-          <th className="pl-2 w-6">
+        <tr className="text-gray-500 font-medium bg-[#f2f2f2] border-t border-b border-[#c7c7c7]">
+          <th className="pl-4 w-6 py-3 pr-8">
             <input
               type="checkbox"
               checked={allSelected}
@@ -145,16 +198,16 @@ export default function ProductTable({
               onChange={toggleSelectAll}
             />
           </th>
-          <th>Produkt</th>
-          <th>Status</th>
-          <th>Lager</th>
-          <th>Type</th>
-          <th>Håndtering</th>
+          <th className="py-3">Produkt</th>
+          <th className="py-3 pr-10">Status</th>
+          <th className="py-3">Lager</th>
+          <th className="py-3">Type</th>
+          <th className="px-3 py-3">Håndtering</th>
         </tr>
       </thead>
 
       <tbody>
-        {products.map((product) => {
+        {filteredProducts.map((product) => {
           const isSelected = selected.includes(product.id);
           return (
             <tr
@@ -163,7 +216,7 @@ export default function ProductTable({
                 isSelected ? "bg-green-100" : "bg-transparent"
               }`}
             >
-              <td className="pl-2 w-6 py-4">
+              <td className="pl-4 w-6 py-4 pr-8">
                 <input
                   type="checkbox"
                   checked={isSelected}
@@ -172,10 +225,37 @@ export default function ProductTable({
               </td>
 
               <td className="py-4">
-                <div className="font-semibold">{product.name ?? "—"}</div>
-                <div className="text-xs text-gray-500">#{product.id}</div>
+                <div className="flex items-center gap-3">
+                  {product.imageUrl ? (
+                    <img
+                      src={product.imageUrl}
+                      alt={product.name}
+                      className="w-10 h-10 rounded-md object-cover bg-gray-100"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-md bg-gray-200 flex items-center justify-center text-gray-400">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="w-6 h-6"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+                        />
+                      </svg>
+                    </div>
+                  )}
+                  <div>
+                    <div className="font-semibold">{product.name ?? "—"}</div>
+                  </div>
+                </div>
               </td>
-              <td className="py-4">
+              <td className="py-4 pr-10">
                 <StatusDisplay status={product.status} />
               </td>
 
@@ -184,7 +264,11 @@ export default function ProductTable({
                   ? `${product.total_stock} på lager i ${product.num_variants} varianter`
                   : "—"}
               </td>
-              <td className="py-4">{product.category?.name ?? "—"}</td>
+              <td className="py-4">
+                <span className="text-gray-500">
+                  {product.category?.name ?? "—"}
+                </span>
+              </td>
 
               <td
                 className="px-3 relative py-4"

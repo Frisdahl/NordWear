@@ -1,13 +1,18 @@
 import React, { useState, useRef, useEffect } from "react";
-import Button from "./Button";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 
 export default function Dropdown({
   label,
   children,
+  className = "",
+  triggerClassName = "text-gray-700 py-4 px-8",
+  disableArrowRotation = false,
 }: {
   label: React.ReactNode;
   children: React.ReactNode;
+  className?: string;
+  triggerClassName?: string;
+  disableArrowRotation?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -24,21 +29,23 @@ export default function Dropdown({
   }, []);
 
   return (
-    <div ref={ref} className="relative inline-block">
-      <Button
-        variant="outline"
-        size="md"
+    <div ref={ref} className={`relative inline-block ${className}`}>
+      <button
         onClick={() => setOpen(!open)}
-        className="min-w-[150px]"
+        className={`flex items-center w-full h-full focus:outline-none ${triggerClassName}`}
       >
         {label}
-        <span className={`ml-2 transition ${open ? "rotate-180" : "rotate-0"}`}>
+        <span
+          className={`ml-2 transition-transform duration-200 ${
+            !disableArrowRotation && open ? "rotate-180" : "rotate-0"
+          }`}
+        >
           <ChevronDownIcon className="w-4 h-4" />
         </span>
-      </Button>
+      </button>
 
       {open && (
-        <div className="absolute left-0 mt-2 w-48 rounded-md border bg-white shadow-md z-20">
+        <div className="absolute left-0 top-full mt-0 w-56 rounded-none border border-t-0 bg-[#f2f1f0] shadow-lg z-50">
           {children}
         </div>
       )}

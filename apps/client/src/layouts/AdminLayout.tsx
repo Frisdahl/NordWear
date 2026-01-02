@@ -6,9 +6,9 @@ import AdminNav from "../components/admin/AdminNav";
 const AdminLayout: React.FC = () => (
   <>
     <AdminHeader />
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-[#1a1a1a]">
       <AdminNav />
-      <main className="w-full px-11 pt-14 bg-[#f2f2f2]">
+      <main className="w-full px-11 pt-8 bg-[#f2f2f2] rounded-tr-2xl">
         <Outlet />
       </main>
     </div>

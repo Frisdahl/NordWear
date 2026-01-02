@@ -1,44 +1,54 @@
-import React from 'react';
-import { CheckCircleIcon, XCircleIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import React, { useEffect } from "react";
+import Icon from "./Icon";
+
+const successIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>`;
+const errorIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>`;
 
 interface NotificationProps {
-  message: string;
-  type: 'success' | 'error';
+  show: boolean;
+  type: "success" | "error";
+  heading: string;
+  subtext: string;
   onClose: () => void;
 }
 
-const Notification: React.FC<NotificationProps> = ({ message, type, onClose }) => {
-  const isSuccess = type === 'success';
-  const bgColor = isSuccess ? 'bg-green-100' : 'bg-red-100';
-  const textColor = isSuccess ? 'text-green-800' : 'text-red-800';
-  const Icon = isSuccess ? CheckCircleIcon : XCircleIcon;
+const Notification: React.FC<NotificationProps> = ({
+  show,
+  type,
+  heading,
+  subtext,
+  onClose,
+}) => {
+  useEffect(() => {
+    if (show) {
+      const timer = setTimeout(() => {
+        onClose();
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [show, onClose]);
+
+  if (!show) return null;
 
   return (
-    <div className={`fixed top-5 right-5 w-full max-w-sm rounded-md shadow-lg pointer-events-auto z-50 ${bgColor}`}>
-      <div className="rounded-md p-4">
-        <div className="flex">
-          <div className="flex-shrink-0">
-            <Icon className={`h-5 w-5 ${textColor}`} aria-hidden="true" />
-          </div>
-          <div className="ml-3">
-            <p className={`text-sm font-medium ${textColor}`}>{message}</p>
-          </div>
-          <div className="ml-auto pl-3">
-            <div className="-mx-1.5 -my-1.5">
-              <button
-                type="button"
-                onClick={onClose}
-                className={`inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                  isSuccess
-                    ? 'bg-green-100 text-green-500 hover:bg-green-200 focus:ring-offset-green-100 focus:ring-green-600'
-                    : 'bg-red-100 text-red-500 hover:bg-red-200 focus:ring-offset-red-100 focus:ring-red-600'
-                }`}
-              >
-                <span className="sr-only">Dismiss</span>
-                <XMarkIcon className="h-5 w-5" aria-hidden="true" />
-              </button>
-            </div>
-          </div>
+    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-fade-in-up">
+      <div className="bg-[#1a1a1a] text-[#f2f2f2] rounded-xl shadow-2xl p-4 flex items-center gap-4 min-w-[320px] border border-[#333]">
+        <div
+          className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+            type === "success" ? "bg-[#25e82c]/10" : "bg-red-500/10"
+          }`}
+        >
+          <Icon
+            src={type === "success" ? successIcon : errorIcon}
+            className={`h-6 w-6 ${
+              type === "success" ? "stroke-[#25e82c]" : "stroke-red-500"
+            }`}
+            strokeWidth={1.5}
+          />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-bold text-sm text-[#f2f2f2]">{heading}</span>
+          <span className="text-xs text-[#f2f2f2]/80">{subtext}</span>
         </div>
       </div>
     </div>

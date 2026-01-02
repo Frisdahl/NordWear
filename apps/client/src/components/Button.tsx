@@ -2,7 +2,7 @@ import React from "react";
 
 type ButtonProps = {
   children: React.ReactNode;
-  variant?: "default" | "primary" | "outline";
+  variant?: "default" | "primary" | "outline" | "custom";
   size?: "sm" | "md" | "lg";
   className?: string;
   onClick?: () => void;
@@ -22,6 +22,7 @@ export default function Button({
     default: "bg-gray-800 text-white hover:bg-gray-700",
     primary: "bg-green-500 text-white hover:bg-green-600",
     outline: "border border-gray-300 text-gray-700 bg-white hover:bg-gray-100",
+    custom: "",
   };
 
   const sizes = {

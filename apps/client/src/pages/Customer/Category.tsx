@@ -5,6 +5,7 @@ import { fetchProducts, searchProducts } from "../../services/api";
 import FilterMenu from "../../components/customer/FilterMenu";
 import ProductCard from "../../components/customer/ProductCard";
 import Notification from "../../components/Notification";
+import Dropdown from "../../components/Dropdown";
 import oneColumnIcon from "../../assets/customer/1-column.svg";
 import twoColumnIcon from "../../assets/customer/2-column.svg";
 import threeColumnIcon from "../../assets/customer/3-column.svg";
@@ -33,6 +34,7 @@ const Category: React.FC = () => {
   const [viewMode, setViewMode] = useState<string>("grid-3");
   const [isFilterMenuOpen, setFilterMenuOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions | null>(null);
+  const [sortOption, setSortOption] = useState<string>("");
   const [isFilterSticky, setFilterSticky] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
   const [filterOriginalTop, setFilterOriginalTop] = useState(0);
@@ -141,7 +143,7 @@ const Category: React.FC = () => {
         if (searchQuery) {
             fetchedProducts = await searchProducts(searchQuery);
         } else {
-            fetchedProducts = await fetchProducts(categoryName, filters);
+            fetchedProducts = await fetchProducts(categoryName, filters, undefined, sortOption);
         }
 
         const productArray = Array.isArray(fetchedProducts)
@@ -157,12 +159,12 @@ const Category: React.FC = () => {
     };
 
     loadProducts();
-  }, [categoryName, filters, searchQuery]);
+  }, [categoryName, filters, searchQuery, sortOption]);
 
   // Reset to page 1 when filters or search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters, categoryName, searchQuery]);
+  }, [filters, categoryName, searchQuery, sortOption]);
 
   // Get current products for the page
   const indexOfLastProduct = currentPage * productsPerPage;
@@ -238,6 +240,23 @@ const Category: React.FC = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleSortChange = (value: string) => {
+    setSortOption(value);
+  };
+
+  const sortOptions = [
+    { label: "Fremhævet", value: "" },
+    { label: "Bestsellere", value: "bestsellers" }, // Placeholder logic
+    { label: "Alfabetisk, A-Å", value: "name-asc" },
+    { label: "Alfabetisk, Å-A", value: "name-desc" },
+    { label: "Pris, lav til høj", value: "price-asc" },
+    { label: "Pris, høj til lav", value: "price-desc" },
+    { label: "Dato, ældre til nyere", value: "oldest" },
+    { label: "Dato, nyere til ældre", value: "newest" },
+  ];
+
+  const currentSortLabel = sortOptions.find(opt => opt.value === sortOption)?.label || "Sorter efter";
+
   return (
     <div className="py-6">
       <FilterMenu
@@ -297,9 +316,21 @@ const Category: React.FC = () => {
               >
                 Filtrer
               </button>
-              <button className="text-gray-700 border-r border-gray-300 flex items-center py-4 px-8">
-                Sorter efter
-              </button>
+              <div className="border-r border-gray-300 flex items-center">
+                 <Dropdown label={currentSortLabel}>
+                    <div className="flex flex-col">
+                      {sortOptions.map((option) => (
+                        <button
+                          key={option.label}
+                          className={`text-left px-4 py-2 hover:bg-gray-100 text-sm ${sortOption === option.value ? 'font-bold' : ''}`}
+                          onClick={() => handleSortChange(option.value)}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                 </Dropdown>
+              </div>
             </div>
             <div className="flex items-center space-x-2 py-4">
               {/* Mobile: Show 1 and 2 column options */}

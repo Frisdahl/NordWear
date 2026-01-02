@@ -6,7 +6,7 @@ import 'dotenv/config';
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretjwtkey'; // Fallback for development
 
-export const login = async (email: string, password: string): Promise<{ token: string; user: { id: number; email: string; role: Role; } } | null> => {
+export const login = async (email: string, password: string): Promise<{ token: string; user: { id: number; email: string; role: Role; name: string; } } | null> => {
   const user = await prisma.user.findUnique({
     where: { email },
   });
@@ -36,6 +36,7 @@ export const login = async (email: string, password: string): Promise<{ token: s
       id: user.id,
       email: user.email,
       role: user.role,
+      name: user.name,
     },
   };
 };

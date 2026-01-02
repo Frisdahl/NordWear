@@ -16,6 +16,8 @@ import ScrollToTop from "./components/ScrollToTop";
 const Dashboard = lazy(() => import("./pages/Admin/Dashboard"));
 const AllProducts = lazy(() => import("./pages/Admin/all_products"));
 const AddProduct = lazy(() => import("./pages/Admin/AddProduct"));
+const GiftCards = lazy(() => import("./pages/Admin/GiftCards"));
+const CreateGiftCard = lazy(() => import("./pages/Admin/CreateGiftCard"));
 const Home = lazy(() => import("./pages/Customer/Home"));
 const Product = lazy(() => import("./pages/Customer/Product"));
 const Category = lazy(() => import("./pages/Customer/Category"));
@@ -105,6 +107,8 @@ const App: React.FC = () => (
             <Route path="all-products" element={<AllProducts />} />
             <Route path="add-product" element={<AddProduct />} />
             <Route path="add-product/:id" element={<AddProduct />} />
+            <Route path="giftcards" element={<GiftCards />} />
+            <Route path="giftcards/new" element={<CreateGiftCard />} />
             {/* more admin routes */}
           </Route>
         </Routes>

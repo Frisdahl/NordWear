@@ -15,8 +15,14 @@ const Icon: React.FC<Props> = ({
 }) => {
   let content = src;
 
-  // 1. Remove all stroke-width="... inside <path>, <line>, etc.
-  content = content.replace(/stroke-width="[^"]*"/g, "");
+  // 1. Remove all stroke-width, stroke, and fill attributes from child elements
+  content = content.replace(/<svg([\s\S]*?)>([\s\S]*?)<\/svg>/, (match, svgAttrs, svgContent) => {
+    const cleanedContent = svgContent
+      .replace(/\sstroke-width="[^"]*"/g, "")
+      .replace(/\sstroke="[^"]*"/g, "")
+      .replace(/\sfill="[^"]*"/g, "");
+    return `<svg${svgAttrs}>${cleanedContent}</svg>`;
+  });
 
   // 2. Inject class + optional stroke-width into root <svg> tag
   content = content.replace(

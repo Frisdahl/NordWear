@@ -27,7 +27,7 @@ import {
   getCheckoutSession,
 } from "../controllers/stripe.controller";
 import { sendOrderConfirmation } from "../controllers/email.controller";
-import { validateGiftCard, createGiftCard } from "../controllers/giftcard.controller";
+import { validateGiftCard, createGiftCard, getGiftCards } from "../controllers/giftcard.controller";
 import { createFreeOrder } from "../controllers/order.controller";
 import { subscribeNewsletter } from "../controllers/newsletter.controller";
 
@@ -62,6 +62,7 @@ router.post("/send-order-confirmation", sendOrderConfirmation);
 // Gift card routes
 router.post("/gift-cards/validate", validateGiftCard);
 router.post("/gift-cards", createGiftCard);
+router.get("/gift-cards", getGiftCards);
 router.post("/orders/create-free", createFreeOrder);
 router.post("/newsletter/subscribe", subscribeNewsletter);
 

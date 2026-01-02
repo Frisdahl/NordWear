@@ -11,7 +11,8 @@ const apiClient = axios.create({
 export const fetchProducts = async (
   category?: string,
   filters?: any,
-  limit?: number
+  limit?: number,
+  sort?: string
 ) => {
   const params = new URLSearchParams();
   if (category) {
@@ -35,6 +36,9 @@ export const fetchProducts = async (
   }
   if (limit) {
     params.append("limit", limit.toString());
+  }
+  if (sort) {
+    params.append("sort", sort);
   }
 
   const response = await apiClient.get("/products", { params });
@@ -163,5 +167,14 @@ export const GetShipmentRates = async (
 
 export const getShipmondoProducts = async () => {
   const response = await apiClient.get("/shipmondo/products");
+  return response.data;
+};
+
+export const createGiftCard = async (giftCardData: {
+  code: string;
+  amount: string;
+  expiresAt: string | null;
+}) => {
+  const response = await apiClient.post("/gift-cards", giftCardData);
   return response.data;
 };

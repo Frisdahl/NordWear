@@ -5,12 +5,26 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import Dropdown from "@/components/Dropdown";
 import { DropdownItem } from "@/components/DropdownItem";
 import ProductTable from "@/components/admin/ProductTable";
+import Icon from "@/components/Icon";
+
+const productActiveSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" /></svg>`;
+const sortIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" /></svg>`;
+const arrowUpIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75 12 3m0 0 3.75 3.75M12 3v18" /></svg>`;
+const arrowDownIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25 12 21m0 0-3.75-3.75M12 21V3" /></svg>`;
+
+const tabs = ["Alle", "Aktive", "Draft", "Arkiveret"];
+const sortOptions = ["Product title", "Lavet", "Opdateret", "Lager", "Type"];
 
 const AllProducts = () => {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<number[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
   const [productCount, setProductCount] = useState(0);
+  const [activeTab, setActiveTab] = useState("Alle");
+
+  // Sorting State
+  const [sortField, setSortField] = useState("Product title");
+  const [sortOrder, setSortOrder] = useState("Nyeste");
 
   const deleteSelected = async () => {
     if (selected.length === 0) {
@@ -29,7 +43,6 @@ const AllProducts = () => {
         const text = await res.text();
         throw new Error(`Status ${res.status}: ${text}`);
       }
-      // clear selection and refresh table
       setSelected([]);
       setRefreshKey((k) => k + 1);
       alert("Slettet valgt(e) produkt(er)");
@@ -40,32 +53,31 @@ const AllProducts = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 bg-gray-50 min-h-screen">
-      <div className="flex justify-between">
-        <div>
-          <div className="flex gap-2">
-            <h1 className="text-fluidTitle font-semibold">Produkter</h1>
-            <div className="w-max px-5 py-1 font-medium bg-nwDarkGray text-[14px] text-white rounded-[4px] flex items-start justify-center self-start">
-              {productCount}
-            </div>
-          </div>
-          <text className="font-medium">
-            Her er alle af dine nuværende produkter i din butik.
-          </text>
+    <div className="container mx-auto px-3 pt-8 min-h-screen">
+      {/* Header Outside */}
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-2 text-[#303030]">
+          <Icon src={productActiveSvg} className="h-4 w-4" strokeWidth={2} />
+          <h1 className="text-[18px] font-bold">Produkter</h1>
         </div>
 
+        {/* Actions moved to Header */}
         <div className="flex gap-4">
-          <Dropdown label="Flere handlinger">
+          <Dropdown
+            label="Flere handlinger"
+            triggerClassName="bg-[#e3e3e3] hover:bg-[#d4d4d4] text-[#303030] rounded-lg px-4 h-10 flex items-center gap-2 text-[13px] font-medium transition-colors"
+            disableArrowRotation={true}
+          >
             <DropdownItem onClick={deleteSelected}>Slet valgte</DropdownItem>
-
             <DropdownItem onClick={() => alert("Eksporter CSV")}>
               Eksporter CSV
             </DropdownItem>
           </Dropdown>
 
           <Button
-            variant="primary"
+            variant="custom"
             size="md"
+            className="bg-[#3b3b3b] text-[#f2f2f2] hover:bg-[#2b2b2b] rounded-lg h-10 px-4 text-[13px]"
             onClick={() => navigate("/admin/add-product")}
           >
             <PlusIcon className="w-4 h-4" /> Tilføj produkt
@@ -73,40 +85,93 @@ const AllProducts = () => {
         </div>
       </div>
 
-      <div className="mt-6 flex flex-col gap-4">
-        <div className="h-[1px] w-full bg-[#9CA3AF] opacity-30"></div>
+      {/* Main Content Box */}
+      <div className="bg-white rounded-2xl flex flex-col gap-0 pb-4 border border-[#c7c7c7]">
+        {/* Top Bar: Tabs + Order By */}
+        <div className="flex justify-between items-center p-4">
+          {/* Status Tabs */}
+          <div className="flex gap-2">
+            {tabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`font-bold text-[13px] px-4 py-2 rounded-lg transition-colors ${
+                  activeTab === tab
+                    ? "bg-[#ebebeb] text-[#303030]"
+                    : "text-[#a4a4a4] hover:bg-[#f2f2f2]"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
 
-        <div className="flex gap-4">
-          <Dropdown label="Filter efter:">
-            <DropdownItem onClick={() => alert("Slettede 3 produkter")}>
-              Slet valgte
-            </DropdownItem>
+          {/* Order By Dropdown */}
+          <Dropdown
+            label={
+              <div className="flex items-center gap-2 p-2">
+                <Icon src={sortIconSvg} className="h-4 w-4" strokeWidth={1.5} />
+                Sorter efter
+              </div>
+            }
+            triggerClassName="bg-[#f2f2f2] border border-[#e6e6e6] text-[#303030] hover:bg-[#e6e6e6] rounded-lg h-10 px-6 flex items-center gap-2 text-[13px] font-medium transition-colors"
+            disableArrowRotation={true}
+          >
+            <div className="flex flex-col py-1">
+              {sortOptions.map((option) => (
+                <button
+                  key={option}
+                  onClick={() => setSortField(option)}
+                  className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center"
+                >
+                  <div
+                    className={`w-4 h-4 rounded-full border border-[#8c8c8c] bg-white mr-3 transition-all ${
+                      sortField === option ? "border-[3px]" : "border"
+                    }`}
+                  ></div>
+                  <span className="text-sm">{option}</span>
+                </button>
+              ))}
+            </div>
 
-            <DropdownItem onClick={() => alert("Eksporter CSV")}>
-              Eksporter CSV
-            </DropdownItem>
-          </Dropdown>
+            <div className="h-[1px] w-full bg-gray-200 my-1"></div>
 
-          <Dropdown label="Sortér efter:">
-            <DropdownItem onClick={() => alert("Slettede 3 produkter")}>
-              Slet valgte
-            </DropdownItem>
-
-            <DropdownItem onClick={() => alert("Eksporter CSV")}>
-              Eksporter CSV
-            </DropdownItem>
+            <div className="flex flex-col py-1">
+              <button
+                onClick={() => setSortOrder("Ældste")}
+                className={`w-full text-left px-4 py-2 flex items-center gap-2 transition-colors ${
+                  sortOrder === "Ældste" ? "bg-[#ebebeb]" : "hover:bg-[#f2f2f2]"
+                }`}
+              >
+                <Icon src={arrowUpIcon} className="h-4 w-4" strokeWidth={1.5} />
+                <span className="text-sm">Ældste først</span>
+              </button>
+              <button
+                onClick={() => setSortOrder("Nyeste")}
+                className={`w-full text-left px-4 py-2 flex items-center gap-2 transition-colors ${
+                  sortOrder === "Nyeste" ? "bg-[#ebebeb]" : "hover:bg-[#f2f2f2]"
+                }`}
+              >
+                <Icon
+                  src={arrowDownIcon}
+                  className="h-4 w-4"
+                  strokeWidth={1.5}
+                />
+                <span className="text-sm">Nyeste først</span>
+              </button>
+            </div>
           </Dropdown>
         </div>
-        <div className="h-[1px] w-full bg-[#9CA3AF] opacity-30"></div>
-      </div>
 
-      <div>
         <ProductTable
           selected={selected}
           onSelectedChange={setSelected}
           refreshKey={refreshKey}
           onTotalChange={setProductCount}
           onDeleteSelected={deleteSelected}
+          activeTab={activeTab}
+          sortField={sortField}
+          sortOrder={sortOrder}
         />
       </div>
     </div>

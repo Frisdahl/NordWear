@@ -101,7 +101,7 @@ export const getProducts = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { category, minPrice, maxPrice, 'categories[]': categories, 'sizes[]': sizes, limit } = req.query;
+    const { category, minPrice, maxPrice, 'categories[]': categories, 'sizes[]': sizes, limit, sort } = req.query;
 
     const minPriceNum = minPrice ? Number(minPrice) : undefined;
     const maxPriceNum = maxPrice ? Number(maxPrice) : undefined;
@@ -116,7 +116,8 @@ export const getProducts = async (
       maxPriceNum,
       categoryIds,
       sizeIds,
-      limitNum
+      limitNum,
+      sort as string
     );
     res.status(200).json(products);
   } catch (error) {

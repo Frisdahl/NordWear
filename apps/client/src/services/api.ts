@@ -50,6 +50,16 @@ export const searchProducts = async (query: string) => {
   return response.data;
 };
 
+export const searchOrders = async (query: string) => {
+  const response = await apiClient.get(`/orders/search?q=${query}`);
+  return response.data;
+};
+
+export const searchGiftCards = async (query: string) => {
+  const response = await apiClient.get(`/gift-cards/search?q=${query}`);
+  return response.data;
+};
+
 export const fetchProduct = async (id: number | string) => {
   const response = await apiClient.get(`/products/${id}`);
   return response.data;
@@ -176,5 +186,45 @@ export const createGiftCard = async (giftCardData: {
   expiresAt: string | null;
 }) => {
   const response = await apiClient.post("/gift-cards", giftCardData);
+  return response.data;
+};
+
+export const fetchGiftCards = async () => {
+  const response = await apiClient.get("/gift-cards");
+  return response.data;
+};
+
+export const fetchGiftCard = async (id: number | string) => {
+  const response = await apiClient.get(`/gift-cards/${id}`);
+  return response.data;
+};
+
+export const fetchOrders = async () => {
+  const response = await apiClient.get("/orders");
+  return response.data;
+};
+
+export const fetchOrder = async (id: number | string) => {
+  const response = await apiClient.get(`/orders/${id}`);
+  return response.data;
+};
+
+export const updateGiftCard = async (
+  id: number | string,
+  giftCardData: {
+    code: string;
+    amount: string;
+    expiresAt: string | null;
+  }
+) => {
+  const response = await apiClient.put(`/gift-cards/${id}`, giftCardData);
+  return response.data;
+};
+
+export const batchUpdateGiftCards = async (
+  ids: number[],
+  data: Partial<{ isEnabled: boolean }>
+) => {
+  const response = await apiClient.put("/gift-cards/batch-update", { ids, data });
   return response.data;
 };

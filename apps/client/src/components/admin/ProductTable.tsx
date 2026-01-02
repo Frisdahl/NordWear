@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import Dropdown from "@/components/Dropdown";
+import { DropdownItem } from "@/components/DropdownItem";
 
 type ProductItem = {
   id: number;
@@ -13,11 +15,12 @@ type ProductItem = {
 };
 
 type Props = {
-  selected: number[];
+  products: ProductItem[];
+  loading: boolean;
+  selected?: number[];
   onSelectedChange: React.Dispatch<React.SetStateAction<number[]>>;
-  refreshKey?: number;
   onTotalChange?: (n: number) => void;
-  onDeleteSelected: () => void;
+  onDeleteSelected?: () => void;
   activeTab: string;
   sortField: string;
   sortOrder: string;
@@ -61,43 +64,19 @@ const StatusDisplay = ({
 };
 
 export default function ProductTable({
+  products,
+  loading,
   selected,
   onSelectedChange,
-  refreshKey = 0,
   onTotalChange,
   onDeleteSelected,
   activeTab,
   sortField,
   sortOrder,
 }: Props) {
-  const [products, setProducts] = useState<ProductItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetch("/api/products");
-        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-        const data: ProductItem[] = await res.json();
-        setProducts(data);
-        if (onTotalChange) onTotalChange(data.length);
-        onSelectedChange((prev) =>
-          prev.filter((id) => data.some((p) => p.id === id))
-        );
-      } catch (err: any) {
-        console.error("Fetch products failed:", err);
-        setError(err.message ?? "Unknown error");
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [refreshKey]);
 
   // Filter and Sort Logic
   const filteredProducts = React.useMemo(() => {
@@ -163,8 +142,9 @@ export default function ProductTable({
   }, []);
 
   const allSelected =
-    filteredProducts.length > 0 && selected.length === filteredProducts.length;
-  const someSelected = selected.length > 0 && !allSelected;
+    filteredProducts.length > 0 && selected && selected.length === filteredProducts.length;
+  const someSelected = selected && selected.length > 0 && !allSelected;
+  const selectedCount = selected ? selected.length : 0;
 
   const toggleSelectAll = () => {
     if (allSelected) onSelectedChange([]);
@@ -177,18 +157,35 @@ export default function ProductTable({
     );
   };
 
+  const handleBulkAction = (action: string) => {
+    if (action === "delete" && onDeleteSelected) {
+        onDeleteSelected();
+    } else {
+        alert(`Bulk action: ${action} - Not implemented yet`);
+    }
+  };
+
+
   if (loading) return <div>Loading products…</div>;
-  if (error)
-    return <div className="text-red-600">Error loading products: {error}</div>;
   if (filteredProducts.length === 0 && products.length > 0)
-    return <div className="p-4 text-gray-500">Ingen produkter matcher filteret.</div>;
+    return (
+      <div className="p-4 text-gray-500">Ingen produkter matcher filteret.</div>
+    );
   if (products.length === 0) return <div>No products found.</div>;
 
   return (
-    <table className="w-full text-left border-collapse">
+    <table className="w-full text-left border-collapse table-fixed">
+      <colgroup>
+        <col className="w-12" />
+        <col className="w-[35%]" />
+        <col className="w-[15%]" />
+        <col className="w-[25%]" />
+        <col className="w-[15%]" />
+        <col className="w-[10%]" />
+      </colgroup>
       <thead>
         <tr className="text-gray-500 font-medium bg-[#f2f2f2] border-t border-b border-[#c7c7c7]">
-          <th className="pl-4 w-6 py-3 pr-8">
+          <th className="pl-4 py-3">
             <input
               type="checkbox"
               checked={allSelected}
@@ -198,17 +195,74 @@ export default function ProductTable({
               onChange={toggleSelectAll}
             />
           </th>
-          <th className="py-3">Produkt</th>
-          <th className="py-3 pr-10">Status</th>
-          <th className="py-3">Lager</th>
-          <th className="py-3">Type</th>
-          <th className="px-3 py-3">Håndtering</th>
+          {selectedCount > 0 ? (
+            <th colSpan={5} className="py-2">
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-medium text-[#303030]">
+                  {selectedCount} valgt
+                </span>
+                <button
+                  className="bg-white border border-[#c7c7c7] text-[#303030] px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-50 transition-colors"
+                  onClick={() => onSelectedChange([])}
+                >
+                  Annuller
+                </button>
+                <button
+                  className="bg-white border border-[#c7c7c7] text-[#303030] px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-50 transition-colors"
+                  onClick={() => handleBulkAction("draft")}
+                >
+                  Sæt som draft
+                </button>
+                <Dropdown
+                  label={
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6 text-[#303030]">
+                      <path fillRule="evenodd" d="M4.5 12a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm6 0a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm6 0a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z" clipRule="evenodd" />
+                    </svg>
+                  }
+                  triggerClassName="p-1.5 bg-white border border-[#c7c7c7] rounded-lg transition-colors text-[#303030] hover:bg-gray-50 h-[30px] flex items-center justify-center"
+                  disableArrowRotation={true}
+                  hideChevron={true}
+                >
+                   <DropdownItem onClick={() => handleBulkAction("archive")}>
+                      <div className="flex items-center gap-2 font-normal">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+                        </svg>
+                        Arkiver produkter
+                      </div>
+                   </DropdownItem>
+                   <DropdownItem onClick={() => handleBulkAction("delete")} className="text-[#8e0e21] hover:bg-[#8e0e21]/10">
+                      <div className="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                        </svg>
+                        Slet produkter
+                      </div>
+                   </DropdownItem>
+                   <div className="h-[1px] bg-gray-200 my-1"></div>
+                   <DropdownItem onClick={() => handleBulkAction("add_tags")}>Tilføj tags</DropdownItem>
+                   <DropdownItem onClick={() => handleBulkAction("remove_tags")}>Fjern tags</DropdownItem>
+                   <div className="h-[1px] bg-gray-200 my-1"></div>
+                   <DropdownItem onClick={() => handleBulkAction("add_collection")}>Tilføj til kollektion</DropdownItem>
+                   <DropdownItem onClick={() => handleBulkAction("remove_collection")}>Fjern fra kollektion</DropdownItem>
+                </Dropdown>
+              </div>
+            </th>
+          ) : (
+            <>
+              <th className="py-3">Produkt</th>
+              <th className="py-3 pr-10">Status</th>
+              <th className="py-3">Lager</th>
+              <th className="py-3">Type</th>
+              <th className="px-3 py-3">Håndtering</th>
+            </>
+          )}
         </tr>
       </thead>
 
       <tbody>
         {filteredProducts.map((product) => {
-          const isSelected = selected.includes(product.id);
+          const isSelected = selected && selected.includes(product.id);
           return (
             <tr
               key={product.id}
@@ -216,7 +270,7 @@ export default function ProductTable({
                 isSelected ? "bg-green-100" : "bg-transparent"
               }`}
             >
-              <td className="pl-4 w-6 py-4 pr-8">
+              <td className="pl-4 py-4">
                 <input
                   type="checkbox"
                   checked={isSelected}
@@ -251,7 +305,12 @@ export default function ProductTable({
                     </div>
                   )}
                   <div>
-                    <div className="font-semibold">{product.name ?? "—"}</div>
+                    <div 
+                      className="font-semibold cursor-pointer hover:underline"
+                      onClick={() => navigate(`/admin/add-product/${product.id}`)}
+                    >
+                      {product.name ?? "—"}
+                    </div>
                   </div>
                 </div>
               </td>

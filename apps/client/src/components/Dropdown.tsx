@@ -7,12 +7,14 @@ export default function Dropdown({
   className = "",
   triggerClassName = "text-gray-700 py-4 px-8",
   disableArrowRotation = false,
+  hideChevron = false,
 }: {
   label: React.ReactNode;
   children: React.ReactNode;
   className?: string;
   triggerClassName?: string;
   disableArrowRotation?: boolean;
+  hideChevron?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -35,13 +37,15 @@ export default function Dropdown({
         className={`flex items-center w-full h-full focus:outline-none ${triggerClassName}`}
       >
         {label}
-        <span
-          className={`ml-2 transition-transform duration-200 ${
-            !disableArrowRotation && open ? "rotate-180" : "rotate-0"
-          }`}
-        >
-          <ChevronDownIcon className="w-4 h-4" />
-        </span>
+        {!hideChevron && (
+          <span
+            className={`ml-2 transition-transform duration-200 ${
+              !disableArrowRotation && open ? "rotate-180" : "rotate-0"
+            }`}
+          >
+            <ChevronDownIcon className="w-4 h-4" />
+          </span>
+        )}
       </button>
 
       {open && (

@@ -20,20 +20,20 @@ import {
   getShipmentRates,
 } from "../controllers/shipping.controller";
 import { uploadImage } from "../controllers/upload.controller";
-import { login, register } from "../controllers/auth.controller"; // Import the login controller
+import { login, register } from "../controllers/auth.controller";
 
 import {
   createCheckoutSession,
   getCheckoutSession,
 } from "../controllers/stripe.controller";
 import { sendOrderConfirmation } from "../controllers/email.controller";
-import { validateGiftCard, createGiftCard, getGiftCards } from "../controllers/giftcard.controller";
-import { createFreeOrder } from "../controllers/order.controller";
+import { validateGiftCard, createGiftCard, getGiftCards, deleteGiftCards, getGiftCard, updateGiftCard, searchGiftCards, batchUpdateGiftCards } from "../controllers/giftcard.controller";
+import { createFreeOrder, searchOrders, getOrders, getOrder } from "../controllers/order.controller";
 import { subscribeNewsletter } from "../controllers/newsletter.controller";
 
 const router = Router();
 
-router.post("/login", login); // Add the login route
+router.post("/login", login);
 router.post("/register", register);
 router.get("/products", getProducts);
 router.get("/products/search", searchProducts);
@@ -63,7 +63,15 @@ router.post("/send-order-confirmation", sendOrderConfirmation);
 router.post("/gift-cards/validate", validateGiftCard);
 router.post("/gift-cards", createGiftCard);
 router.get("/gift-cards", getGiftCards);
+router.get("/gift-cards/search", searchGiftCards);
+router.put("/gift-cards/batch-update", batchUpdateGiftCards);
+router.get("/gift-cards/:id", getGiftCard);
+router.put("/gift-cards/:id", updateGiftCard);
+router.delete("/gift-cards/batch-delete", deleteGiftCards);
 router.post("/orders/create-free", createFreeOrder);
+router.get("/orders/search", searchOrders);
+router.get("/orders", getOrders);
+router.get("/orders/:id", getOrder);
 router.post("/newsletter/subscribe", subscribeNewsletter);
 
 export default router;

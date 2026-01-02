@@ -6,16 +6,17 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "pnpm --filter client dev & pnpm --filter server dev",
-    "build": "pnpm --filter client build & pnpm --filter server build",
-    "start": "pnpm --filter server start",
-    "db:seed": "prisma db seed"
+    "dev": "npm run dev --workspace=client & npm run dev --workspace=clothing-webshop-server",
+    "build": "npm run build --workspaces",
+    "start": "npm run start --workspace=clothing-webshop-server",
+    "db:seed": "prisma db seed",
+    "lint": "echo 'No linting configured'",
+    "typecheck": "npm exec --workspaces -- tsc --noEmit"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
   },
   "devDependencies": {
-    "pnpm": "^6.0.0",
     "prisma": "^4.16.2",
     "typescript": "^4.5.0",
     "vite": "^2.6.0"

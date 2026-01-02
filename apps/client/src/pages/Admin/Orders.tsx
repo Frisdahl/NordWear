@@ -1,43 +1,41 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "@/components/Button";
-import { PlusIcon } from "@heroicons/react/24/outline";
-import ProductTable from "@/components/admin/ProductTable";
+import OrderTable from "@/components/admin/OrderTable";
 import Icon from "@/components/Icon";
 import MainContent from "@/components/admin/MainContent";
 import Notification from "@/components/Notification";
+import { fetchOrders } from "@/services/api";
 
-const productActiveSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" /></svg>`;
+const ordersActiveSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>`;
 
-const tabs = ["Alle", "Aktive", "Draft", "Arkiveret"];
-const sortOptions = ["Product title", "Lavet", "Opdateret", "Lager", "Type"];
+const tabs = ["Alle", "Gennemført", "Afventer", "Annulleret", "Fejlet"];
+const sortOptions = ["Oprettet", "Beløb", "Kunde"];
 
-const AllProducts = () => {
+const Orders = () => {
   const navigate = useNavigate();
-  const [products, setProducts] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<number[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [productCount, setProductCount] = useState(0);
+  const [orderCount, setOrderCount] = useState(0);
   const [activeTab, setActiveTab] = useState("Alle");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [notification, setNotification] = useState({ show: false, type: "success" as "success" | "error", heading: "", subtext: "" });
 
   // Sorting State
-  const [sortField, setSortField] = useState("Product title");
+  const [sortField, setSortField] = useState("Oprettet");
   const [sortOrder, setSortOrder] = useState("Nyeste");
 
   useEffect(() => {
     (async () => {
       setLoading(true);
       try {
-        const res = await fetch("/api/products");
-        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-        const data = await res.json();
-        setProducts(data);
-        setProductCount(data.length);
+        const data = await fetchOrders();
+        setOrders(data);
+        setOrderCount(data.length);
       } catch (err) {
-        console.error("Fetch products failed:", err);
+        console.error("Fetch orders failed:", err);
       } finally {
         setLoading(false);
       }
@@ -46,7 +44,8 @@ const AllProducts = () => {
 
   const confirmDelete = async () => {
     try {
-      const res = await fetch("/api/products", {
+      // Assuming a similar bulk delete endpoint exists for orders
+      const res = await fetch("/api/orders", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ids: selected }),
@@ -62,8 +61,8 @@ const AllProducts = () => {
       setNotification({
         show: true,
         type: "success",
-        heading: "Produkter slettet",
-        subtext: `${deletedCount} ${deletedCount === 1 ? "produkt er" : "produkter er"} blevet slettet.`
+        heading: "Ordrer slettet",
+        subtext: `${deletedCount} ${deletedCount === 1 ? "ordre er" : "ordrer er"} blevet slettet.`
       });
     } catch (err) {
       console.error("Delete failed:", err);
@@ -71,14 +70,10 @@ const AllProducts = () => {
         show: true,
         type: "error",
         heading: "Fejl ved sletning",
-        subtext: "Kunne ikke slette produkterne. Prøv igen senere."
+        subtext: "Kunne ikke slette ordrerne. Prøv igen senere."
       });
     }
   };
-
-  const selectedProductNames = products
-    .filter((p) => selected.includes(p.id))
-    .map((p) => p.name);
 
   return (
     <div className="container mx-auto px-3 pt-8 min-h-screen relative">
@@ -98,7 +93,7 @@ const AllProducts = () => {
             {/* Header */}
             <div className="bg-[#f2f2f2] px-6 py-4 flex justify-between items-center border-b border-[#e6e6e6]">
               <h2 className="text-base font-bold text-[#303030]">
-                Slet {selected.length} {selected.length === 1 ? "produkt" : "produkter"}?
+                Slet {selected.length} {selected.length === 1 ? "ordre" : "ordrer"}?
               </h2>
               <button onClick={() => setShowDeleteModal(false)} className="text-[#a0a0a0] hover:text-[#303030] transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -110,7 +105,7 @@ const AllProducts = () => {
             {/* Body */}
             <div className="p-6">
               <p className="text-sm text-[#606060]">
-                Dette kan ikke fortrydes. Alle medier, der kun bruges af dette produkt, vil også blive slettet.
+                Dette kan ikke fortrydes. Data for disse ordrer vil gå tabt permanent.
               </p>
             </div>
 
@@ -137,11 +132,11 @@ const AllProducts = () => {
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-2 text-[#303030]">
           <Icon
-            src={productActiveSvg}
+            src={ordersActiveSvg}
             className="h-[1.5rem] w-[1.5rem]"
-            strokeWidth={2}
+            strokeWidth={1.5}
           />
-          <h1 className="text-[1.5rem] font-bold">Produkter</h1>
+          <h1 className="text-[1.5rem] font-bold">Ordrer</h1>
         </div>
 
         {/* Actions moved to Header */}
@@ -150,9 +145,9 @@ const AllProducts = () => {
             variant="custom"
             size="md"
             className="bg-[#3b3b3b] text-[#f2f2f2] hover:bg-[#2b2b2b] rounded-lg h-10 px-4 text-[13px]"
-            onClick={() => navigate("/admin/add-product")}
+            onClick={() => alert("Opret ordre manuelt (kommer snart)")}
           >
-            <PlusIcon className="w-4 h-4" /> Tilføj produkt
+            Opret ordre
           </Button>
         </div>
       </div>
@@ -167,12 +162,12 @@ const AllProducts = () => {
         sortOrder={sortOrder}
         setSortOrder={setSortOrder}
       >
-        <ProductTable
-          products={products}
+        <OrderTable
+          orders={orders}
           loading={loading}
           selected={selected}
           onSelectedChange={setSelected}
-          onTotalChange={setProductCount}
+          onTotalChange={setOrderCount}
           onDeleteSelected={() => setShowDeleteModal(true)}
           activeTab={activeTab}
           sortField={sortField}
@@ -183,4 +178,4 @@ const AllProducts = () => {
   );
 };
 
-export default AllProducts;
+export default Orders;

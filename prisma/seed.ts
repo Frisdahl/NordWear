@@ -154,6 +154,78 @@ async function main() {
   });
   console.log('Gift cards seeded.');
 
+  // 8. Seed Customers
+  const regularUser = await prisma.user.findUnique({ where: { email: 'user@example.com' } });
+  if (regularUser) {
+    const customer = await prisma.customer.create({
+      data: {
+        userId: regularUser.id,
+      }
+    });
+    console.log('Customer seeded.');
+
+    // 9. Seed Orders
+    const ordersToSeed = [
+      {
+        id: 1,
+        customerId: customer.id,
+        amount: 89900,
+        currency: 'dkk',
+        status: 'COMPLETED' as any,
+        paymentIntentId: 'pi_test_1',
+        customerDetails: { email: regularUser.email, name: regularUser.name },
+        shippingDetails: { address: { line1: 'Testvej 1', city: 'Testby', postal_code: '1234', country: 'DK' } },
+      },
+      {
+        id: 2,
+        customerId: customer.id,
+        amount: 45000,
+        currency: 'dkk',
+        status: 'PENDING' as any,
+        paymentIntentId: 'pi_test_2',
+        customerDetails: { email: regularUser.email, name: regularUser.name },
+        shippingDetails: { address: { line1: 'Gade 2', city: 'Aarhus', postal_code: '8000', country: 'DK' } },
+      },
+      {
+        id: 3,
+        customerId: customer.id,
+        amount: 120000,
+        currency: 'dkk',
+        status: 'CANCELED' as any,
+        paymentIntentId: 'pi_test_3',
+        customerDetails: { email: regularUser.email, name: regularUser.name },
+        shippingDetails: { address: { line1: 'Vej 3', city: 'Kbh', postal_code: '1000', country: 'DK' } },
+      }
+    ];
+
+    for (const orderData of ordersToSeed) {
+        const order = await prisma.order.create({ data: orderData });
+        
+        // Add some order items
+        await prisma.order_item.createMany({
+            data: [
+                {
+                    orderId: order.id,
+                    productId: 1,
+                    quantity: 1,
+                    price: 29900,
+                    sizeId: 1,
+                    colorId: 1,
+                },
+                {
+                    orderId: order.id,
+                    productId: 2,
+                    quantity: 2,
+                    price: 30000,
+                    sizeId: 2,
+                    colorId: 2,
+                }
+            ]
+        });
+    }
+    console.log('Orders and order items seeded.');
+  }
+
   console.log('Seeding finished.');
 }
 

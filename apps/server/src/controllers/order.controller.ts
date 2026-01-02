@@ -68,3 +68,122 @@ export const createFreeOrder = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to create order" });
   }
 };
+
+export const searchOrders = async (req: Request, res: Response) => {
+    const { q } = req.query;
+    if (typeof q !== "string") {
+        return res.status(400).json({ message: "Invalid search query" });
+    }
+
+    try {
+        const orderId = parseInt(q);
+        const where: any = { OR: [] };
+        
+        // Add ID search if it's a number
+        if (!isNaN(orderId)) {
+            where.OR.push({ id: { equals: orderId } });
+        }
+
+        // Add Status search ONLY if it matches a valid enum value
+        const validStatuses = ["PENDING", "COMPLETED", "FAILED", "CANCELED"];
+        const upperQuery = q.toUpperCase();
+        if (validStatuses.includes(upperQuery)) {
+             where.OR.push({ status: { equals: upperQuery as any } });
+        }
+
+        // Search in email/customer name via relations
+        // This is more complex in Prisma but possible.
+        // For simplicity, we stick to ID and Exact Status match for now.
+        // If we want partial match on status, we can't because it's an ENUM in DB.
+
+        // If no valid search criteria added (e.g. searching "shoes" which isn't ID or Status), return empty
+        if (where.OR.length === 0) {
+             return res.json([]);
+        }
+
+        const orders = await prisma.order.findMany({
+            where,
+            include: {
+                order_item: {
+                    include: {
+                        product: true
+                    }
+                },
+                customer: {
+                    include: {
+                        user: true
+                    }
+                }
+            },
+            orderBy: { created_at: 'desc' },
+            take: 10
+        });
+
+        res.json(orders);
+    } catch (error) {
+        console.error("Error searching orders:", error);
+        res.status(500).json({ error: "Failed to search orders" });
+    }
+};
+
+export const getOrders = async (req: Request, res: Response) => {
+  try {
+    const orders = await prisma.order.findMany({
+      include: {
+        order_item: {
+          include: {
+            product: true,
+            size: true,
+            color: true,
+          },
+        },
+        customer: {
+            include: {
+                user: true
+            }
+        }
+      },
+      orderBy: {
+        created_at: "desc",
+      },
+    });
+    res.json(orders);
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    res.status(500).json({ error: "Failed to fetch orders" });
+  }
+};
+
+export const getOrder = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        order_item: {
+          include: {
+            product: {
+                include: {
+                    images: true
+                }
+            },
+            size: true,
+            color: true,
+          },
+        },
+        customer: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+    res.json(order);
+  } catch (error) {
+    console.error("Error fetching order:", error);
+    res.status(500).json({ error: "Failed to fetch order" });
+  }
+};

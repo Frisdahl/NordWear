@@ -28,8 +28,8 @@ jobs:
     - name: Typecheck
       run: npm run typecheck
 
-    - name: Run Tests
-      run: npm test
+    - name: Run Unit Tests
+      run: npm test -- --reporter=verbose
 
     - name: Build
       run: npm run build

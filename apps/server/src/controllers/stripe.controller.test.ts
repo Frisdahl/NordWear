@@ -24,15 +24,13 @@ const { mockStripeInstance, mockPrismaInstance } = vi.hoisted(() => {
       },
       order: {
         create: vi.fn(),
+        findUnique: vi.fn(),
+      },
+      product_quantity: {
+        findFirst: vi.fn(),
+        update: vi.fn(),
       },
       $transaction: vi.fn(async (cb) => {
-        // Create a mock transaction object that has the same structure
-        const tx = {
-          order: { create: vi.fn() },
-          giftCard: { update: vi.fn() }
-        };
-        // We need to be able to check these later, but for now let's just use the main mock's methods if possible
-        // Actually, let's just pass mockPrismaInstance itself as the transaction object
         return await cb(mockPrismaInstance);
       }),
     }

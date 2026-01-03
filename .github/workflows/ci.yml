@@ -28,8 +28,11 @@ jobs:
     - name: Typecheck
       run: npm run typecheck
 
-    - name: Run Unit Tests
-      run: npm test -- --reporter=verbose
+    - name: Run Frontend Tests
+      run: npm test --workspace=client -- --reporter=verbose
+
+    - name: Run Backend Tests
+      run: npm test --workspace=clothing-webshop-server -- --reporter=verbose
 
     - name: Build
       run: npm run build

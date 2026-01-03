@@ -67,7 +67,7 @@ const Home: React.FC = () => {
     if (!emailInput || !emailInput.includes("@")) return;
     setSubscribeStatus("loading");
     try {
-      const res = await fetch("http://localhost:5000/api/newsletter/subscribe", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/newsletter/subscribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: emailInput }),

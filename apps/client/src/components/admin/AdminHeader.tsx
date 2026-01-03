@@ -21,6 +21,7 @@ const AdminHeader: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [searchResults, setSearchResults] = useState<SearchResults>({ orders: [], products: [], giftCards: [] });
   const [loading, setLoading] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
   const filters = ["Ordrer", "Produkter", "Gavekort"];
@@ -33,6 +34,7 @@ const AdminHeader: React.FC = () => {
         !searchRef.current.contains(event.target as Node)
       ) {
         setIsSearchOpen(false);
+        setIsExpanded(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -64,6 +66,7 @@ const AdminHeader: React.FC = () => {
         }
 
         setSearchResults({ orders, products, giftCards });
+        setIsExpanded(false); // Reset expansion on new search
       } catch (error) {
         console.error("Search failed", error);
       } finally {
@@ -78,6 +81,7 @@ const AdminHeader: React.FC = () => {
     setIsSearchOpen(false);
     setSearchQuery("");
     setSearchResults({ orders: [], products: [], giftCards: [] });
+    setIsExpanded(false);
   };
 
   const getInitials = (name: string) => {
@@ -90,6 +94,13 @@ const AdminHeader: React.FC = () => {
 
   const displayName = user?.name || "Admin User";
   const initials = getInitials(displayName);
+
+  const totalResults = searchResults.orders.length + searchResults.products.length + searchResults.giftCards.length;
+  const hasHiddenResults = !isExpanded && (
+    searchResults.orders.length > 5 ||
+    searchResults.products.length > 5 ||
+    searchResults.giftCards.length > 5
+  );
 
   return (
     <header className="text-[#e3e3e3] px-11 h-[60px] bg-[#1a1a1a] flex items-center sticky top-0 z-50">
@@ -107,93 +118,113 @@ const AdminHeader: React.FC = () => {
           <div className="relative w-full">
              {/* Dropdown Background */}
              {isSearchOpen && (
-              <div className="absolute top-[-12px] left-[-20px] right-[-20px] bg-white rounded-lg shadow-2xl pt-16 pb-6 px-5 border border-gray-200 z-10 max-h-[80vh] overflow-y-auto">
-                <div className="flex gap-2 mb-4 flex-wrap border-b border-gray-100 pb-4">
-                  {availableFilters.map((filter) => (
-                    <button
-                      key={filter}
-                      onClick={() => setActiveFilter(filter)}
-                      className="px-4 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200"
-                    >
-                      {filter}
-                    </button>
-                  ))}
+              <div className="absolute top-[-12px] left-[-20px] right-[-20px] bg-white rounded-lg shadow-2xl border border-gray-200 z-10 flex flex-col max-h-[80vh] overflow-hidden">
+                {/* Fixed Header Section with Filters */}
+                <div className="pt-16 px-5 pb-4 border-b border-gray-100 bg-white z-20">
+                  <div className="flex gap-2 flex-wrap">
+                    {availableFilters.map((filter) => (
+                      <button
+                        key={filter}
+                        onClick={() => setActiveFilter(filter)}
+                        className="px-4 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200"
+                      >
+                        {filter}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                {searchQuery.trim().length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-10 text-gray-400">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        stroke="currentColor"
-                        className="w-12 h-12 mb-3 opacity-50"
-                    >
-                        <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-                        />
-                    </svg>
-                    <p className="text-gray-500 font-medium">
-                        Søg efter alt i butikken
-                    </p>
-                    </div>
-                ) : loading ? (
-                    <div className="text-center py-8 text-gray-500">Søger...</div>
-                ) : (
-                    <div className="space-y-6">
-                        {(searchResults.orders.length === 0 && searchResults.products.length === 0 && searchResults.giftCards.length === 0) && (
-                            <p className="text-center text-gray-500 py-4">Ingen resultater fundet.</p>
-                        )}
+                {/* Scrollable Results Section */}
+                <div className="overflow-y-auto px-5 py-4 flex-1">
+                  {searchQuery.trim().length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                      <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth="1.5"
+                          stroke="currentColor"
+                          className="w-12 h-12 mb-3 opacity-50"
+                      >
+                          <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                          />
+                      </svg>
+                      <p className="text-gray-500 font-medium">
+                          Søg efter alt i butikken
+                      </p>
+                      </div>
+                  ) : loading ? (
+                      <div className="text-center py-8 text-gray-500">Søger...</div>
+                  ) : (
+                      <div className="space-y-6">
+                          {(searchResults.orders.length === 0 && searchResults.products.length === 0 && searchResults.giftCards.length === 0) && (
+                              <p className="text-center text-gray-500 py-4">Ingen resultater fundet.</p>
+                          )}
 
-                        {searchResults.orders.length > 0 && (
-                            <div>
-                                <h3 className="text-xs font-bold text-gray-400 uppercase mb-2">Ordrer</h3>
-                                <div className="space-y-1">
-                                    {searchResults.orders.map(order => (
-                                        <Link to={`/admin/orders/${order.id}`} key={order.id} onClick={handleResultClick} className="block p-2 hover:bg-gray-50 rounded flex justify-between">
-                                            <span className="text-sm font-medium text-gray-800">Ordre #{order.id}</span>
-                                            <span className="text-xs text-gray-500">{order.status}</span>
-                                        </Link>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                          {searchResults.orders.length > 0 && (
+                              <div>
+                                  <h3 className="text-xs font-bold text-gray-400 uppercase mb-2">Ordrer</h3>
+                                  <div className="space-y-1">
+                                      {searchResults.orders.slice(0, isExpanded ? undefined : 5).map(order => (
+                                          <Link to={`/admin/orders/${order.id}`} key={order.id} onClick={handleResultClick} className="block p-2 hover:bg-gray-50 rounded flex justify-between">
+                                              <span className="text-sm font-medium text-gray-800">Ordre #{order.id}</span>
+                                              <span className="text-xs text-gray-500">{order.status}</span>
+                                          </Link>
+                                      ))}
+                                  </div>
+                              </div>
+                          )}
 
-                        {searchResults.products.length > 0 && (
-                            <div>
-                                <h3 className="text-xs font-bold text-gray-400 uppercase mb-2">Produkter</h3>
-                                <div className="space-y-1">
-                                    {searchResults.products.map(product => (
-                                        <Link to={`/admin/add-product/${product.id}`} key={product.id} onClick={handleResultClick} className="block p-2 hover:bg-gray-50 rounded flex items-center gap-3">
-                                            {product.imageUrl && <img src={product.imageUrl} alt="" className="w-8 h-8 object-cover rounded" />}
-                                            <div>
-                                                <div className="text-sm font-medium text-gray-800">{product.name}</div>
-                                                <div className="text-xs text-gray-500">{product.price} DKK</div>
-                                            </div>
-                                        </Link>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                          {searchResults.products.length > 0 && (
+                              <div>
+                                  <h3 className="text-xs font-bold text-gray-400 uppercase mb-2">Produkter</h3>
+                                  <div className="space-y-1">
+                                      {searchResults.products.slice(0, isExpanded ? undefined : 5).map(product => (
+                                          <Link to={`/admin/add-product/${product.id}`} key={product.id} onClick={handleResultClick} className="block p-2 hover:bg-gray-50 rounded flex items-center gap-3">
+                                              {product.imageUrl && <img src={product.imageUrl} alt="" className="w-8 h-8 object-cover rounded" />}
+                                              <div>
+                                                  <div className="text-sm font-medium text-gray-800">{product.name}</div>
+                                                  <div className="text-xs text-gray-500">{product.price} DKK</div>
+                                              </div>
+                                          </Link>
+                                      ))}
+                                  </div>
+                              </div>
+                          )}
 
-                        {searchResults.giftCards.length > 0 && (
-                            <div>
-                                <h3 className="text-xs font-bold text-gray-400 uppercase mb-2">Gavekort</h3>
-                                <div className="space-y-1">
-                                    {searchResults.giftCards.map(gc => (
-                                        <Link to={`/admin/giftcards/${gc.id}`} key={gc.id} onClick={handleResultClick} className="block p-2 hover:bg-gray-50 rounded flex justify-between">
-                                            <span className="text-sm font-medium text-gray-800">{gc.code}</span>
-                                            <span className="text-xs text-gray-500">{gc.balance / 100} DKK</span>
-                                        </Link>
-                                    ))}
-                                </div>
+                          {searchResults.giftCards.length > 0 && (
+                              <div>
+                                  <h3 className="text-xs font-bold text-gray-400 uppercase mb-2">Gavekort</h3>
+                                  <div className="space-y-1">
+                                      {searchResults.giftCards.slice(0, isExpanded ? undefined : 5).map(gc => (
+                                          <Link to={`/admin/giftcards/${gc.id}`} key={gc.id} onClick={handleResultClick} className="block p-2 hover:bg-gray-50 rounded flex justify-between">
+                                              <span className="text-sm font-medium text-gray-800">{gc.code}</span>
+                                              <span className="text-xs text-gray-500">{gc.balance / 100} DKK</span>
+                                          </Link>
+                                      ))}
+                                  </div>
+                              </div>
+                          )}
+
+                          {(totalResults > 0) && (
+                            <div className="pt-4 border-t border-gray-100 flex justify-between items-center mt-4">
+                                <span className="text-sm text-gray-500">Fandt {totalResults} resultater</span>
+                                {hasHiddenResults && (
+                                    <button 
+                                        onClick={() => setIsExpanded(true)}
+                                        className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                                    >
+                                        Vis alle
+                                    </button>
+                                )}
                             </div>
-                        )}
-                    </div>
-                )}
+                          )}
+                      </div>
+                  )}
+                </div>
               </div>
             )}
 

@@ -1,22 +1,25 @@
-FROM node:16
+FROM node:20-alpine
 
-# Set the working directory
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
+# Copy package files for the server
+COPY apps/server/package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the application code
-COPY . .
+# Copy prisma schema from root
+COPY prisma ./prisma
 
-# Build the TypeScript code
+# Copy the server source code
+COPY apps/server ./
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Build the server
 RUN npm run build
 
-# Expose the application port
-EXPOSE 3000
+EXPOSE 5000
 
-# Command to run the application
 CMD ["npm", "start"]

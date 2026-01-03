@@ -4,6 +4,7 @@ import { XMarkIcon, TrashIcon } from "@heroicons/react/24/outline";
 import useCart from "../../hooks/useCart";
 import CustomerCartIcon from "../../assets/customer/customer-cart.svg";
 import { formatPrice } from "../../utils/formatPrice";
+import { calculateSubtotal } from "../../utils/cartUtils";
 
 interface CartProps {
   isOpen: boolean;
@@ -15,12 +16,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
     useCart();
   const [termsAccepted, setTermsAccepted] = useState(false);
 
-  const subtotal = useMemo(() => {
-    return cart.reduce(
-      (acc, product) => acc + product.price * product.quantity,
-      0
-    );
-  }, [cart]);
+  const subtotal = useMemo(() => calculateSubtotal(cart), [cart]);
 
   return (
     <>

@@ -2,6 +2,8 @@ import React, { useMemo, useState, useEffect } from "react";
 import useCart from "../../hooks/useCart";
 import { useAuth } from "../../contexts/AuthContext"; // Import useAuth
 import { formatPrice } from "../../utils/formatPrice";
+import { calculateSubtotal } from "../../utils/cartUtils";
+import { processShippingOptions } from "../../utils/shippingUtils";
 import { loadStripe } from "@stripe/stripe-js";
 import parsePhoneNumber, { AsYouType } from "libphonenumber-js";
 
@@ -104,12 +106,7 @@ const Checkout: React.FC = () => {
       "Når du har klikket på “Betal nu”, vil du blive videresendt til Anyday, for at gennemføre dit køb sikkert.",
   };
 
-  const subtotal = useMemo(() => {
-    return cart.reduce(
-      (acc, product) => acc + product.price * product.quantity,
-      0
-    );
-  }, [cart]);
+  const subtotal = useMemo(() => calculateSubtotal(cart), [cart]);
 
   const [shippingCost, setShippingCost] = useState(0);
   const [selectedShippingId, setSelectedShippingId] = useState<string | null>(
@@ -279,7 +276,7 @@ const Checkout: React.FC = () => {
     if (!giftCardInput) return;
 
     try {
-      const res = await fetch("http://localhost:5000/api/gift-cards/validate", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/gift-cards/validate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code: giftCardInput }),
@@ -310,7 +307,7 @@ const Checkout: React.FC = () => {
     }
 
     const response = await fetch(
-      "http://localhost:5000/api/create-checkout-session",
+      `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/create-checkout-session`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -327,7 +324,7 @@ const Checkout: React.FC = () => {
     if (data.freeOrder) {
       // Handle free order
       const freeRes = await fetch(
-        "http://localhost:5000/api/orders/create-free",
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/orders/create-free`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -637,68 +634,7 @@ const Checkout: React.FC = () => {
             <h2 className="text-lg font-medium mb-4">Leveringsmetode</h2>
             <div className="space-y-[-1px]">
               {shippingOptions.length > 0 ? (
-                (() => {
-                  const allOptions: any[] = [];
-                  shippingOptions.forEach((option: any) => {
-                    if (
-                      option.service_points &&
-                      option.service_points.length > 0
-                    ) {
-                      option.service_points.forEach((sp: any) => {
-                        allOptions.push({
-                          id: sp.id,
-                          name: `${option.carrier_name
-                            .replace(" (DK)", "")
-                            .replace(" Denmark", "")} - ${(
-                            sp.distance / 1000
-                          ).toFixed(2)}km - ${sp.name}`,
-                          address: sp.address,
-                          price: option.price,
-                          isServicePoint: true,
-                        });
-                      });
-                    } else {
-                      allOptions.push({
-                        id: option.id,
-                        name: option.name,
-                        address: "",
-                        price: option.price,
-                        isServicePoint: false,
-                        carrier_name: option.carrier_name,
-                      });
-                    }
-                  });
-
-                  const unwantedHomeDelivery = [
-                    "Return Drop Off",
-                    "Parcel",
-                    "Business Parcel",
-                  ];
-                  const homeDeliveryOptions = allOptions.filter(
-                    (option) =>
-                      !option.isServicePoint &&
-                      !unwantedHomeDelivery.some((unwanted) =>
-                        option.name.includes(unwanted)
-                      )
-                  );
-                  const servicePointOptions = allOptions.filter(
-                    (option) => option.isServicePoint
-                  );
-
-                  const postNordOptions = servicePointOptions.filter((option) =>
-                    option.name.startsWith("PostNord")
-                  );
-                  const glsOptions = servicePointOptions.filter((option) =>
-                    option.name.startsWith("GLS -")
-                  );
-
-                  const finalOptions = [
-                    ...postNordOptions.slice(0, 3),
-                    ...glsOptions.slice(0, 3),
-                    ...homeDeliveryOptions,
-                  ];
-
-                  return finalOptions.map((option: any, index: number) => {
+                processShippingOptions(shippingOptions).map((option: any, index: number, array: any[]) => {
                     const carrierName = option.name.split(" - ")[0];
                     return (
                       <label
@@ -710,7 +646,7 @@ const Checkout: React.FC = () => {
                         } ${
                           index === 0
                             ? "rounded-t-md"
-                            : index === finalOptions.length - 1
+                            : index === array.length - 1
                             ? "rounded-b-md"
                             : ""
                         }`}
@@ -754,8 +690,7 @@ const Checkout: React.FC = () => {
                         </div>
                       </label>
                     );
-                  });
-                })()
+                  })
               ) : (
                 <p className="border border-gray-300 rounded-md p-4 text-sm text-gray-500">
                   Angiv din leveringsadresse for at se de tilgængelige

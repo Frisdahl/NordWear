@@ -37,15 +37,23 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
 
   const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
 
-  const condensedCart = cart.map((item: any) => ({
-    id: item.id,
-    quantity: item.quantity,
-    selectedSize: item.selectedSize,
-    price: item.price,
-    colorId: item.colorId, // Assuming colorId is needed and passed
-    sizeId: item.sizeId, // Assuming sizeId is needed and passed
-    name: item.name // Include name for logging or easier debugging in webhook
-  }));
+  const condensedCart = cart.map((item: any) => {
+    if (!item.id) {
+      console.warn(`Item missing ID in cart: ${item.name}`);
+    }
+    return {
+      id: item.id,
+      quantity: item.quantity,
+      price: item.price,
+      colorId: item.colorId || null,
+      sizeId: item.sizeId || null,
+    };
+  });
+
+  const cartJson = JSON.stringify(condensedCart);
+  if (cartJson.length > 500) {
+    console.warn("Metadata 'cart' exceeds 500 characters. Order creation via webhook might fail.");
+  }
 
   let discounts = undefined;
   let discountAmount = 0;
@@ -91,9 +99,9 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
     },
     phone_number_collection: { enabled: true },
     metadata: {
-      customerId: customerId ? customerId.toString() : null, // Pass customerId to webhook
-      cart: JSON.stringify(condensedCart), // Pass condensed cart
-      giftCardCode: giftCardCode || null,
+      customerId: customerId ? customerId.toString() : "", 
+      cart: cartJson,
+      giftCardCode: giftCardCode || "",
       discountAmount: discountAmount.toString(),
     },
   });
@@ -108,7 +116,7 @@ export const stripeWebhookHandler = async (req: Request, res: Response) => {
 
   try {
     event = stripe.webhooks.constructEvent(
-      req.body, // Use req.body directly as it contains the raw buffer from express.raw()
+      req.body,
       sig as string,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
@@ -118,40 +126,49 @@ export const stripeWebhookHandler = async (req: Request, res: Response) => {
   }
 
   // Handle the event
-  switch (event.type) {
-    case "checkout.session.completed":
-      const session = event.data.object as Stripe.Checkout.Session;
-      console.log(`Checkout session completed: ${session.id}`);
-      // Ensure metadata exists and is parsed
-      const customerId = session.metadata?.customerId;
-      const cartItems = session.metadata?.cart
-        ? JSON.parse(session.metadata.cart)
-        : [];
+  try {
+    switch (event.type) {
+      case "checkout.session.completed":
+        const session = event.data.object as Stripe.Checkout.Session;
+        console.log(`Processing checkout.session.completed for session: ${session.id}`);
+        
+        const customerId = session.metadata?.customerId;
+        const cartItemsRaw = session.metadata?.cart;
+        
+        if (!cartItemsRaw) {
+          console.error(`No cart items found in metadata for session ${session.id}`);
+          break;
+        }
 
-      if (cartItems.length > 0) {
-        await createOrderInDB(session, customerId, cartItems);
-      } else {
-        console.warn(
-          "Missing cart items in session metadata for order creation."
-        );
-      }
-      break;
-    case "payment_intent.succeeded":
-      const paymentIntent = event.data.object as Stripe.PaymentIntent;
-      console.log(`PaymentIntent was successful: ${paymentIntent.id}`);
-      // Handle successful payment here, e.g., fulfill the order
-      break;
-    case "payment_method.attached":
-      const paymentMethod = event.data.object as Stripe.PaymentMethod;
-      console.log(`PaymentMethod was attached: ${paymentMethod.id}`);
-      // Handle payment method attached event
-      break;
-    // ... handle other event types
-    default:
-      console.log(`Unhandled event type ${event.type}`);
+        let cartItems;
+        try {
+          cartItems = JSON.parse(cartItemsRaw);
+        } catch (e) {
+          console.error(`Failed to parse cart metadata for session ${session.id}: ${cartItemsRaw}`);
+          break;
+        }
+
+        if (Array.isArray(cartItems) && cartItems.length > 0) {
+          // IMPORTANT: Use await here to ensure DB transaction finishes before responding
+          await createOrderInDB(session, customerId, cartItems);
+        } else {
+          console.warn(`Cart items empty or invalid for session ${session.id}`);
+        }
+        break;
+
+      case "payment_intent.succeeded":
+        console.log(`PaymentIntent succeeded: ${event.data.object.id}`);
+        break;
+
+      default:
+        console.log(`Unhandled event type: ${event.type}`);
+    }
+  } catch (error: any) {
+    console.error(`Error handling webhook event ${event.type}:`, error);
+    // Return 500 so Stripe retries if it's a transient error
+    return res.status(500).json({ error: error.message });
   }
 
-  // Return a 200 response to acknowledge receipt of the event
   return res.json({ received: true });
 };
 
@@ -161,37 +178,48 @@ const createOrderInDB = async (
   customerId: string | undefined,
   cartItems: any[]
 ) => {
-  const giftCardCode = session.metadata?.giftCardCode;
+  const giftCardCode = session.metadata?.giftCardCode || null;
   const discountAmount = session.metadata?.discountAmount
     ? parseInt(session.metadata.discountAmount)
     : 0;
 
+  console.log(`Starting DB transaction for order. Session: ${session.id}, Items: ${cartItems.length}`);
+
   try {
     await prisma.$transaction(async (tx) => {
+      // Create the order
       const order = await tx.order.create({
         data: {
-          customerId: customerId ? parseInt(customerId) : null,
-          amount: session.amount_total!,
-          currency: session.currency!,
+          customerId: (customerId && customerId !== "null" && customerId !== "") ? parseInt(customerId) : null,
+          amount: session.amount_total || 0,
+          currency: session.currency || "dkk",
           status: "COMPLETED",
-          paymentIntentId: session.payment_intent as string,
+          paymentIntentId: session.payment_intent as string || `SESSION-${session.id}`,
           customerDetails: (session.customer_details as any) || null,
           shippingDetails: ((session as any).shipping_details as any) || null,
           discountAmount: discountAmount,
-          giftCardCode: giftCardCode || null,
+          giftCardCode: giftCardCode,
           order_item: {
-            create: cartItems.map((item: any) => ({
-              productId: item.id,
-              quantity: item.quantity,
-              price: item.price,
-              sizeId: item.sizeId ? parseInt(item.sizeId) : null,
-              colorId: item.colorId ? parseInt(item.colorId) : null,
-            })),
+            create: cartItems.map((item: any) => {
+              const pid = parseInt(item.id);
+              if (isNaN(pid)) {
+                throw new Error(`Invalid Product ID: ${item.id}`);
+              }
+              return {
+                productId: pid,
+                quantity: parseInt(item.quantity) || 1,
+                price: Math.round(parseFloat(item.price) * 100), // convert to cents
+                sizeId: item.sizeId ? parseInt(item.sizeId) : null,
+                colorId: item.colorId ? parseInt(item.colorId) : null,
+              };
+            }),
           },
         },
       });
 
+      // Update gift card if applicable
       if (giftCardCode && discountAmount > 0) {
+        console.log(`Updating gift card ${giftCardCode}, decrementing ${discountAmount}`);
         await tx.giftCard.update({
           where: { code: giftCardCode },
           data: {
@@ -199,13 +227,13 @@ const createOrderInDB = async (
           },
         });
       }
-      console.log("Order created successfully:", order.id);
+      
+      console.log(`Order created successfully. DB ID: ${order.id}`);
+    }, {
+      timeout: 10000 // 10s timeout for the transaction
     });
-    // Here you might also send an email confirmation, update inventory, etc.
-
-    // Also clear the user's cart on the client-side (this would be through a separate API call or a direct clear if it's not server-backed)
-    // For now, this is server-side order creation. Client-side cart clearing is a different concern.
   } catch (error) {
-    console.error("Error creating order in DB:", error);
+    console.error(`Transaction failed for session ${session.id}:`, error);
+    throw error; // Re-throw so the caller (webhook handler) catches it
   }
 };

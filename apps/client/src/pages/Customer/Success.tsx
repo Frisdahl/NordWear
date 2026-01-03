@@ -13,13 +13,12 @@ const Success: React.FC = () => {
     const fetchSession = async () => {
       if (sessionId) {
         try {
-          const response = await fetch(
-            `http://localhost:5000/api/checkout-session?session_id=${sessionId}`
-          );
+                  const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/checkout-session?session_id=${sessionId}`);
+          
           const data = await response.json();
           setSession(data);
 
-          await fetch("http://localhost:5000/api/send-order-confirmation", {
+          await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/send-order-confirmation`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

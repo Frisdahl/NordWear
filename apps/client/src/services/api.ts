@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Product } from "../types";
+import { buildProductQueryParams } from "../utils/apiUtils";
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
@@ -14,33 +15,7 @@ export const fetchProducts = async (
   limit?: number,
   sort?: string
 ) => {
-  const params = new URLSearchParams();
-  if (category) {
-    params.append("category", category);
-  }
-  if (filters) {
-    if (filters.priceRange) {
-      params.append("minPrice", filters.priceRange[0]);
-      params.append("maxPrice", filters.priceRange[1]);
-    }
-    if (filters.categories) {
-      filters.categories.forEach((catId: number) =>
-        params.append("categories[]", catId.toString())
-      );
-    }
-    if (filters.sizes) {
-      filters.sizes.forEach((sizeId: number) =>
-        params.append("sizes[]", sizeId.toString())
-      );
-    }
-  }
-  if (limit) {
-    params.append("limit", limit.toString());
-  }
-  if (sort) {
-    params.append("sort", sort);
-  }
-
+  const params = buildProductQueryParams(category, filters, limit, sort);
   const response = await apiClient.get("/products", { params });
   return response.data;
 };

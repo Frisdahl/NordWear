@@ -33,8 +33,7 @@ describe('calculateSubtotal', () => {
   });
 
   it('handles products with missing price (treats as 0)', () => {
-     // @ts-ignore - simulating runtime missing price
-    const cart = [{ ...mockProduct, price: undefined, quantity: 2 }];
+    const cart = [{ ...mockProduct, price: undefined as unknown as number, quantity: 2 }];
     expect(calculateSubtotal(cart)).toBe(0);
   });
 });

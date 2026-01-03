@@ -110,6 +110,10 @@ export const getProducts = async (
     const categoryIds = categories ? (Array.isArray(categories) ? categories.map(Number) : [Number(categories)]) : undefined;
     const sizeIds = sizes ? (Array.isArray(sizes) ? sizes.map(Number) : [Number(sizes)]) : undefined;
 
+    // ✅ Draft Filtering: Only admins see DRAFT/OFFLINE
+    const user = (req as any).user;
+    const statusFilter = (user && user.role === 'ADMIN') ? undefined : 'ONLINE';
+
     const products: any[] = await getProductsService(
       category as string,
       minPriceNum,
@@ -117,7 +121,8 @@ export const getProducts = async (
       categoryIds,
       sizeIds,
       limitNum,
-      sort as string
+      sort as string,
+      statusFilter
     );
     res.status(200).json(products);
   } catch (error) {
@@ -142,6 +147,14 @@ export const getProduct = async (
       res.status(404).json({ message: "Product not found." });
       return;
     }
+
+    // ✅ Draft Protection: Prevent viewing offline products via direct URL
+    const user = (req as any).user;
+    if (product.status !== 'ONLINE' && (!user || user.role !== 'ADMIN')) {
+      res.status(404).json({ message: "Product not found." });
+      return;
+    }
+
     res.status(200).json(product);
   } catch (error) {
     console.error(`GET /api/products/${req.params.id} error:`, error);

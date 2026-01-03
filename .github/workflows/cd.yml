@@ -1,0 +1,29 @@
+name: CD (Production Deployment)
+
+on:
+  push:
+    branches: [ "prod" ]
+
+jobs:
+  # 1. First, we run all validations to ensure we don't deploy bugs
+  validate:
+    uses: ./.github/workflows/ci.yml
+
+  # 2. If validation passes, we deploy
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # This is a generic step. Most services (DigitalOcean, Railway, Render)
+      # have a "Deploy Hook" or a specific Action. 
+      # Below is the DigitalOcean example:
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Deploy to DigitalOcean App Platform
+        run: doctl apps create-deployment ${{ secrets.DO_APP_ID }}

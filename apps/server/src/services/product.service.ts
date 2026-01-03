@@ -8,11 +8,16 @@ export const getProducts = async (
   categoryIds?: number[],
   sizeIds?: number[],
   limit?: number,
-  sort?: string
+  sort?: string,
+  status?: string // Added status filter
 ) => {
   const where: Prisma.productWhereInput = {
     deleted_at: null,
   };
+
+  if (status) {
+    where.status = status as any;
+  }
 
   if (categoryIds && categoryIds.length > 0) {
     where.category_Id = { in: categoryIds };

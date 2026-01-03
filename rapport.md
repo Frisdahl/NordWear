@@ -1,96 +1,89 @@
 # Teknisk Projektrapport: NordWear E-commerce Platform
 
 ## 1. Introduktion
-Denne rapport beskriver den tekniske arkitektur, implementeringsstrategier og designvalg bag NordWear – en moderne, skræddersyet e-commerce platform. Systemet er udviklet fra bunden med fokus på skalerbarhed, ydeevne og en gnidningsfri brugeroplevelse. Rapporten gennemgår de centrale komponenter i full-stack løsningen, herunder frontend, backend, database og tredjepartsintegrationer.
+Denne rapport beskriver den tekniske arkitektur, implementeringsstrategier og designvalg bag NordWear – en moderne, skræddersyet e-commerce platform. Systemet er udviklet fra bunden med fokus på skalerbarhed, ydeevne og en gnidningsfri brugeroplevelse. Rapporten gennemgår de centrale komponenter i full-stack løsningen, herunder frontend, backend, database og tredjepartsintegrationer, samt de omfattende sikkerheds- og infrastrukturmæssige optimeringer, der er foretaget for at gøre systemet produktionsklar.
 
 ## 2. Systemarkitektur
 Projektet er bygget op omkring en **Client-Server arkitektur**, hvor frontend og backend er skarpt adskilt (Decoupled Architecture). Dette muliggør uafhængig udvikling, test og skalering af de to lag.
 
-*   **Frontend (Client):** En Single Page Application (SPA), der håndterer præsentationslaget og brugerinteraktionen.
-*   **Backend (Server):** Et RESTful API, der håndterer forretningslogik, datavalidering, databasekald og integrationer med eksterne tjenester.
+*   **Frontend (Client):** En Single Page Application (SPA) bygget med React, der håndterer præsentationslaget og brugerinteraktionen.
+*   **Backend (Server):** Et RESTful API bygget med Node.js/Express, der håndterer forretningslogik, datavalidering, databasekald og integrationer med eksterne tjenester.
 *   **Database:** En relationel database (MySQL), der sikrer dataintegritet for kritiske forretningsdata som ordrer og kundeprofiler.
+*   **Infrastruktur:** Hele applikationen er containeriseret med **Docker** for at sikre et konsistent miljø på tværs af udvikling og produktion.
 
 ## 3. Teknologistack
 
 Valget af teknologier er baseret på ønsket om et moderne, typesikkert og performant udviklingsmiljø.
 
 ### 3.1 Frontend
-*   **React (v18+):** Valgt for sin komponentbaserede struktur, som gør det muligt at genbruge UI-elementer (f.eks. `ProductCard`, `Button`, `Dropdown`).
-*   **TypeScript:** Anvendes til at sikre statisk typning af props og state, hvilket reducerer runtime-fejl betydeligt og forbedrer udvikleroplevelsen (DX).
-*   **Vite:** Build-tool, der erstatter Webpack for hurtigere opstartstider og Hot Module Replacement (HMR) under udvikling.
-*   **React Router:** Håndterer klient-side routing, hvilket giver en hurtig navigation uden fulde side-reloads (SPA-følelse).
-*   **Tailwind CSS:** Utility-first CSS framework, der sikrer et konsistent designsystem og reducerer CSS-bundle størrelsen ved kun at inkludere anvendte klasser.
+*   **React (v18+):** Valgt for sin komponentbaserede struktur, som gør det muligt at genbruge UI-elementer.
+*   **TypeScript:** Anvendes til at sikre statisk typning, hvilket reducerer runtime-fejl og forbedrer udvikleroplevelsen (DX).
+*   **Vite:** Build-tool valgt for lynhurtige opstartstider og Hot Module Replacement (HMR).
+*   **React Router:** Håndterer klient-side routing (SPA).
+*   **Tailwind CSS:** Utility-first CSS framework, der sikrer et responsivt og konsistent designsystem.
+*   **Zustand:** Letvægts state-management anvendt til håndtering af indkøbskurven.
 
 ### 3.2 Backend
-*   **Node.js & Express:** En letvægts og fleksibel server-løsning, der udnytter JavaScript (TypeScript) i hele stakken. Express håndterer routing og middleware-logik.
-*   **TypeScript:** Sikrer typesikkerhed på tværs af API-kontrakter og interne services.
-*   **Prisma ORM:** Fungerer som bindeled mellem Node.js og MySQL. Prisma er valgt for sin intuitive datamodellering (`schema.prisma`) og autogenererede, typesikre database-klient, der minimerer risikoen for SQL-injections og syntaksfejl.
+*   **Node.js & Express:** Valgt for sin fleksibilitet og asynkrone natur.
+*   **Prisma ORM:** Fungerer som typesikkert bindeled mellem Node.js og MySQL.
+*   **Zod:** Anvendes til streng runtime-validering af alle indkommende API-requests.
+*   **Stripe SDK:** Integreret til håndtering af betalingsprocesser og webhooks.
 
-### 3.3 Database
-*   **MySQL:** En robust relationel database (RDBMS), valgt grundet kravet om stærk datakonsistens (ACID) i forbindelse med transaktioner, ordrer og varelager.
+### 3.3 Infrastruktur og CI/CD
+*   **Docker & Docker Compose:** Containerisering af MySQL, API og Nginx-frontend.
+*   **Nginx:** Anvendes som webserver for frontenden, konfigureret med SPA-routing (`try_files`).
+*   **GitHub Actions:** Automatiseret CI-pipeline, der kører typecheck og unit tests parallelt for både frontend og backend ved hver push til `main` og `Dev`.
 
 ## 4. Applikationsstruktur og Designmønstre
 
 Systemet følger en lagdelt arkitektur ("Layered Architecture") på backenden for at sikre "Separation of Concerns".
 
-1.  **Routes (API Layer):** Definerer endpoints (f.eks. `GET /products`, `POST /login`) og delegerer anmodningen til den rette controller.
-2.  **Controllers:** Håndterer HTTP-specifik logik. De modtager `req` (request) og `res` (response), validerer input, kalder services og returnerer HTTP-statuskoder (200, 400, 500).
-3.  **Services:** Indeholder selve forretningslogikken. Det er her, der kommunikeres med databasen via Prisma eller eksterne API'er. Services er uafhængige af HTTP-laget, hvilket gør dem lettere at teste.
-4.  **Utils/Helpers:** Genbrugelige hjælpefunktioner til f.eks. prisformatering, email-afsendelse eller password-hashing.
+1.  **Routes (API Layer):** Definerer endpoints og delegerer anmodninger.
+2.  **Controllers:** Håndterer HTTP-logik, validerer input via Zod-middlewares og returnerer svar.
+3.  **Services:** Indeholder forretningslogikken, herunder databaseinteraktion og integrationer.
+4.  **Utils/Helpers:** Genbrugelige funktioner til prisberegning, shipping-mapping og validering.
 
 ## 5. Kærnefunktionalitet og Integrationer
 
 ### 5.1 Checkout Flow og Betaling (Stripe)
-Betalingssystemet er bygget op omkring **Stripe Checkout** (hosted løsning) for at maksimere sikkerheden og minimere ansvaret for håndtering af kortdata (PCI Compliance).
+Betalingssystemet er bygget op omkring **Stripe Checkout** med fokus på sikkerhed og dataintegritet.
 
-1.  **Initiation:** Når kunden går til betaling, sender frontend en liste over kurvens indhold til backendens `/create-checkout-session`.
-2.  **Session Creation:** Backenden kommunikerer med Stripe API for at oprette en session, inklusiv varelinjer, priser og succes/cancel URL'er.
-3.  **Redirect:** Frontend modtager et sessions-ID og omdirigerer brugeren til Stripes sikre betalingsside.
-4.  **Fulfillment (Webhooks):** Dette er en kritisk del af arkitekturen. Når betalingen er gennemført hos Stripe, sender Stripe et asynkront webhook-kald til vores backend (`/api/webhook`).
-    *   Backenden verificerer signaturen for at sikre, at kaldet kommer fra Stripe.
-    *   Systemet opdaterer ordrestatus i databasen fra `PENDING` til `COMPLETED` (eller `PAID`).
-    *   Dette sikrer, at en ordre kun behandles, hvis betalingen reelt er gået igennem, uafhængigt af om brugeren vender tilbage til "Tak for købet"-siden.
+1.  **Stock Verification:** Før en betalingssession oprettes, verificerer backenden i realtid, om de ønskede varer er på lager.
+2.  **Session Creation:** Opretter en sikker Stripe-session med metadata, der inkluderer de specifikke variant-ID'er (størrelse/farve).
+3.  **Fulfillment (Webhooks):** Ved succesfuld betaling sender Stripe et asynkront kald til vores backend.
+    *   **Idempotency:** Systemet tjekker først, om ordren allerede er oprettet (for at undgå dubletter ved gentagne webhook-kald).
+    *   **Atomic Transactions:** Ordreoprettelse, gavekort-opdatering og lager-decrementering sker i én samlet databasetransaktion.
+    *   **Inventory Update:** Lagerbeholdningen i `product_quantity` tabellen nedskrives automatisk baseret på de købte varianter.
 
 ### 5.2 Forsendelse (Shipmondo)
-Platformen integrerer med Shipmondo for at tilbyde dynamiske fragtpriser og valg af pakkeshop.
-
-*   **API-integration:** Backenden agerer proxy for kald til Shipmondo API. Dette skjuler API-nøglerne for klienten.
-*   **Pakkeshop-vælger:** Frontend henter en liste over nærmeste pakkeshops baseret på kundens postnummer og præsenterer dem i et interaktivt kort eller en liste.
-*   **Fragtberegning:** Systemet kan beregne fragtpriser baseret på ordrens samlede vægt eller prisgrænser (f.eks. fri fragt over et vist beløb).
+Integrationen med Shipmondo tilbyder dynamiske fragtpriser og valg af pakkeshop. Backend agerer proxy for at beskytte API-nøgler, og frontenden præsenterer pakkeshops baseret på kundens postnummer.
 
 ### 5.3 Autentificering og Roller
-Systemet skelner mellem **User** (login-data) og **Customer** (shop-data).
-*   Login sker via JWT (JSON Web Tokens). Ved login modtager klienten en token, som gemmes (typisk i `localStorage` eller cookies) og sendes med i headeren på efterfølgende requests.
-*   Backend middleware (`authenticateToken`) beskytter private routes (f.eks. "Min Konto" eller Admin Dashboard) ved at validere tokenen før adgang gives.
+Systemet benytter en moderne og sikker autentificeringsmodel:
+*   **JWT & HTTP-Only Cookies:** Tokens gemmes i secure, http-only cookies. Dette eliminerer risikoen for session-stealing via XSS (Cross-Site Scripting), da JavaScript ikke kan tilgå cookien.
+*   **RBAC (Role-Based Access Control):** Middleware sikrer, at kun administratorer kan tilgå følsomme funktioner som produktstyring og ordrehistorik.
+*   **Session Sync:** En `/auth/me` endpoint sikrer, at frontend-UI'et altid afspejler den aktuelle server-session ved app-start.
 
 ## 6. Databasemodellering
-Prisma-schemaet definerer relationerne mellem entiteterne:
-
-*   **User vs. Customer:** En 1-til-1 relation. `User` indeholder email/password (hash), mens `Customer` indeholder relationer til ordrer, favoritter og kurv. Dette design tillader, at en bruger kan eksistere uden at være en "kunde" (f.eks. en admin), og det separerer auth-data fra forretningsdata.
-*   **Order & OrderItem:** En klassisk 1-til-mange relation. En ordre indeholder metadata (status, total, kunde), mens `OrderItem` er et snapshot af produktet på købstidspunktet (pris, størrelse, farve).
-*   **Product Variants:** Produkter er modelleret med varianter (størrelse/farve) i en `ProductQuantity` tabel for at styre lagerbeholdning præcist på variant-niveau.
+Prisma-schemaet sikrer korrekt struktur og dataintegritet:
+*   **Variant-styring:** `ProductQuantity` kobler produkter med specifikke farver og størrelser, hvilket muliggør præcis lagerstyring.
+*   **Ordrer:** Gemmer snapshots af priser og produktdata på købstidspunktet samt Stripe-metadata for fuld sporbarhed.
 
 ## 7. Sikkerhedstiltag
 
-1.  **Environment Variables:** Alle hemmeligheder (Database URL, Stripe Secret Key, Shipmondo Token) er gemt i `.env` filer og indlæses kun på serveren. De eksponeres aldrig i frontend-koden.
-2.  **API Keys:** Tredjeparts API-kald sker server-side ("Backend-for-Frontend" pattern), så klienten aldrig kender de faktiske API-nøgler.
-3.  **Input Validering:** Backenden validerer data før databasekald for at forhindre inkomplette eller ondsindede data.
-4.  **CORS:** Cross-Origin Resource Sharing er konfigureret til kun at tillade requests fra det godkendte frontend-domæne.
+1.  **CSRF Beskyttelse:** Implementeret via "Double Submit Cookie" princippet og kontrol af `X-Requested-With` headeren på alle state-changing requests (POST, PUT, DELETE).
+2.  **Rate Limiting:** Beskytter API'et mod brute-force og DoS-angreb ved at begrænse antallet af requests pr. IP.
+3.  **Security Headers:** `Helmet.js` er konfigureret til at sætte sikre HTTP-headers, herunder Content Security Policy (CSP).
+4.  **SQL Injection:** Forebygges naturligt gennem brugen af Prisma ORM med præ-kompilerede queries.
+5.  **Input Sanitize:** Alle requests valideres mod strenge Zod-schemas før behandling.
 
 ## 8. Løsning af Tekniske Udfordringer
 
-Under udviklingen blev flere komplekse problemstillinger adresseret:
-
-*   **Race Conditions ved Oprettelse (Upsert):**
-    *   *Problem:* Når en bruger loggede ind, forsøgte systemet at hente deres kundeprofil. Hvis den ikke fandtes, forsøgte systemet at oprette den. Ved hurtige, parallelle requests (f.eks. Reacts `StrictMode` der mounter to gange, eller hurtige brugere), opstod der "Unique Constraint" fejl, fordi to processer forsøgte at oprette den samme kunde samtidig.
-    *   *Løsning:* Implementering af Prismas `upsert` (Update or Insert) metode. Dette delegerer logikken til databasen som en atomar operation: "Find kunden, og hvis ikke fundet, opret den". Dette eliminerede fejlen og gjorde systemet selv-helende.
-
-*   **Single Page Application (SPA) Scroll-adfærd:**
-    *   *Problem:* Som standard i en SPA bevares scroll-positionen ved navigering til en ny side (f.eks. fra produktliste til produktdetalje), hvilket betød, at brugeren landede midt på den nye side.
-    *   *Løsning:* Implementering af en global `ScrollToTop`-komponent, der lytter på `pathname` ændringer i React Router og programmatisk scroller vinduet til toppen `(0, 0)` ved hver navigation.
-
-*   **Avanceret Filtrering og Sortering:**
-    *   *Implementation:* I stedet for at filtrere arrays i frontenden (hvilket ikke skalerer med tusindvis af produkter), er filtrering og sortering implementeret direkte i databasekaldet via Prisma. Frontend sender parametre som `sort=price-asc` eller `minPrice=500` til API'et, som konstruerer en dynamisk SQL-query (`orderBy`, `where`). Dette sikrer, at pagination og performance bevares selv med store datamængder.
+*   **Race Conditions i Lagerstyring:** Løst ved at kombinere proaktive stock-checks før betaling med atomare databasetransaktioner ved ordre-fulfillment.
+*   **Docker SPA Routing:** Løst ved at implementere en custom Nginx-konfiguration med `try_files` direktivet, så React Router kan håndtere dybe links uden 404-fejl.
+*   **Responsive Layout Alignment:** Standardiseret side-padding (`px-6 md:px-12`) på tværs af alle sider for at sikre en visuel rød tråd.
+*   **Jumpy UI ved Header-skift:** Implementeret `ResizeObserver` i hovedlayoutet for dynamisk at beregne headerens højde og justere en `HeaderSpacer`, hvilket sikrer en stabil scroll-oplevelse.
+*   **Toast Notifikationer:** Anvendelse af **React Portals** for at sikre, at notifikationer (f.eks. "Produkt tilføjet") altid er placeret øverst i DOM-hierarkiet og fastlåst til viewporten uafhængigt af komponent-styling.
 
 ---
-*Denne rapport dokumenterer status på NordWear-projektet pr. dags dato og danner grundlag for videreudvikling og drift.*
+*Denne rapport dokumenterer NordWear-platformens udvikling fra prototype til en sikker, skalérbar og produktionsklar full-stack løsning.*

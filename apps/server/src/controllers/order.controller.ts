@@ -72,6 +72,8 @@ export const createFreeOrder = async (req: Request, res: Response) => {
                         where: { id: pq.id },
                         data: { quantity: { decrement: qty } },
                     });
+                } else {
+                    throw new Error(`Variant not found for Product: ${pid}, Size: ${sid}, Color: ${cid}. Order cancelled.`);
                 }
             }
         }

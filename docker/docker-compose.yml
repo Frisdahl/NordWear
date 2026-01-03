@@ -20,8 +20,8 @@ services:
 
   server:
     build:
-      context: .
-      dockerfile: apps/server/Dockerfile
+      context: ../
+      dockerfile: docker/server.Dockerfile
     restart: always
     environment:
       DATABASE_URL: mysql://user:password@db:3306/nordwear_db
@@ -36,8 +36,8 @@ services:
 
   client:
     build:
-      context: .
-      dockerfile: apps/client/Dockerfile
+      context: ../
+      dockerfile: docker/client.Dockerfile
       args:
         - VITE_API_URL=http://localhost:5000/api
     restart: always

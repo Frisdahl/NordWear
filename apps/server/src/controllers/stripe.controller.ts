@@ -292,7 +292,8 @@ const createOrderInDB = async (
             });
             console.log(`Decremented stock for product ${pid}, size ${sid}, color ${cid} by ${qty}`);
           } else {
-            console.warn(`Could not find product_quantity record for product ${pid}, size ${sid}, color ${cid}`);
+            // ✅ CRITICAL: Throw error to ROLLBACK the whole transaction if stock info is missing
+            throw new Error(`Variant not found for Product: ${pid}, Size: ${sid}, Color: ${cid}. Transaction rolled back.`);
           }
         }
       }

@@ -18,19 +18,11 @@ COPY apps/server ./
 RUN npx prisma generate
 
 # Build the server
-
 RUN npm run build
 
-
-
 # Make startup script executable
-
 RUN chmod +x docker-start.sh
 
-
-
 EXPOSE 5000
-
-
 
 CMD ["./docker-start.sh"]

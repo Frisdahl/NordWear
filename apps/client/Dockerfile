@@ -25,8 +25,9 @@ FROM nginx:stable-alpine
 # Copy built assets from build stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Default nginx config is usually fine for SPA if we add a small tweak for routing
-# but for now let's use the default.
-# EXPOSE 80 is default for nginx:stable-alpine
+# Copy custom nginx config for SPA routing
+COPY apps/client/nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]

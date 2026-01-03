@@ -11,6 +11,7 @@ import {
   getCustomerByUserId,
 } from "../../services/api";
 import { useSpring, animated } from "react-spring";
+import Notification from "../Notification";
 
 interface ProductCardProps {
   product: Product;
@@ -27,10 +28,21 @@ const ProductCard: React.FC<ProductCardProps> = ({
   style,
   index = 0,
 }) => {
-  const { id, name, price, offer_price, imageUrl, colors } = product;
+  const { id, name, price, offer_price, imageUrl } = product;
   const [isLiked, setIsLiked] = useState(false);
   const { user } = useAuth();
   const [customerId, setCustomerId] = useState<number | null>(null);
+  const [notification, setNotification] = useState<{
+    show: boolean;
+    type: "success" | "error";
+    heading: string;
+    subtext: string;
+  }>({
+    show: false,
+    type: "success",
+    heading: "",
+    subtext: "",
+  });
 
   const animation = useSpring({
     from: { opacity: 0, transform: "translateX(-20px)" },
@@ -90,70 +102,95 @@ const ProductCard: React.FC<ProductCardProps> = ({
       try {
         if (isLiked) {
           await unlikeProduct(customerId, id);
+          setNotification({
+            show: true,
+            type: "success",
+            heading: "Fjernet",
+            subtext: `${name} er fjernet fra din ønskeliste`,
+          });
         } else {
           await likeProduct(customerId, id);
+          setNotification({
+            show: true,
+            type: "success",
+            heading: "Tilføjet",
+            subtext: `${name} er tilføjet til din ønskeliste`,
+          });
         }
         setIsLiked(!isLiked);
       } catch (error) {
         console.error("Error liking/unliking product:", error);
+        setNotification({
+          show: true,
+          type: "error",
+          heading: "Fejl",
+          subtext: "Der skete en fejl. Prøv venligst igen.",
+        });
       }
     }
   };
 
   return (
-    <animated.div style={{ ...style, ...animation }}>
-      <Link
-        to={`/product/${id}`}
-        className={`block overflow-hidden w-full ${className}`}
-      >
-        <div className="relative w-full aspect-square">
-          {}
-          <img
-            src={imageUrl || "https://placehold.co/450x450?text=Nordwear"}
-            alt={name}
-            className="  h-full w-full object-cover opacity-100"
-          />
+    <>
+      <Notification
+        show={notification.show}
+        type={notification.type}
+        heading={notification.heading}
+        subtext={notification.subtext}
+        onClose={() => setNotification({ ...notification, show: false })}
+      />
+      <animated.div style={{ ...style, ...animation }}>
+        <Link
+          to={`/product/${id}`}
+          className={`block overflow-hidden w-full ${className}`}
+        >
+          <div className="relative w-full aspect-square">
+            <img
+              src={imageUrl || "https://placehold.co/450x450?text=Nordwear"}
+              alt={name}
+              className="h-full w-full object-cover opacity-100"
+            />
 
-          {/* Discount Badge */}
-          {discountPercent > 0 && (
-            <div className="absolute top-2 left-2 bg-[#171717] font-[EB-Garamond] text-[#F1F0EE] text-xs px-2 py-1 rounded-sm">
-              SPAR {discountPercent}%
-            </div>
-          )}
-
-          {/* Wishlist Button */}
-          <button
-            onClick={handleLikeClick}
-            className="absolute top-2 right-2 h-8 w-8 bg-[#171717] rounded-full flex items-center justify-center text-white"
-          >
-            {isLiked ? (
-              <HeartIconSolid className="h-5 w-5" />
-            ) : (
-              <HeartIconOutline className="h-5 w-5" />
+            {/* Discount Badge */}
+            {discountPercent > 0 && (
+              <div className="absolute top-2 left-2 bg-[#171717] font-[EB-Garamond] text-[#F1F0EE] text-xs px-2 py-1 rounded-sm">
+                SPAR {discountPercent}%
+              </div>
             )}
-          </button>
-        </div>
 
-        <div className="relative pt-3 text-center">
-          <h3 className="text-[1rem] text-[#1c1c1c] ">{name}</h3>
-
-          <div className="mt-1.5 flex items-center justify-center">
-            <p className="tracking-wide text-[1rem] text-[#1c1c1ca6]">
-              {offer_price ? (
-                <span className="flex items-center space-x-2">
-                  <span>{offer_price} kr.</span>
-                  <span className="line-through text-[#1c1c1ca6]">
-                    {price} kr.
-                  </span>
-                </span>
+            <button
+              onClick={handleLikeClick}
+              className="absolute top-2 right-2 h-8 w-8 bg-[#171717] rounded-full flex items-center justify-center text-white"
+            >
+              {isLiked ? (
+                <HeartIconSolid className="h-5 w-5 text-white" />
               ) : (
-                `${price} kr.`
+                <HeartIconOutline className="h-5 w-5" />
               )}
-            </p>
+            </button>
           </div>
-        </div>
-      </Link>
-    </animated.div>
+
+          <div className="relative pt-3 text-center">
+            <h3 className="text-[1rem] text-[#1c1c1c] ">{name}</h3>
+
+            <div className="mt-1.5 flex items-center justify-center">
+              <p className="tracking-wide text-[1rem] text-[#1c1c1ca6]">
+                {offer_price ? (
+                  <span className="flex items-center space-x-2">
+                    <span>{offer_price} kr.</span>
+                    <span className="line-through text-[#1c1c1ca6]">
+                      {price} kr.
+                    </span>
+                  </span>
+                ) : (
+                  `${price} kr.`
+                )}
+              </p>
+            </div>
+          </div>
+        </Link>
+      </animated.div>
+    </>
   );
 };
 

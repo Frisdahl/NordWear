@@ -17,8 +17,8 @@ const Login: React.FC = () => {
 
     try {
       const response = await loginApi(email, password);
-      // Assuming response contains token and user object { id, email, role }
-      login(response.token, response.user);
+      // Assuming response contains user object { id, email, role, name }
+      login(response.user);
 
       if (response.user.role === 'ADMIN') {
         navigate('/admin/dashboard');

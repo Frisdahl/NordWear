@@ -27,7 +27,7 @@ const sneakerspoints = [
   },
   {
     title: "Materialer",
-    description: `Vores sneakers er fremstillet af premium materialer, herunder blødt læder og slidstærkt kanvas, der sikrer både komfort og holdbarhed. 
+    description: `Vores sneakers fremstilles af premium materialer, herunder blødt læder og slidstærkt kanvas, der sikrer både komfort og holdbarhed. 
 
  Den polstrede indersål giver ekstra støtte til dine fødder, mens den fleksible ydersål sikrer et godt greb på forskellige overflader. 
 
@@ -43,10 +43,8 @@ const sneakerspoints = [
   },
 ];
 
-// Mock Rating
 const rating = { value: 4.7, count: 128 };
 
-// Mock Key Sales Points
 const salesPoints = [
   "✔ Fri fragt ved køb over 499,-",
   "✔ Levering indenfor 1-3 hverdage",
@@ -66,7 +64,6 @@ const Product: React.FC = () => {
   } | null>(null);
   const { addToCart } = useCart();
 
-  // State for selections
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -74,7 +71,6 @@ const Product: React.FC = () => {
   const [sizeDropdownOpen, setSizeDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -94,13 +90,8 @@ const Product: React.FC = () => {
       try {
         const fetchedProduct = await fetchProduct(Number(id));
         setProduct(fetchedProduct);
-        // Set initial selected image and color
         if (fetchedProduct?.images?.length > 0) {
           setSelectedImage(fetchedProduct.images[0].url);
-        }
-        if (fetchedProduct?.product_quantity?.length > 0) {
-          // This logic assumes we can derive colors from product_quantity
-          // A better approach would be for the API to provide a clean color list
         }
       } catch (err) {
         setError("Failed to fetch product");
@@ -141,41 +132,43 @@ const Product: React.FC = () => {
     }
   }, [product]);
 
-  // Memoize derived lists of unique colors and sizes
   const availableColors = useMemo(() => {
     if (!product || !product.product_quantity) return [];
-    const colorMap = new Map();
+    const colorMap = new Map<number, string>();
     product.product_quantity.forEach((pq) => {
-      // @ts-ignore - color relation is not in type, but is fetched
       if (pq.color) colorMap.set(pq.color.id, pq.color.name);
     });
-    return Array.from(colorMap.values());
+    return Array.from(colorMap.entries()).map(([id, name]) => ({ id, name }));
   }, [product]);
 
   const availableSizes = useMemo(() => {
     if (!product || !product.product_quantity) return [];
-    const sizeMap = new Map();
+    const sizeMap = new Map<number, string>();
     product.product_quantity.forEach((pq) => {
-      // @ts-ignore - size relation is not in type, but is fetched
       if (pq.size) sizeMap.set(pq.size.id, pq.size.name);
     });
-    return Array.from(sizeMap.values());
+    return Array.from(sizeMap.entries()).map(([id, name]) => ({ id, name }));
   }, [product]);
 
   useEffect(() => {
     if (availableColors.length > 0 && !selectedColor) {
-      setSelectedColor(availableColors[0]);
+      setSelectedColor(availableColors[0].name);
     }
     if (availableSizes.length > 0 && !selectedSize) {
-      setSelectedSize(availableSizes[0]);
+      setSelectedSize(availableSizes[0].name);
     }
   }, [availableColors, availableSizes, selectedColor, selectedSize]);
 
   const handleAddToCart = () => {
     if (product) {
+      const colorId = availableColors.find(c => c.name === selectedColor)?.id;
+      const sizeId = availableSizes.find(s => s.name === selectedSize)?.id;
+
       addToCart({ 
         ...product, 
         selectedSize: selectedSize || undefined, 
+        selectedSizeId: sizeId,
+        selectedColorId: colorId,
         imageUrl: selectedImage as any 
       });
       setNotification({
@@ -197,7 +190,7 @@ const Product: React.FC = () => {
   const { name, price, offer_price, images } = product;
 
   return (
-    <div className="bg-[#f2f1f0] mt-12">
+    <div className="bg-[#f2f1f0] overflow-x-hidden">
       {notification && (
         <Notification
           heading={notification.type === "success" ? "Success" : "Fejl"}
@@ -207,330 +200,265 @@ const Product: React.FC = () => {
           onClose={() => setNotification(null)}
         />
       )}
-      <div className="lg:grid md:grid-cols-[2fr_1fr] lg:gap-[5rem] lg:px-12">
-        {/* Image gallery */}
-        <div className="lg:col-span-1">
-          <div className="lg:grid lg:grid-cols-2 lg:gap-4">
-            {images &&
-              images.map((image, idx) => (
-                <div
-                  key={image.id ?? image.url ?? idx}
-                  className="w-full aspect-square bg-gray-200"
-                >
-                  <img
-                    src={image.url}
-                    alt={`${name}-${idx}`}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
-          </div>
-        </div>
-
-        {/* Product info */}
-        <div className="lg:col-span-1 px-4 py-6 lg:px-0 lg:py-0">
-          <h1 className="text-[clamp(1.5rem,4vw,2.625rem)] text-gray-800 font-['EB_Garamond'] pb-3">
-            {name}
-          </h1>
-          <div className="mt-2 flex items-center">
-            <div className="flex items-center">
-              {[...Array(5)].map((_, i) => (
-                <StarIcon
-                  key={i}
-                  className={`h-5 w-5 ${
-                    i < Math.floor(rating.value)
-                      ? "text-yellow-400"
-                      : "text-gray-300"
-                  }`}
-                />
-              ))}
+      
+      <div className="px-6 md:px-12 py-8 md:py-12">
+        <div className="lg:grid lg:grid-cols-[1.5fr_1fr] lg:gap-16 xl:gap-24">
+          {/* Image gallery */}
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {images &&
+                images.map((image, idx) => (
+                  <div
+                    key={image.id ?? image.url ?? idx}
+                    className="w-full aspect-square bg-gray-200"
+                  >
+                    <img
+                      src={image.url}
+                      alt={`${name}-${idx}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
             </div>
-            <p className="ml-2 text-sm font-medium text-gray-600">
-              {rating.value.toFixed(1)} ({rating.count} anmeldelser)
-            </p>
           </div>
-          {/* Key Sales Points */}
-          <ul className="mt-4 space-y-2 text-[clamp(1rem,.875vw,1rem)] text-[#1c1c1c]">
-            {salesPoints.map((point) => (
-              <li key={point} className="flex items-center">
-                <span>{point}</span>
-              </li>
-            ))}
-          </ul>
-          {/* Price */}
-          <div className="mt-6">
-            <p className="font-['EB_Garamond'] ">
-              {offer_price ? (
-                <span className="flex items-baseline gap-3">
-                  <span className="text-[1.3125rem] font-bold text-[rgb(48,122,7)]">
-                    {formatPrice(offer_price)}
+
+          {/* Product info */}
+          <div className="mt-8 lg:mt-0">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl text-gray-800 font-['EB_Garamond'] mb-4">
+              {name}
+            </h1>
+            
+            <div className="flex items-center mb-6">
+              <div className="flex items-center">
+                {[...Array(5)].map((_, i) => (
+                  <StarIcon
+                    key={i}
+                    className={`h-4 w-4 md:h-5 md:w-5 ${
+                      i < Math.floor(rating.value)
+                        ? "text-yellow-400"
+                        : "text-gray-300"
+                    }`}
+                  />
+                ))}
+              </div>
+              <p className="ml-2 text-xs md:text-sm font-medium text-gray-600">
+                {rating.value.toFixed(1)} ({rating.count} anmeldelser)
+              </p>
+            </div>
+
+            {/* Key Sales Points */}
+            <ul className="space-y-2 text-sm md:text-base text-[#1c1c1c] mb-8">
+              {salesPoints.map((point) => (
+                <li key={point} className="flex items-center">
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+
+            {/* Price */}
+            <div className="mb-8">
+              <p className="font-['EB_Garamond']">
+                {offer_price ? (
+                  <span className="flex items-baseline gap-3">
+                    <span className="text-2xl md:text-3xl font-bold text-[rgb(48,122,7)]">
+                      {formatPrice(offer_price)}
+                    </span>
+                    <span className="line-through text-lg text-[#1c1c1ca6]">
+                      {formatPrice(price)}
+                    </span>
                   </span>
-                  <span className="line-through text-lg text-[#1c1c1ca6]">
+                ) : (
+                  <span className="text-2xl md:text-3xl font-bold text-[#1c1c1ca6]">
                     {formatPrice(price)}
                   </span>
-                </span>
-              ) : (
-                <span className="text-[1.3125rem] font-bold text-[#1c1c1ca6]">
-                  {formatPrice(price)}
-                </span>
-              )}
-            </p>
-          </div>
-          {/* Color Swatches */}
-          <div className="mt-6">
-            <h3 className="text-sm font-medium text-gray-900">Farve</h3>
-            <div className="flex items-center space-x-2 mt-2">
-              {availableColors.map((color) => (
-                <button
-                  key={color}
-                  onClick={() => setSelectedColor(color)}
-                  className={`h-8 w-8 rounded-full border-2 p-0.5 ${
-                    selectedColor === color
-                      ? "border-blue-500"
-                      : "border-transparent"
-                  }`}
-                >
-                  <div
-                    className="h-full w-full rounded-full border border-gray-200"
-                    style={{ backgroundColor: color }}
-                  ></div>
-                </button>
-              ))}
+                )}
+              </p>
             </div>
-          </div>
-          {/* Size Dropdown */}
-          <div className="mt-6">
-            <h3 className="text-sm font-medium text-gray-900">Størrelse</h3>
-            <div className="relative mt-2" ref={dropdownRef}>
+
+            {/* Selection Controls */}
+            <div className="space-y-6 mb-10">
+                          {/* Color Swatches */}
+                          {availableColors.length > 0 && (
+                            <div>
+                              <h3 className="text-sm font-medium text-gray-900 mb-3">Farve</h3>
+                              <div className="flex items-center space-x-3">
+                                {availableColors.map((color) => (
+                                  <button
+                                    key={color.id}
+                                    onClick={() => setSelectedColor(color.name)}
+                                    className={`h-8 w-8 rounded-full border-2 p-0.5 transition-all ${
+                                      selectedColor === color.name
+                                        ? "border-[#1c1c1c]"
+                                        : "border-transparent hover:border-gray-300"
+                                    }`}
+                                  >
+                                    <div
+                                      className="h-full w-full rounded-full border border-gray-200"
+                                      style={{ backgroundColor: color.name }}
+                                    ></div>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+              
+                          {/* Size Dropdown */}
+                          <div>
+                            <h3 className="text-sm font-medium text-gray-900 mb-3">Størrelse</h3>
+                            <div className="relative" ref={dropdownRef}>
+                              <button
+                                onClick={() => setSizeDropdownOpen(!sizeDropdownOpen)}
+                                className="w-full flex justify-between items-center px-4 py-3 text-base border border-[#00000026] bg-white hover:bg-gray-50 focus:outline-none rounded-sm transition-colors"
+                              >
+                                <span>{selectedSize || "Vælg størrelse"}</span>
+                                <ChevronDownIcon
+                                  className={`h-4 w-4 text-gray-700 transition-transform duration-200 ${
+                                    sizeDropdownOpen ? "rotate-180" : ""
+                                  }`}
+                                />
+                              </button>
+              
+                              {sizeDropdownOpen && (
+                                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#00000026] z-20 shadow-lg rounded-sm">
+                                  {availableSizes.map((size) => (
+                                    <button
+                                      key={size.id}
+                                      onClick={() => {
+                                        setSelectedSize(size.name);
+                                        setSizeDropdownOpen(false);
+                                      }}
+                                      className={`w-full text-left px-4 py-3 text-base transition-colors ${
+                                        selectedSize === size.name
+                                          ? "bg-[#1c1c1c] text-white"
+                                          : "bg-white text-gray-900 hover:bg-gray-100"
+                                      }`}
+                                    >
+                                      {size.name}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                            {/* Add to Cart Button */}
               <button
-                onClick={() => setSizeDropdownOpen(!sizeDropdownOpen)}
-                className="w-full flex justify-between items-center px-3 py-2 text-base border border-gray-400 bg-white hover:bg-gray-50 focus:outline-none"
+                onClick={handleAddToCart}
+                className="w-full bg-[#1c1c1c] text-white text-[1rem] py-4 font-semibold hover:bg-opacity-90 transition-all rounded-sm shadow-sm"
               >
-                <span>{selectedSize || "Vælg størrelse"}</span>
-                <ChevronDownIcon
-                  className={`h-4 w-4 text-gray-700 transition-transform duration-200 ${
-                    sizeDropdownOpen ? "rotate-180" : ""
-                  }`}
-                />
+                Føj til indkøbskurv
               </button>
-
-              {sizeDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-400 z-10 animate-in fade-in duration-200">
-                  {availableSizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => {
-                        setSelectedSize(size);
-                        setSizeDropdownOpen(false);
-                      }}
-                      className={`w-full text-left px-3 py-2 text-base transition-colors ${
-                        selectedSize === size
-                          ? "bg-[#1c1c1c] text-white"
-                          : "bg-white text-gray-900 hover:bg-[#6b6b6b] hover:text-white"
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
-          </div>
-          {/* Add to Cart Button */}
-          <div>
-            <button
-              onClick={handleAddToCart}
-              className="w-full bg-[#1c1c1c] text-white text-[1rem] py-3 font-['montserrat'] hover:bg-opacity-90"
-            >
-              Føj til indkøbskurv
-            </button>
-          </div>
 
-          {/* Product description shown under the two accordions */}
-          <div className="text-gray-700 whitespace-pre-line my-6">
-            {product.description || "Ingen beskrivelse."}
-          </div>
+            {/* Product description */}
+            <div className="text-gray-700 text-sm md:text-base leading-relaxed whitespace-pre-line mb-8 border-t border-[#00000026] pt-8">
+              {product.description || "Ingen beskrivelse tilgængelig."}
+            </div>
 
-          {/* Accordions */}
-          <div className="mt-6 border-t border-[#d1d0cd]">
-            <Accordion
-              id="shipping"
-              isOpen={openAccordion === "shipping"}
-              onToggle={() =>
-                setOpenAccordion(
-                  openAccordion === "shipping" ? null : "shipping"
-                )
-              }
-              icon={<TruckIcon className="h-6 w-6 text-gray-700" />}
-              title="Gratis fragt | Gratis ombytning"
-              content="Altid gratis fragt til Bring Pakkeshop."
-            />
-            <Accordion
-              id="trustpilot"
-              isOpen={openAccordion === "trustpilot"}
-              onToggle={() =>
-                setOpenAccordion(
-                  openAccordion === "trustpilot" ? null : "trustpilot"
-                )
-              }
-              icon={<ShieldCheckIcon className="h-6 w-6 text-gray-700" />}
-              title="Fremragende | Trustpilot"
-              content="Læs alle vores +500 anmeldelser på Trustpilot"
-            />
-            <Accordion
-              id="materials"
-              isOpen={openAccordion === "materials"}
-              onToggle={() =>
-                setOpenAccordion(
-                  openAccordion === "materials" ? null : "materials"
-                )
-              }
-              icon={<ShieldCheckIcon className="h-6 w-6 text-gray-700" />}
-              title="Materialer"
-              content={
-                <ul className="list-none space-y-3 text-gray-700">
-                  <li className="flex items-start gap-3">
-                    <CheckIcon className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
-                    <span>
-                      Vores T-shirts er fremstillet af 100% økologisk,
-                      langfibret bomuld, som giver en ekstra blød, åndbar og
-                      slidstærk kvalitet. Stoffet holder formen vask efter vask
-                      og føles behageligt mod huden hele dagen.
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckIcon className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
-                    <span>
-                      Den strikkede jersey-konstruktion gør stoffet naturligt
-                      fleksibelt, så T-shirten bevæger sig med kroppen uden at
-                      miste pasformen. Samtidig reducerer den højere tråd- og
-                      garnkvalitet risikoen for fnuldring.
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckIcon className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
-                    <span>
-                      Forstærkede syninger ved skuldre og hals sikrer bedre
-                      holdbarhed og gør, at T-shirten bevarer sin pasform over
-                      længere tid – selv ved hyppig brug.
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckIcon className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
-                    <span>
-                      Farveægtheden er optimeret gennem miljøvenlige
-                      farveprocesser, som giver dybere og mere holdbare farver
-                      uden brug af skadelige kemikalier.
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckIcon className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
-                    <span>
-                      Vores etiketter er vævet i blødt, hudvenligt materiale,
-                      som ikke kradser og gør T-shirten endnu mere behagelig at
-                      have på.
-                    </span>
-                  </li>
-                </ul>
-              }
-            />
-
-            <Accordion
-              id="sizeGuide"
-              isOpen={openAccordion === "sizeGuide"}
-              onToggle={() =>
-                setOpenAccordion(
-                  openAccordion === "sizeGuide" ? null : "sizeGuide"
-                )
-              }
-              icon={<CheckIcon className="h-6 w-6 text-gray-700" />}
-              title="Størrelsesguide"
-              content={
-                <ul className="list-none space-y-3 text-gray-700">
-                  <li className="flex items-start gap-3">
-                    <CheckIcon className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
-                    <span>
-                      Alle vores T-shirts er ”true to size”, og derfor anbefaler
-                      vi, at du vælger den størrelse, du normalt bruger.
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckIcon className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
-                    <div>
-                      <div className="font-medium">Hvad er min størrelse?</div>
-                      <div>
-                        Du kan nemt finde den rigtige størrelse ved at bruge
-                        vores størrelsesguide,.
-                      </div>
-                    </div>
-                  </li>
-                </ul>
-              }
-            />
+            {/* Accordions */}
+            <div className="border-t border-[#00000026]">
+              <Accordion
+                id="shipping"
+                isOpen={openAccordion === "shipping"}
+                onToggle={() => setOpenAccordion(openAccordion === "shipping" ? null : "shipping")}
+                icon={<TruckIcon className="h-5 w-5 text-gray-700" />}
+                title="Gratis fragt | Gratis ombytning"
+                content="Altid gratis fragt til Bring Pakkeshop ved køb over 499,-."
+              />
+              <Accordion
+                id="trustpilot"
+                isOpen={openAccordion === "trustpilot"}
+                onToggle={() => setOpenAccordion(openAccordion === "trustpilot" ? null : "trustpilot")}
+                icon={<ShieldCheckIcon className="h-5 w-5 text-gray-700" />}
+                title="Fremragende | Trustpilot"
+                content="Læs alle vores +500 anmeldelser på Trustpilot. Vi vægter kundeservice og kvalitet højere end alt andet."
+              />
+              <Accordion
+                id="materials"
+                isOpen={openAccordion === "materials"}
+                onToggle={() => setOpenAccordion(openAccordion === "materials" ? null : "materials")}
+                icon={<ShieldCheckIcon className="h-5 w-5 text-gray-700" />}
+                title="Materialer"
+                content={
+                  <ul className="list-none space-y-3 text-sm md:text-base text-gray-700 pt-2">
+                    <li className="flex items-start gap-3">
+                      <CheckIcon className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span>Premium europæiske materialer udvalgt for holdbarhed og komfort.</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckIcon className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span>Håndlavet i Portugal under ansvarlige arbejdsforhold.</span>
+                    </li>
+                  </ul>
+                }
+              />
+            </div>
           </div>
         </div>
       </div>
-      <section className="grid grid-cols-3 px-12 gap-[4.375rem] border border-t-[#d1d0cd] py-14 mt-20">
-        {sneakerspoints.map((point) => (
-          <div key={point.title}>
-            <h3 className="text-3xl text-gray-800 mb-4 font-['EB_Garamond']">
-              {point.title}
-            </h3>
-            <p className="text-gray-700 text-[1rem] leading-6 whitespace-pre-line">
-              {point.description}
-            </p>
-          </div>
-        ))}
+
+      {/* Detail Points Section */}
+      <section className="px-6 md:px-12 py-16 border-t border-[#00000026] bg-white">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16">
+          {sneakerspoints.map((point) => (
+            <div key={point.title}>
+              <h3 className="text-2xl md:text-3xl text-gray-800 mb-4 font-['EB_Garamond']">
+                {point.title}
+              </h3>
+              <p className="text-gray-600 text-sm md:text-base leading-relaxed whitespace-pre-line">
+                {point.description}
+              </p>
+            </div>
+          ))}
+        </div>
       </section>
 
-      <section className="py-14 w-full bg-[#181c2e] text-center">
-        <h1 className="font-['EB-Garamond'] text-4xl text-white  leading-[1.4] max-w-4xl mx-auto px-4">
+      {/* Quote Section */}
+      <section className="py-16 w-full bg-[#181c2e] text-center px-6">
+        <h2 className="font-['EB_Garamond'] text-2xl md:text-4xl text-white leading-snug max-w-4xl mx-auto">
           Hos NORDWEAR tror vi på forfinelse frem for forandring – tidløse
-          sneakers til den bevidste mand.
-        </h1>
+          designs til den bevidste mand.
+        </h2>
       </section>
 
-      <section className="mt-14 flex flex-col items-center pb-20 px-12">
-        <h1 className="text-4xl font-['EB_Garamond'] text-center color-[#1c1c1c]">
+      {/* Related Products */}
+      <section className="py-16 px-6 md:px-12 bg-[#f2f1f0]">
+        <h2 className="text-3xl md:text-4xl font-['EB_Garamond'] text-center mb-12">
           Du er måske også interesseret i
-        </h1>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-10 w-full">
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {relatedProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
         {categoryName && (
-          <button className="bg-[#1c1c1c] text-white px-6 py-2 mt-6">
-            Se alle {categoryName.toLowerCase()}
-          </button>
+          <div className="text-center mt-12">
+            <button className="bg-[#1c1c1c] text-white px-8 py-3 font-semibold rounded-sm hover:bg-opacity-90 transition-all">
+              Se alle {categoryName.toLowerCase()}
+            </button>
+          </div>
         )}
       </section>
 
-      <div className="relative border-y border-gray-300">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 items-center">
-          {/* Image on the left */}
-          <div className="max-h-[650px] md:h-screen overflow-hidden">
+      {/* Brand Values Block */}
+      <div className="border-y border-[#00000026] bg-white">
+        <div className="grid grid-cols-1 md:grid-cols-2 items-center">
+          <div className="h-72 md:h-[600px] overflow-hidden order-1 md:order-none">
             <img
-              src="https://images.unsplash.com/photo-1569664739361-5d5727ca3df9?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              src="https://images.unsplash.com/photo-1569664739361-5d5727ca3df9?q=80&w=1470&auto=format&fit=crop"
               alt="Design"
-              className="w-full object-cover block h-full"
+              className="w-full h-full object-cover"
             />
           </div>
-
-          {/* White box overlapping in center */}
-          <div className="relative pr-12 md:ml-[-64px] z-10">
-            <div className="bg-white text-center py-16 px-8 md:px-12 shadow-lg relative">
-              <h1 className="text-[2.25rem] md:text-4xl font-['EB_Garamond'] mb-6">
-                Skandinavisk design - Håndarbejde fra Portugal
-              </h1>
-              <p className="text-base md:text-lg text-gray-700 leading-relaxed mb-8">
-                Vi skaber ikke trends – vi skaber tidløse stykker. Hvert produkt
-                kombinerer nordisk minimalisme, sofistikeret design og
-                uomtvisteligt komfort. Udvalgt materiale for dets kvalitet,
-                skønhed og karakter.
-              </p>
-            </div>
+          <div className="p-8 md:p-16 lg:p-24 bg-white">
+            <h2 className="text-3xl md:text-4xl font-['EB_Garamond'] mb-6">
+              Skandinavisk design - Håndarbejde fra Portugal
+            </h2>
+            <p className="text-gray-600 text-sm md:text-lg leading-relaxed">
+              Vi skaber ikke trends – vi skaber tidløse stykker. Hvert produkt
+              kombinerer nordisk minimalisme, sofistikeret design og
+              uomtvisteligt komfort. Udvalgt materiale for dets kvalitet,
+              skønhed og karakter.
+            </p>
           </div>
         </div>
       </div>

@@ -26,6 +26,31 @@ export const getCheckoutSession = async (req: Request, res: Response) => {
 export const createCheckoutSession = async (req: Request, res: Response) => {
   const { cart, customerId, giftCardCode } = req.body; // Expect customerId and giftCardCode
 
+  // ✅ 1. Pre-payment Stock Check
+  try {
+    for (const item of cart) {
+      const pid = parseInt(item.id);
+      const sid = item.selectedSizeId ? parseInt(item.selectedSizeId) : null;
+      const cid = item.selectedColorId ? parseInt(item.selectedColorId) : null;
+      const qty = parseInt(item.quantity) || 1;
+
+      if (pid && sid && cid) {
+        const pq = await prisma.product_quantity.findFirst({
+          where: { productId: pid, sizeId: sid, colorId: cid },
+        });
+
+        if (!pq || pq.quantity < qty) {
+          return res.status(400).json({ 
+            error: `Beklager, der er ikke nok på lager af ${item.name}. (Tilgængelig: ${pq?.quantity || 0})` 
+          });
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Stock check error:", error);
+    return res.status(500).json({ error: "Fejl ved lager-tjek" });
+  }
+
   const line_items = cart.map((item: any) => ({
     price_data: {
       currency: "dkk",
@@ -45,8 +70,8 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
       id: item.id,
       quantity: item.quantity,
       price: item.price,
-      colorId: item.colorId || null,
-      sizeId: item.sizeId || null,
+      colorId: item.selectedColorId || null,
+      sizeId: item.selectedSizeId || null,
     };
   });
 
@@ -182,11 +207,22 @@ const createOrderInDB = async (
   const discountAmount = session.metadata?.discountAmount
     ? parseInt(session.metadata.discountAmount)
     : 0;
+  const paymentIntentId = session.payment_intent as string || `SESSION-${session.id}`;
 
   console.log(`Starting DB transaction for order. Session: ${session.id}, Items: ${cartItems.length}`);
 
   try {
     await prisma.$transaction(async (tx) => {
+      // ✅ Idempotency Check: prevent duplicate orders for the same payment intent
+      const existingOrder = await tx.order.findUnique({
+        where: { paymentIntentId: paymentIntentId }
+      });
+
+      if (existingOrder) {
+        console.log(`Order already exists for paymentIntentId: ${paymentIntentId}. Skipping.`);
+        return;
+      }
+
       // Create the order
       const order = await tx.order.create({
         data: {
@@ -194,7 +230,7 @@ const createOrderInDB = async (
           amount: session.amount_total || 0,
           currency: session.currency || "dkk",
           status: "COMPLETED",
-          paymentIntentId: session.payment_intent as string || `SESSION-${session.id}`,
+          paymentIntentId: paymentIntentId,
           customerDetails: (session.customer_details as any) || null,
           shippingDetails: ((session as any).shipping_details as any) || null,
           discountAmount: discountAmount,
@@ -226,6 +262,39 @@ const createOrderInDB = async (
             balance: { decrement: discountAmount },
           },
         });
+      }
+
+      // Decrement stock for each item
+      for (const item of cartItems) {
+        const pid = parseInt(item.id);
+        const sid = item.sizeId ? parseInt(item.sizeId) : null;
+        const cid = item.colorId ? parseInt(item.colorId) : null;
+        const qty = parseInt(item.quantity) || 1;
+
+        if (pid && sid && cid) {
+          // Find the product_quantity record
+          const pq = await tx.product_quantity.findFirst({
+            where: {
+              productId: pid,
+              sizeId: sid,
+              colorId: cid,
+            },
+          });
+
+          if (pq) {
+            await tx.product_quantity.update({
+              where: { id: pq.id },
+              data: {
+                quantity: {
+                  decrement: qty,
+                },
+              },
+            });
+            console.log(`Decremented stock for product ${pid}, size ${sid}, color ${cid} by ${qty}`);
+          } else {
+            console.warn(`Could not find product_quantity record for product ${pid}, size ${sid}, color ${cid}`);
+          }
+        }
       }
       
       console.log(`Order created successfully. DB ID: ${order.id}`);

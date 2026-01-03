@@ -7,14 +7,14 @@ const Success: React.FC = () => {
   const [session, setSession] = useState<any>(null);
   const location = useLocation();
   const sessionId = new URLSearchParams(location.search).get("session_id");
+  const orderId = new URLSearchParams(location.search).get("orderId");
   const { cart, clearCart } = useCart();
 
   useEffect(() => {
-    const fetchSession = async () => {
+    const fetchOrderData = async () => {
       if (sessionId) {
         try {
-                  const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/checkout-session?session_id=${sessionId}`);
-          
+          const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/checkout-session?session_id=${sessionId}`);
           const data = await response.json();
           setSession(data);
 
@@ -22,19 +22,42 @@ const Success: React.FC = () => {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              "X-Requested-With": "XMLHttpRequest",
             },
             body: JSON.stringify({ session_id: sessionId }),
           });
 
-          // clearCart();
+          clearCart();
         } catch (error) {
           console.error("Error fetching session:", error);
+        }
+      } else if (orderId) {
+        try {
+          const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/orders/${orderId}`);
+          const data = await response.json();
+          // Transform order data to match session structure enough for rendering
+          setSession({
+            customer_details: data.customerDetails,
+            amount_total: data.amount,
+            line_items: {
+              data: data.order_item.map((item: any) => ({
+                id: item.id,
+                description: item.product.name,
+                quantity: item.quantity,
+                price: { unit_amount: item.price },
+                imageUrl: item.product.images?.[0]?.url || item.product.imageUrl
+              }))
+            }
+          });
+          clearCart();
+        } catch (error) {
+          console.error("Error fetching order:", error);
         }
       }
     };
 
-    fetchSession();
-  }, [sessionId, clearCart]);
+    fetchOrderData();
+  }, [sessionId, orderId, clearCart]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
@@ -75,20 +98,20 @@ const Success: React.FC = () => {
               <p>{session.customer_details?.address?.country}</p>
             </div>
             {session.line_items?.data.map((item: any) => {
-              const cartItem = cart.find(
-                (cartItem) => cartItem.name === item.description
-              );
+              const imageUrl = item.imageUrl || item.price?.product?.images?.[0] || "";
               return (
                 <div
                   key={item.id}
                   className="flex justify-between items-center mb-2"
                 >
                   <div className="flex items-center">
-                    <img
-                      src={cartItem?.imageUrl || ""}
-                      alt={item.description}
-                      className="w-16 h-16 object-cover rounded-md mr-4"
-                    />
+                    {imageUrl && (
+                      <img
+                        src={imageUrl}
+                        alt={item.description}
+                        className="w-16 h-16 object-cover rounded-md mr-4"
+                      />
+                    )}
                     <div>
                       <p className="font-semibold">{item.description}</p>
                       <p className="text-gray-500">Antal: {item.quantity}</p>

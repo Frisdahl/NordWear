@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "Dev" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "Dev" ]
 
 jobs:
   build:
@@ -27,6 +27,9 @@ jobs:
 
     - name: Typecheck
       run: npm run typecheck
+
+    - name: Run Tests
+      run: npm test
 
     - name: Build
       run: npm run build

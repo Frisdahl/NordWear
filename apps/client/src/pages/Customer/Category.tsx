@@ -31,7 +31,7 @@ const Category: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [notification, setNotification] = useState({ message: "", type: "" });
-  const [viewMode, setViewMode] = useState<string>("grid-3");
+  const [viewMode, setViewMode] = useState<string>("grid-2"); // Default to 2 columns on mobile
   const [isFilterMenuOpen, setFilterMenuOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions | null>(null);
   const [sortOption, setSortOption] = useState<string>("");
@@ -85,15 +85,6 @@ const Category: React.FC = () => {
             title: "Til Enhver Lejlighed",
             description:
               "Vores trøjer er skabt med en passion for detaljer og kvalitet. Med et bredt udvalg af stilarter og farver, finder du nemt en trøje, der passer til din personlige stil. \n\n Perfekt til både formelle og afslappede begivenheder, vores trøjer sikrer, at du altid ser skarp ud.",
-          },
-        ];
-
-      case "deals":
-        return [
-          {
-            title: "Eksklusive Tilbud",
-            description:
-              "Gør et kup! Her finder du vores bedste tilbud på udvalgte varer. Skynd dig, før det er for sent.",
           },
         ];
 
@@ -161,12 +152,10 @@ const Category: React.FC = () => {
     loadProducts();
   }, [categoryName, filters, searchQuery, sortOption]);
 
-  // Reset to page 1 when filters or search changes
   useEffect(() => {
     setCurrentPage(1);
   }, [filters, categoryName, searchQuery, sortOption]);
 
-  // Get current products for the page
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = products.slice(
@@ -194,8 +183,6 @@ const Category: React.FC = () => {
         return "Alt vores footwear - sneakers, dress sko, loafers og støvler er udviklet i et stilrent og klassisk design, hvilket gør at de passer til ethvert outfit. Komfort og kvalitet er noget vi ikke vil gå på kompromis med og derfor er alle produkter håndlavet i Portugal.";
       case "shirts":
         return "Vores skjorter er designet med fokus på kvalitet og pasform. Uanset om du er til et klassisk eller moderne look, har vi en skjorte til dig. Alle vores skjorter er lavet af de bedste materialer for at sikre komfort hele dagen.";
-      case "deals":
-        return "Gør et kup! Her finder du vores bedste tilbud på udvalgte varer. Skynd dig, før det er for sent.";
       default:
         if (categoryName) {
           return `Udforsk vores udvalg af ${categoryName} i høj kvalitet. Designet i Danmark og produceret i Europa.`;
@@ -215,9 +202,9 @@ const Category: React.FC = () => {
       deals: "Tilbud",
     };
     return (
-      translations[categoryName?.toLowerCase() || ""] ||
-      categoryName ||
-      "Alle Produkter"
+      translations[categoryName?.toLowerCase() || ""]
+      || categoryName
+      || "Alle Produkter"
     );
   };
 
@@ -229,11 +216,10 @@ const Category: React.FC = () => {
 
   const gridClasses: { [key: string]: string } = {
     "grid-1": "grid-cols-1",
-    "grid-2": "grid-cols-2 md:grid-cols-3",
-    "grid-3": "grid-cols-3 md:grid-cols-4",
-    "grid-4": "grid-cols-4",
-    "grid-5": "grid-cols-5",
-    "grid-6": "grid-cols-6",
+    "grid-2": "grid-cols-2",
+    "grid-3": "grid-cols-2 md:grid-cols-3",
+    "grid-4": "grid-cols-2 md:grid-cols-4",
+    "grid-6": "grid-cols-2 md:grid-cols-3 lg:grid-cols-6",
   };
 
   const handlePageChange = (pageNumber: number) => {
@@ -247,7 +233,6 @@ const Category: React.FC = () => {
 
   const sortOptions = [
     { label: "Fremhævet", value: "" },
-    { label: "Bestsellere", value: "bestsellers" }, // Placeholder logic
     { label: "Alfabetisk, A-Å", value: "name-asc" },
     { label: "Alfabetisk, Å-A", value: "name-desc" },
     { label: "Pris, lav til høj", value: "price-asc" },
@@ -274,7 +259,9 @@ const Category: React.FC = () => {
           onClose={() => setNotification({ message: "", type: "" })}
         />
       )}
-      <div className="mx-auto sm:px-12">
+      
+      {/* Top Header Section with padding */}
+      <div className="px-6 md:px-12 mx-auto">
         {/* Breadcrumbs */}
         <nav className="flex items-center space-x-2 text-[0.625rem] text-[#1c1c1ca6] mb-4">
           <Link to="/" className="hover:text-[#1c1c1c] transition-colors">
@@ -301,26 +288,26 @@ const Category: React.FC = () => {
         </p>
       </div>
 
+      {/* Filter and View Controls Bar */}
       <div
         ref={filterRef}
-        className={`border-b mb-8 transition-all duration-300 ${
-          isFilterSticky
+        className={`border-b mb-8 transition-all duration-300 ${isFilterSticky
             ? "fixed left-0 right-0 z-10 bg-[#f2f1f0] shadow-md border-t-0"
             : "relative border-t"
         }`}
         style={{ top: isFilterSticky ? headerHeight : "auto" }}
       >
-        <div className="mx-auto pl-3 md:pr-12 ">
+        <div className="px-6 md:px-12 mx-auto">
           <div className="flex justify-between items-stretch">
             <div className="flex">
               <button
-                className="text-gray-700 border-r border-gray-300 flex items-center py-4 px-8"
+                className="text-gray-700 border-r border-[#00000026] flex items-center py-4 pr-6 md:px-8 text-sm font-medium"
                 onClick={() => setFilterMenuOpen(true)}
               >
                 Filtrer
               </button>
-              <div className="border-r border-gray-300 flex items-center">
-                 <Dropdown label={currentSortLabel}>
+              <div className="border-r border-[#00000026] flex items-center px-4 md:px-8">
+                 <Dropdown label={<span className="text-sm font-medium">{currentSortLabel}</span>}>
                     <div className="flex flex-col">
                       {sortOptions.map((option) => (
                         <button
@@ -335,59 +322,32 @@ const Category: React.FC = () => {
                  </Dropdown>
               </div>
             </div>
+            
             <div className="flex items-center space-x-2 py-4">
-              {/* Mobile: Show 1 and 2 column options */}
-              <div className="flex md:hidden space-x-2">
+              {/* Responsive column icons */}
+              <div className="flex items-center space-x-2">
                 <img
                   src={oneColumnIcon}
                   alt="1 column"
-                  className={`cursor-pointer ${
-                    viewMode !== "grid-1" ? "opacity-70" : ""
-                  }`}
+                  className={`cursor-pointer w-5 h-5 ${viewMode !== "grid-1" ? "opacity-30" : ""}`}
                   onClick={() => setViewMode("grid-1")}
                 />
                 <img
                   src={twoColumnIcon}
                   alt="2 column"
-                  className={`cursor-pointer ${
-                    viewMode !== "grid-2" ? "opacity-70" : ""
-                  }`}
-                  onClick={() => setViewMode("grid-2")}
-                />
-              </div>
-
-              {/* Desktop: Show all 4 column options */}
-              <div className="hidden md:flex space-x-2">
-                <img
-                  src={oneColumnIcon}
-                  alt="1 column"
-                  className={`cursor-pointer md:hidden ${
-                    viewMode !== "grid-1" ? "opacity-70" : ""
-                  }`}
-                  onClick={() => setViewMode("grid-1")}
-                />
-                <img
-                  src={twoColumnIcon}
-                  alt="2 column"
-                  className={`cursor-pointer ${
-                    viewMode !== "grid-2" ? "opacity-70" : ""
-                  }`}
+                  className={`cursor-pointer w-5 h-5 ${viewMode !== "grid-2" ? "opacity-30" : ""}`}
                   onClick={() => setViewMode("grid-2")}
                 />
                 <img
                   src={threeColumnIcon}
                   alt="3 column"
-                  className={`cursor-pointer ${
-                    viewMode !== "grid-3" ? "opacity-70" : ""
-                  }`}
+                  className={`cursor-pointer w-5 h-5 hidden md:block ${viewMode !== "grid-3" ? "opacity-30" : ""}`}
                   onClick={() => setViewMode("grid-3")}
                 />
                 <img
                   src={multipleColumnIcon}
                   alt="6 column"
-                  className={`cursor-pointer ${
-                    viewMode !== "grid-6" ? "opacity-70" : ""
-                  }`}
+                  className={`cursor-pointer w-5 h-5 hidden lg:block ${viewMode !== "grid-6" ? "opacity-30" : ""}`}
                   onClick={() => setViewMode("grid-6")}
                 />
               </div>
@@ -395,19 +355,21 @@ const Category: React.FC = () => {
           </div>
         </div>
       </div>
+      
       {isFilterSticky && (
         <div style={{ height: filterRef.current?.offsetHeight || 0 }} />
       )}
 
-      <div className="mx-auto px-6 sm:px-12">
+      {/* Products Grid with aligned padding */}
+      <div className="px-6 md:px-12 mx-auto">
         {loading ? (
-          <div className="text-center">Loading products...</div>
+          <div className="text-center py-20">Loading products...</div>
         ) : error ? (
-          <div className="text-center text-red-500">{error}</div>
+          <div className="text-center text-red-500 py-20">{error}</div>
         ) : (
           <>
             <div
-              className={`grid gap-x-4 gap-y-[4rem] ${gridClasses[viewMode]}`}
+              className={`grid gap-x-4 gap-y-12 md:gap-y-16 ${gridClasses[viewMode]}`}
             >
               {currentProducts.map((product, index) => (
                 <ProductCard
@@ -421,13 +383,12 @@ const Category: React.FC = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center space-x-2 mt-12 mb-8">
+              <div className="flex justify-center items-center space-x-2 mt-16 mb-8">
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className={`px-4 py-2 border rounded ${
-                    currentPage === 1
-                      ? "opacity-50 cursor-not-allowed"
+                  className={`px-4 py-2 border border-[#00000026] rounded-sm ${currentPage === 1
+                      ? "opacity-30 cursor-not-allowed"
                       : "hover:bg-gray-100"
                   }`}
                 >
@@ -446,10 +407,9 @@ const Category: React.FC = () => {
                         <button
                           key={pageNumber}
                           onClick={() => handlePageChange(pageNumber)}
-                          className={`px-4 py-2 border rounded ${
-                            currentPage === pageNumber
-                              ? "bg-[#1c1c1c] text-white"
-                              : "hover:bg-gray-100"
+                          className={`px-4 py-2 border rounded-sm transition-colors ${currentPage === pageNumber
+                              ? "bg-[#1c1c1c] text-white border-[#1c1c1c]"
+                              : "border-[#00000026] hover:bg-gray-100"
                           }`}
                         >
                           {pageNumber}
@@ -459,7 +419,7 @@ const Category: React.FC = () => {
                       pageNumber === currentPage - 2 ||
                       pageNumber === currentPage + 2
                     ) {
-                      return <span key={pageNumber}>...</span>;
+                      return <span key={pageNumber} className="px-2">...</span>;
                     }
                     return null;
                   }
@@ -468,9 +428,8 @@ const Category: React.FC = () => {
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className={`px-4 py-2 border rounded ${
-                    currentPage === totalPages
-                      ? "opacity-50 cursor-not-allowed"
+                  className={`px-4 py-2 border border-[#00000026] rounded-sm ${currentPage === totalPages
+                      ? "opacity-30 cursor-not-allowed"
                       : "hover:bg-gray-100"
                   }`}
                 >
@@ -482,14 +441,15 @@ const Category: React.FC = () => {
         )}
       </div>
 
-      <section className="px-12 mt-14 bg-[#181c2e] text-white py-20">
-        <div className="grid grid-cols-3 gap-36">
+      {/* Responsive Category Info Section */}
+      <section className="px-6 md:px-12 mt-20 bg-[#181c2e] text-white py-16 md:py-24">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 md:gap-16 lg:gap-24">
           {getCategoryInfo(categoryName).map((element, index) => (
-            <div key={index} className="col-span-3 md:col-span-1">
-              <h2 className="text-3xl text-white mb-4 font-['EB_Garamond']">
+            <div key={index} className="space-y-4">
+              <h2 className="text-2xl md:text-3xl text-white font-['EB_Garamond'] leading-tight">
                 {element.title}
               </h2>
-              <p className="whitespace-pre-line text-gray-300">
+              <p className="whitespace-pre-line text-gray-300 text-sm md:text-base leading-relaxed">
                 {element.description}
               </p>
             </div>

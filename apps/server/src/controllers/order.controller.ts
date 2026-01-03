@@ -45,15 +45,36 @@ export const createFreeOrder = async (req: Request, res: Response) => {
                 giftCardCode: giftCardCode,
                 order_item: {
                     create: cart.map((item: any) => ({
-                        productId: item.id,
-                        quantity: item.quantity,
-                        price: item.price,
-                        sizeId: item.sizeId ? parseInt(item.sizeId) : null,
-                        colorId: item.colorId ? parseInt(item.colorId) : null,
+                        productId: parseInt(item.id),
+                        quantity: parseInt(item.quantity),
+                        price: Math.round(parseFloat(item.price) * 100),
+                        sizeId: item.selectedSizeId ? parseInt(item.selectedSizeId) : null,
+                        colorId: item.selectedColorId ? parseInt(item.selectedColorId) : null,
                     })),
                 }
             }
         });
+
+        // Decrement stock for each item
+        for (const item of cart) {
+            const pid = parseInt(item.id);
+            const sid = item.selectedSizeId ? parseInt(item.selectedSizeId) : null;
+            const cid = item.selectedColorId ? parseInt(item.selectedColorId) : null;
+            const qty = parseInt(item.quantity) || 1;
+
+            if (pid && sid && cid) {
+                const pq = await tx.product_quantity.findFirst({
+                    where: { productId: pid, sizeId: sid, colorId: cid },
+                });
+
+                if (pq) {
+                    await tx.product_quantity.update({
+                        where: { id: pq.id },
+                        data: { quantity: { decrement: qty } },
+                    });
+                }
+            }
+        }
 
         await tx.giftCard.update({
             where: { code: giftCardCode },

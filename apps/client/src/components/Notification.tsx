@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 import Icon from "./Icon";
 
 const successIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>`;
@@ -30,8 +31,8 @@ const Notification: React.FC<NotificationProps> = ({
 
   if (!show) return null;
 
-  return (
-    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-fade-in-up">
+  return createPortal(
+    <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-[9999] animate-fade-in-up">
       <div className="bg-[#1a1a1a] text-[#f2f2f2] rounded-xl shadow-2xl p-4 flex items-center gap-4 min-w-[320px] border border-[#333]">
         <div
           className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
@@ -51,7 +52,8 @@ const Notification: React.FC<NotificationProps> = ({
           <span className="text-xs text-[#f2f2f2]/80">{subtext}</span>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

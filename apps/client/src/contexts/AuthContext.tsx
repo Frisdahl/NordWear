@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import axios from 'axios';
+import { getMe } from '../services/api';
 
 // Define the shape of the user object
 interface AuthUser {
@@ -8,18 +10,15 @@ interface AuthUser {
   name: string;
 }
 
-// Define the shape of the auth context value
 interface AuthContextType {
   user: AuthUser | null;
-  token: string | null;
-  login: (token: string, user: AuthUser) => void;
+  login: (user: AuthUser) => void;
   logout: () => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
   loading: boolean;
 }
 
-// Create the context with a default (null) value
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
@@ -30,14 +29,18 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
 
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  const logout = async () => {
+    try {
+      const apiBase = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+      await axios.post(`${apiBase}/logout`, {}, { withCredentials: true });
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      setUser(null);
+      localStorage.removeItem('user');
+    }
   };
 
   useEffect(() => {
@@ -45,7 +48,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const resetTimer = () => {
       if (inactivityTimer) clearTimeout(inactivityTimer);
-      if (token) { // Only set timer if user is logged in
+      if (user) {
         inactivityTimer = setTimeout(() => {
           console.log("User inactive, logging out...");
           logout();
@@ -61,7 +64,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     window.addEventListener('keypress', handleActivity);
     window.addEventListener('click', handleActivity);
 
-    resetTimer(); // Start timer initially
+    resetTimer();
 
     return () => {
       if (inactivityTimer) clearTimeout(inactivityTimer);
@@ -69,42 +72,42 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       window.removeEventListener('keypress', handleActivity);
       window.removeEventListener('click', handleActivity);
     };
-  }, [token]); // Re-run effect when token changes (login/logout)
+  }, [user]);
 
   useEffect(() => {
-    const initializeAuth = () => {
-      const storedUser = localStorage.getItem('user');
-      const storedToken = localStorage.getItem('token');
-
-      if (storedUser && storedToken) {
-        try {
-          setUser(JSON.parse(storedUser));
-          setToken(storedToken);
-        } catch (error) {
-          console.error("Failed to parse stored user data:", error);
+    const initializeAuth = async () => {
+      try {
+        // Always try to fetch current user from server to validate cookie
+        const response = await getMe();
+        if (response && response.user) {
+          setUser(response.user);
+          localStorage.setItem('user', JSON.stringify(response.user));
+        } else {
+          setUser(null);
           localStorage.removeItem('user');
-          localStorage.removeItem('token');
         }
+      } catch (error) {
+        // If 401 or other error, clear local state
+        setUser(null);
+        localStorage.removeItem('user');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false); // Set loading to false after check
     };
 
     initializeAuth();
   }, []);
 
-  const login = (newToken: string, newUser: AuthUser) => {
-    setToken(newToken);
+  const login = (newUser: AuthUser) => {
     setUser(newUser);
-    localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(newUser));
   };
 
-  const isAuthenticated = !!user && !!token;
+  const isAuthenticated = !!user;
   const isAdmin = user?.role === 'ADMIN';
 
   const contextValue = {
     user,
-    token,
     login,
     logout,
     isAuthenticated,
@@ -119,7 +122,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   );
 };
 
-// Custom hook to use the auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {

@@ -11,7 +11,8 @@
     "start": "npm run start --workspace=clothing-webshop-server",
     "db:seed": "prisma db seed",
     "lint": "echo 'No linting configured'",
-    "typecheck": "npm exec --workspaces -- tsc --noEmit"
+    "typecheck": "npm exec --workspaces -- tsc --noEmit",
+    "test": "npm test --workspaces"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

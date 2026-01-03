@@ -28,7 +28,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
         onClick={onClose}
       />
       <div
-        className={`fixed right-0 h-full bg-[#f2f1f0] w-[90vw] md:w-[25vw] shadow-xl transform transition-transform duration-500 ease-in-out flex flex-col ${
+        className={`fixed right-0 h-full bg-[#f2f1f0] w-[90vw] md:w-[35vw] lg:w-[25vw] min-w-[320px] max-w-[500px] shadow-xl transform transition-transform duration-500 ease-in-out flex flex-col ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
         style={{ zIndex: 9999 }}

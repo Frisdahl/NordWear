@@ -4,7 +4,13 @@ import jwt from 'jsonwebtoken';
 import 'dotenv/config';
 
 const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || 'supersecretjwtkey'; // Fallback for development
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('FATAL: JWT_SECRET environment variable is not set!');
+}
+
+const SECRET = JWT_SECRET || 'dev-secret-key';
 
 export const login = async (email: string, password: string): Promise<{ token: string; user: { id: number; email: string; role: Role; name: string; } } | null> => {
   const user = await prisma.user.findUnique({
@@ -25,7 +31,7 @@ export const login = async (email: string, password: string): Promise<{ token: s
   // Generate JWT
   const token = jwt.sign(
     { userId: user.id, userRole: user.role },
-    JWT_SECRET,
+    SECRET,
     { expiresIn: '1h' } // Token expires in 1 hour
   );
 
@@ -63,3 +69,15 @@ export const register = async (name: string, email: string, password: string): P
       return user;
     });
   };
+
+export const getUserById = async (id: number) => {
+  return prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true,
+    },
+  });
+};

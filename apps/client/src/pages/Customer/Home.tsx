@@ -69,7 +69,10 @@ const Home: React.FC = () => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/newsletter/subscribe`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest"
+        },
         body: JSON.stringify({ email: emailInput }),
       });
       if (res.ok) {
@@ -127,7 +130,7 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="text-[#1c1c1c]">
+    <div className="text-[#1c1c1c] overflow-x-hidden">
       {notification.message && (
         <Notification
           show={!!notification.message}
@@ -139,7 +142,7 @@ const Home: React.FC = () => {
       )}
 
       {/* Hero Section */}
-      <section className="h-screen max-h-[85vh] bg-gray-800 flex items-end text-white relative -mt-24">
+      <section className="h-screen max-h-[75vh] md:max-h-[85vh] bg-gray-800 flex items-end text-white relative -mt-24">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
@@ -148,11 +151,11 @@ const Home: React.FC = () => {
             filter: "brightness(0.6)",
           }}
         ></div>
-        <div className="text-center z-10 p-4 pb-16 w-full">
-          <h1 className="text-5xl md:text-5xl font-normal font-['EB_Garamond'] tracking-tighter mb-4">
+        <div className="text-center z-10 px-6 pb-12 md:pb-16 w-full">
+          <h1 className="text-3xl md:text-5xl font-normal font-['EB_Garamond'] tracking-tighter mb-4">
             Stilrene, håndlavede produkter.
           </h1>
-          <p className="text-lg md:text-xl font-['EB_Garamond'] mb-8 max-w-2xl mx-auto">
+          <p className="text-base md:text-xl font-['EB_Garamond'] mb-8 max-w-2xl mx-auto">
             Til den moderne eventyrer. Kompromisløs kvalitet inspireret af
             naturen.
           </p>
@@ -163,9 +166,9 @@ const Home: React.FC = () => {
       </section>
 
       {/* Featured Products Section */}
-      <section className="py-16 sm:py-13 relative">
+      <section className="py-12 md:py-16 relative">
         <div className="mx-auto">
-          <h2 className="text-4xl font-['EB_Garamond'] text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-['EB_Garamond'] text-center mb-8 md:mb-12">
             Udvalgte produkter
           </h2>
           {loading ? (
@@ -173,7 +176,7 @@ const Home: React.FC = () => {
           ) : error ? (
             <div className="text-center text-red-500">{error}</div>
           ) : (
-            <div className="relative px-12">
+            <div className="relative px-6 md:px-12">
               <div
                 className="embla overflow-hidden group relative"
                 ref={emblaRef}
@@ -181,7 +184,7 @@ const Home: React.FC = () => {
                 <div className="embla__container flex relative flex-row items-stretch">
                   {products.map((product, index) => (
                     <div
-                      className="embla__slide flex-none w-full sm:w-1/2 md:w-1/2 lg:w-1/4 flex items-center justify-center p-2"
+                      className="embla__slide flex-none w-[80%] sm:w-1/2 md:w-1/2 lg:w-1/4 flex items-center justify-center p-2"
                       key={product.id}
                     >
                       <ProductCard
@@ -195,7 +198,7 @@ const Home: React.FC = () => {
               </div>
             </div>
           )}
-          <div className="text-center mt-12">
+          <div className="text-center mt-8 md:mt-12">
             <Link
               to="/category"
               className="bg-[#181c2e] text-white py-3 font-semibold px-8 transition-transform transform hover:scale-105"
@@ -206,7 +209,8 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      <section className="py-16 sm:py-24 relativ grid-cols-2 md:grid-cols-2 gap-6 px-6 md:px-12 grid">
+      {/* Categories Grid */}
+      <section className="py-12 md:py-24 grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 px-6 md:px-12">
         {categories.map((category) => (
           <Link
             to={`/category/${category.name.toLowerCase()}`}
@@ -217,24 +221,22 @@ const Home: React.FC = () => {
         ))}
       </section>
 
+      {/* Design Showcase 1 */}
       <div className="relative border-y border-gray-300">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 items-center min-h-96 md:min-h-screen">
-          {/* Image on the left */}
-          <div className="h-96 md:h-screen overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 items-center">
+          <div className="h-72 md:h-screen overflow-hidden">
             <img
               src="https://images.unsplash.com/photo-1603787081207-362bcef7c144?q=80&w=1965&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
               alt="Design"
-              className="w-full h-96 md:h-screen object-cover block"
+              className="w-full h-full object-cover block"
             />
           </div>
-
-          {/* White box overlapping in center */}
-          <div className="relative pr-12 md:ml-[-64px] z-10">
-            <div className="bg-white text-center py-16 px-12 shadow-lg relative">
-              <h1 className="text-[2.25rem] md:text-4xl font-['EB_Garamond'] mb-6">
+          <div className="relative px-6 py-12 md:py-0 md:pr-12 md:ml-[-64px] z-10">
+            <div className="bg-white text-center py-12 px-6 md:py-16 md:px-12 shadow-lg relative">
+              <h1 className="text-2xl md:text-4xl font-['EB_Garamond'] mb-6">
                 Dansk design - Håndlavet i Portugal
               </h1>
-              <p className="text-base md:text-lg text-gray-700 leading-relaxed mb-8">
+              <p className="text-sm md:text-lg text-gray-700 leading-relaxed mb-8">
                 Vi laver ikke hurtig mode. Vi laver produkter, der forener
                 skandinavisk enkelhed, raffineret æstetik og kompromisløs
                 komfort. Altid i nøje udvalgte materialer – valgt for deres
@@ -248,41 +250,40 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      <h1 className="text-[2.625rem] text-center mt-14 px-6 font-['EB_Garamond'] mb-14">
-        Hos NordWear tror vi på forfinelse frem for forandring - <br></br>{" "}
+      <h1 className="text-2xl md:text-[2.625rem] text-center mt-14 px-6 font-['EB_Garamond'] mb-14 leading-tight">
+        Hos NordWear tror vi på forfinelse frem for forandring - <br className="hidden md:block"></br>{" "}
         tidløst design, kvalitet og bæredygtighed.
       </h1>
 
+      {/* Overproduction Section */}
       <div className="border-y border-gray-300">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-14 items-center min-h-96 md:min-h-screen">
-          {/* Image on the left */}
-          <div className="h-96 md:h-screen overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-14 items-center">
+          <div className="h-72 md:h-screen overflow-hidden">
             <img
               src="https://images.unsplash.com/photo-1556906781-9a412961c28c?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
               alt="Design"
-              className="w-full h-96 md:h-screen object-cover block"
+              className="w-full h-full object-cover block"
             />
           </div>
-          {/* Text for right side */}
-          <div>
-            <div className="py-8 max-w-xl">
-              <h1 className="text-[2.25rem] md:text-4xl font-['EB_Garamond'] mb-6">
+          <div className="px-6 py-12 md:py-8">
+            <div className="max-w-xl">
+              <h1 className="text-2xl md:text-4xl font-['EB_Garamond'] mb-6">
                 Slut med overproduktion
               </h1>
-              <p className="text-base md:text-lg text-gray-700 leading-relaxed mb-8">
+              <p className="text-sm md:text-lg text-gray-700 leading-relaxed mb-6">
                 Vores "Made for you" koncept bygger på slow fashion og handler
                 om at undgå overproduktion og evige udsalg.
               </p>
-              <p className="text-base md:text-lg text-gray-700 leading-relaxed mb-8">
+              <p className="text-sm md:text-lg text-gray-700 leading-relaxed mb-6">
                 Vi laver tidløse designs, så vores kollektion er den samme året
                 rundt.
               </p>
-              <p className="text-base md:text-lg text-gray-700 leading-relaxed mb-8">
+              <p className="text-sm md:text-lg text-gray-700 leading-relaxed mb-6">
                 Før vi sætter nye styles i produktion, inddrager vi vores kunder
                 og nyhedsbrevets medlemmer, så vi kun producerer det, der er
                 efterspørgsel på.
               </p>
-              <p className="text-base md:text-lg text-gray-700 leading-relaxed mb-8">
+              <p className="text-sm md:text-lg text-gray-700 leading-relaxed mb-6">
                 Det minimerer spild og bidrager til en mere ansvarlig
                 produktion.
               </p>
@@ -298,24 +299,24 @@ const Home: React.FC = () => {
 
       {/* Gift Card Popup */}
       {showPopup && (
-        <div className="fixed bottom-8 right-8 z-50 animate-bounce-in">
-          <div className="bg-[#1c1c1c] text-white p-8 rounded-lg shadow-2xl max-w-sm relative">
+        <div className="fixed bottom-8 right-8 z-50 animate-bounce-in max-w-[calc(100vw-4rem)]">
+          <div className="bg-[#1c1c1c] text-white p-6 md:p-8 rounded-lg shadow-2xl max-w-sm relative">
             <button
               onClick={() => setShowPopup(false)}
               className="absolute top-2 right-4 text-2xl text-gray-400 hover:text-white"
             >
               &times;
             </button>
-            <h3 className="text-2xl font-['EB_Garamond'] mb-4">
+            <h3 className="text-xl md:text-2xl font-['EB_Garamond'] mb-4">
               Få 15% rabat!
             </h3>
-            <p className="text-sm text-gray-300 mb-6">
+            <p className="text-xs md:text-sm text-gray-300 mb-6">
               Tilmeld dig vores nyhedsbrev og modtag et gavekort på 15% til dit
               næste køb.
             </p>
             <div className="flex flex-col gap-3">
               {subscribeStatus === "success" ? (
-                <p className="text-green-400 font-medium text-center">
+                <p className="text-green-400 font-medium text-center text-sm">
                   Tak! Tjek din indbakke for dit gavekort.
                 </p>
               ) : (
@@ -331,7 +332,7 @@ const Home: React.FC = () => {
                   <button
                     onClick={handleSubscribe}
                     disabled={subscribeStatus === "loading"}
-                    className="bg-[#f2f1f0] text-[#1c1c1c] font-semibold py-2 px-4 hover:bg-white transition-colors disabled:opacity-70"
+                    className="bg-[#f2f1f0] text-[#1c1c1c] font-semibold py-2 px-4 hover:bg-white transition-colors disabled:opacity-70 text-sm"
                   >
                     {subscribeStatus === "loading"
                       ? "Tilmelder..."

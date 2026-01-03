@@ -76,134 +76,113 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
 
   return (
     <>
+      {/* Separate Backdrop - Matching Mobile Menu & Cart */}
       <div
-        className={`fixed inset-0 bg-black bg-opacity-75 z-40 transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black bg-opacity-50 transition-opacity duration-300 ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
+        style={{ zIndex: 9998 }}
         onClick={onClose}
-      ></div>
+      />
 
+      {/* Filter Drawer - Matching Mobile Menu & Cart Animation */}
       <div
-        className={`fixed top-0 right-0 h-full w-[90%] md:w-[30%] bg-[#f2f1f0] z-50 shadow-lg transform transition-transform duration-300 ${
+        className={`fixed top-0 right-0 h-full bg-[#f2f1f0] w-[85vw] md:w-[35vw] lg:w-[25vw] min-w-[320px] max-w-[500px] shadow-xl transform transition-transform duration-500 ease-in-out flex flex-col ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
+        style={{ zIndex: 9999 }}
       >
-        <div className="p-4 flex justify-between items-center border-b">
-          <h2 className="text-lg font-serif">Filtrer</h2>
+        <div className="p-6 flex justify-end items-center pb-4">
           <button onClick={onClose}>
             <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
-        <div className="p-4">
-          <Accordion
-            title="Pris"
-            content={
-              <div className="pt-8 px-4">
-                <Slider
-                  getAriaLabel={() => "Price range"}
-                  value={priceRange}
-                  onChange={handleSliderChange}
-                  valueLabelDisplay="auto"
-                  min={0}
-                  max={2499}
-                  sx={{
-                    color: "#1c1c1c",
-                    "& .MuiSlider-thumb": {
-                      width: 20,
-                      height: 20,
-                    },
-                  }}
-                />
-                <div className="flex justify-between mt-2 text-sm">
-                  <span>kr. {priceRange[0]}</span>
-                  <span>kr. {priceRange[1]}</span>
-                </div>
-                <div className="flex justify-between mt-4 space-x-2">
-                  <input
-                    type="number"
-                    placeholder="Min"
-                    value={priceRange[0]}
-                    onChange={(e) =>
-                      setPriceRange([+e.target.value, priceRange[1]])
-                    }
-                    className="w-full p-2 border rounded"
+        
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="space-y-4">
+            <Accordion
+              title="Pris"
+              content={
+                <div className="pt-8 px-4 pb-4">
+                  <Slider
+                    getAriaLabel={() => "Price range"}
+                    value={priceRange}
+                    onChange={handleSliderChange}
+                    valueLabelDisplay="auto"
+                    min={0}
+                    max={2499}
+                    sx={{
+                      color: "#1c1c1c",
+                      "& .MuiSlider-thumb": {
+                        width: 20,
+                        height: 20,
+                      },
+                    }}
                   />
-                  <input
-                    type="number"
-                    placeholder="Max"
-                    value={priceRange[1]}
-                    onChange={(e) =>
-                      setPriceRange([priceRange[0], +e.target.value])
-                    }
-                    className="w-full p-2 border rounded"
-                  />
+                  <div className="flex justify-between mt-2 text-sm">
+                    <span>kr. {priceRange[0]}</span>
+                    <span>kr. {priceRange[1]}</span>
+                  </div>
                 </div>
-              </div>
-            }
-          />
-          <Accordion
-            title="Produkttype"
-            content={
-              <div className="pt-4 space-y-2">
-                {categories.map((category) => (
-                  <div
-                    key={category.id}
-                    className="flex items-center cursor-pointer"
-                    onClick={() => handleCategoryChange(category.id)}
-                  >
+              }
+            />
+            <Accordion
+              title="Produkttype"
+              content={
+                <div className="pt-4 pb-4 space-y-3">
+                  {categories.map((category) => (
                     <div
-                      className={`transition-all duration-300 flex items-center justify-center ${
-                        selectedCategories.includes(category.id) ? "w-6" : "w-0"
-                      }`}
+                      key={category.id}
+                      className="flex items-center cursor-pointer group"
+                      onClick={() => handleCategoryChange(category.id)}
                     >
                       <div
-                        className={`h-1.5 w-1.5 rounded-full bg-black transition-opacity duration-300 ${
-                          selectedCategories.includes(category.id)
-                            ? "opacity-100"
-                            : "opacity-0"
+                        className={`h-4 w-4 border border-[#1c1c1c] rounded-sm flex items-center justify-center transition-colors ${
+                          selectedCategories.includes(category.id) ? "bg-[#1c1c1c]" : "bg-transparent"
                         }`}
-                      ></div>
+                      >
+                        {selectedCategories.includes(category.id) && (
+                          <div className="h-1.5 w-1.5 bg-white rounded-full"></div>
+                        )}
+                      </div>
+                      <span className="ml-3 text-sm">{category.name}</span>
                     </div>
-                    <span className="ml-2">{category.name}</span>
-                  </div>
-                ))}
-              </div>
-            }
-          />
-          <Accordion
-            title="Størrelse"
-            content={
-              <div className="pt-4 space-y-2">
-                {sizes.map((size) => (
-                  <div
-                    key={size.id}
-                    className="flex items-center cursor-pointer"
-                    onClick={() => handleSizeChange(size.id)}
-                  >
+                  ))}
+                </div>
+              }
+            />
+            <Accordion
+              title="Størrelse"
+              content={
+                <div className="pt-4 pb-4 space-y-3">
+                  {sizes.map((size) => (
                     <div
-                      className={`transition-all duration-300 flex items-center justify-center ${
-                        selectedSizes.includes(size.id) ? "w-6" : "w-0"
-                      }`}
+                      key={size.id}
+                      className="flex items-center cursor-pointer group"
+                      onClick={() => handleSizeChange(size.id)}
                     >
                       <div
-                        className={`h-1.5 w-1.5 rounded-full bg-black transition-opacity duration-300 ${
-                          selectedSizes.includes(size.id)
-                            ? "opacity-100"
-                            : "opacity-0"
+                        className={`h-4 w-4 border border-[#1c1c1c] rounded-sm flex items-center justify-center transition-colors ${
+                          selectedSizes.includes(size.id) ? "bg-[#1c1c1c]" : "bg-transparent"
                         }`}
-                      ></div>
+                      >
+                        {selectedSizes.includes(size.id) && (
+                          <div className="h-1.5 w-1.5 bg-white rounded-full"></div>
+                        )}
+                      </div>
+                      <span className="ml-3 text-sm">{size.name}</span>
                     </div>
-                    <span className="ml-2">{size.name}</span>
-                  </div>
-                ))}
-              </div>
-            }
-          />
+                  ))}
+                </div>
+              }
+            />
+          </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 p-4">
+
+        <div className="p-6 border-t border-[#00000026] bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
           <button
             onClick={handleApply}
-            className="w-full py-3 bg-[#1c1c1c] text-[#f5f5f5]"
+            className="w-full py-3 bg-[#1c1c1c] text-white rounded-md font-medium transition-opacity hover:opacity-90"
           >
             Anvend
           </button>

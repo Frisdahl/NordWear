@@ -9,9 +9,17 @@ const CustomerLayout: React.FC = () => {
   const headerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (headerRef.current) {
-      setHeaderHeight(headerRef.current.offsetHeight);
-    }
+    if (!headerRef.current) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (headerRef.current) {
+        setHeaderHeight(headerRef.current.offsetHeight);
+      }
+    });
+
+    resizeObserver.observe(headerRef.current);
+
+    return () => resizeObserver.disconnect();
   }, [headerRef]);
 
   return (

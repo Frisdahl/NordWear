@@ -48,6 +48,8 @@ export interface Product {
     stock: number;
   }[];
   selectedSize?: string;
+  selectedSizeId?: number;
+  selectedColorId?: number;
 }
 
 export interface Category {

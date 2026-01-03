@@ -278,7 +278,10 @@ const Checkout: React.FC = () => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/gift-cards/validate`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest"
+        },
         body: JSON.stringify({ code: giftCardInput }),
       });
       const data = await res.json();
@@ -310,7 +313,10 @@ const Checkout: React.FC = () => {
       `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/create-checkout-session`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest"
+        },
         body: JSON.stringify({
           cart,
           customerId: user?.id,
@@ -327,7 +333,10 @@ const Checkout: React.FC = () => {
         `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/orders/create-free`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest"
+          },
           body: JSON.stringify({
             cart,
             customerId: user?.id,

@@ -4,9 +4,22 @@ import { buildProductQueryParams } from "../utils/apiUtils";
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
+    "X-Requested-With": "XMLHttpRequest",
   },
+});
+
+// ✅ Security: Attach JWT token to requests if it exists
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
 });
 
 export const fetchProducts = async (
@@ -84,6 +97,11 @@ export const register = async (
   password: string
 ) => {
   const response = await apiClient.post("/register", { name, email, password });
+  return response.data;
+};
+
+export const getMe = async () => {
+  const response = await apiClient.get("/auth/me");
   return response.data;
 };
 

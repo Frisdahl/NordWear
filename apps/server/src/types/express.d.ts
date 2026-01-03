@@ -1,9 +1,15 @@
-import { Request } from 'express';
+import { Role } from '@prisma/client';
 
 declare global {
   namespace Express {
     interface Request {
-      rawBody: Buffer;
+      rawBody?: Buffer;
+      user?: {
+        id: number;
+        role: Role;
+      };
     }
   }
 }
+
+export {};

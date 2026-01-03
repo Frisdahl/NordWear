@@ -21,7 +21,7 @@ services:
   server:
     build:
       context: ../
-      dockerfile: docker/server.Dockerfile
+      dockerfile: apps/server/Dockerfile
     restart: always
     environment:
       DATABASE_URL: mysql://user:password@db:3306/nordwear_db

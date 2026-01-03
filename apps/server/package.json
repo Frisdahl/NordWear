@@ -22,7 +22,7 @@
     "jsonwebtoken": "^9.0.3",
     "mysql2": "^2.3.3",
     "stripe": "^20.1.0",
-    "zod": "^4.3.4"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.10",
@@ -36,7 +36,7 @@
     "prisma": "^4.16.2",
     "supertest": "^7.1.4",
     "ts-node": "^10.0.0",
-    "typescript": "^5.9.3",
+    "typescript": "^5.7.2",
     "vitest": "^4.0.16",
     "vitest-mock-extended": "^3.1.0"
   }

@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html.smooth-scroll {
+    scroll-behavior: smooth;
+  }
+}
+
 @layer components {
   @import "./admin/admin.css";
 }

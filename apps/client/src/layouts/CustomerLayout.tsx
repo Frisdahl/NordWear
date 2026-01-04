@@ -9,6 +9,13 @@ const CustomerLayout: React.FC = () => {
   const headerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    document.documentElement.classList.add("smooth-scroll");
+    return () => {
+      document.documentElement.classList.remove("smooth-scroll");
+    };
+  }, []);
+
+  useEffect(() => {
     if (!headerRef.current) return;
 
     const resizeObserver = new ResizeObserver(() => {

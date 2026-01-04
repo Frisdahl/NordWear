@@ -130,7 +130,7 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="text-[#1c1c1c] overflow-x-hidden">
+    <div className="text-[#1c1c1c] overflow-x-hidden w-full">
       {notification.message && (
         <Notification
           show={!!notification.message}
@@ -142,7 +142,7 @@ const Home: React.FC = () => {
       )}
 
       {/* Hero Section */}
-      <section className="h-screen max-h-[75vh] md:max-h-[85vh] bg-gray-800 flex items-end text-white relative -mt-24">
+      <section className="h-[100dvh] max-h-[75vh] md:max-h-[85vh] bg-gray-800 flex items-end text-white relative -mt-24">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{

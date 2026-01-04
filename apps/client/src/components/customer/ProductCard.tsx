@@ -189,10 +189,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
               </div>
             )}
 
-            {/* Like Button - Hidden by default, show on hover */}
+            {/* Like Button - Visible on mobile, hover-only on desktop */}
             <button
               onClick={handleLikeClick}
-              className="absolute top-2 right-2 h-8 w-8 bg-[#171717] rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
+              className="absolute top-2 right-2 h-8 w-8 bg-[#171717] rounded-full flex items-center justify-center text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 z-10"
             >
               {isLiked ? (
                 <HeartIconSolid className="h-5 w-5 text-white" />
@@ -201,8 +201,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
               )}
             </button>
 
-            {/* Quick Add Container */}
-            <div className="absolute bottom-0 left-0 right-0 h-1/5 bg-white/60 backdrop-blur-lg flex flex-col justify-center items-center translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-in-out p-2 z-20">
+            {/* Quick Add Container - Hidden on mobile */}
+            <div className="absolute bottom-0 left-0 right-0 h-1/5 bg-white/60 backdrop-blur-lg hidden md:flex flex-col justify-center items-center translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-in-out p-2 z-20">
                 <span className="text-xs font-semibold uppercase tracking-wider mb-1 text-[#1c1c1c]">Tilføj produkt</span>
                 <div className="flex gap-2 overflow-x-auto w-full justify-center scrollbar-hide">
                     {sortedSizes && sortedSizes.length > 0 ? (

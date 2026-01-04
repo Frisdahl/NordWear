@@ -179,7 +179,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             <img
               src={imageUrl || "https://placehold.co/450x450?text=Nordwear"}
               alt={name}
-              className="h-full w-full object-cover opacity-100"
+              className="block h-full w-full object-cover opacity-100"
             />
 
             {/* Discount Badge */}
@@ -224,7 +224,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
           <div className="relative pt-3 text-center">
             <Link to={`/product/${id}`}>
-                <h3 className="text-[1rem] text-[#1c1c1c]">{name}</h3>
+                <h3 className="text-[14px] md:text-[1rem] text-[#1c1c1c] truncate">{name}</h3>
             </Link>
 
             <div className="mt-1.5 flex items-center justify-center">

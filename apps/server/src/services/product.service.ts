@@ -82,6 +82,7 @@ export const getProducts = async (
       product_quantity: {
         include: {
           color: true,
+          size: true,
         },
       },
       images: {
@@ -100,14 +101,20 @@ export const getProducts = async (
     const num_variants = product.product_quantity.length;
     const imageUrl = product.images.length > 0 ? product.images[0].url : null;
     
-    // Get unique colors
+    // Get unique colors and sizes
     const colorMap = new Map<number, string>();
+    const sizeMap = new Map<number, { id: number; name: string }>();
+
     product.product_quantity.forEach(item => {
       if (item.color) {
         colorMap.set(item.color.id, item.color.name);
       }
+      if (item.size) {
+        sizeMap.set(item.size.id, { id: item.size.id, name: item.size.name });
+      }
     });
     const colors = Array.from(colorMap.values());
+    const sizes = Array.from(sizeMap.values());
 
     return {
       id: product.id,
@@ -121,6 +128,7 @@ export const getProducts = async (
       total_stock: total_stock,
       num_variants: num_variants,
       colors: colors,
+      sizes: sizes,
     };
   });
 };

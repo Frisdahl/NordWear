@@ -39,6 +39,7 @@ export interface Product {
   images?: ProductImage[];
   imageUrl?: string | null;
   colors?: string[];
+  sizes?: { id: number; name: string }[];
   shipment_size?: ShipmentSize;
   product_quantity?: ProductQuantity[];
   description: string;

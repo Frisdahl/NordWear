@@ -82,9 +82,9 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                           className="max-w-[100px] max-h-[100px] w-auto h-auto object-contain"
                         />
                       </div>
-                      <div className="flex flex-col h-full justify-between font-sans overflow-hidden">
+                      <div className="flex flex-col h-full justify-between font-sans">
                         <div className="min-w-0">
-                          <span className="font-bold block truncate text-[clamp(13px,1.5vw,14px)]">
+                          <span className="font-bold block text-[clamp(13px,1.5vw,14px)]">
                             {product.name}
                           </span>
                           <span className="block text-[clamp(10px,1.2vw,11.7px)]">

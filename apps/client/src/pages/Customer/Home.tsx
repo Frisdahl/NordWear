@@ -178,7 +178,7 @@ const Home: React.FC = () => {
           ) : (
             <div className="relative px-6 md:px-12">
               <div
-                className="embla overflow-hidden group relative"
+                className="embla overflow-hidden relative cursor-grab active:cursor-grabbing"
                 ref={emblaRef}
               >
                 <div className="embla__container flex relative flex-row items-stretch">

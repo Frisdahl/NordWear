@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Product } from "../../types";
 import { HeartIcon as HeartIconOutline } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
 import { useAuth } from "../../contexts/AuthContext";
+import useCart from "../../hooks/useCart"; // Import useCart
 import {
   likeProduct,
   unlikeProduct,
@@ -28,9 +29,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
   style,
   index = 0,
 }) => {
-  const { id, name, price, offer_price, imageUrl } = product;
+  const { id, name, price, offer_price, imageUrl, sizes } = product; // Destructure sizes
   const [isLiked, setIsLiked] = useState(false);
   const { user } = useAuth();
+  const { addToCart } = useCart(); // Use useCart
+  const navigate = useNavigate();
   const [customerId, setCustomerId] = useState<number | null>(null);
   const [notification, setNotification] = useState<{
     show: boolean;
@@ -130,6 +133,35 @@ const ProductCard: React.FC<ProductCardProps> = ({
     }
   };
 
+  const handleAddToCart = (e: React.MouseEvent, sizeId: number, sizeName: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    addToCart({
+        ...product,
+        selectedSizeId: sizeId,
+        selectedSize: sizeName,
+        quantity: 1
+    });
+    
+    setNotification({
+        show: true,
+        type: "success",
+        heading: "Lagt i kurv",
+        subtext: `${name} (${sizeName}) er lagt i din kurv`,
+    });
+  };
+
+  const sizeOrder = ["XS", "S", "M", "L", "XL", "XXL"];
+  const sortedSizes = sizes?.sort((a, b) => {
+      const indexA = sizeOrder.indexOf(a.name);
+      const indexB = sizeOrder.indexOf(b.name);
+      if (indexA === -1 && indexB === -1) return a.name.localeCompare(b.name);
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+      return indexA - indexB;
+  });
+
   return (
     <>
       <Notification
@@ -140,11 +172,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
         onClose={() => setNotification({ ...notification, show: false })}
       />
       <animated.div style={{ ...style, ...animation }}>
-        <Link
-          to={`/product/${id}`}
-          className={`block overflow-hidden w-full ${className}`}
+        <div
+          className={`block overflow-hidden w-full group relative ${className}`}
         >
-          <div className="relative w-full aspect-square">
+          <Link to={`/product/${id}`} className="block relative w-full aspect-square overflow-hidden">
             <img
               src={imageUrl || "https://placehold.co/450x450?text=Nordwear"}
               alt={name}
@@ -153,14 +184,15 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
             {/* Discount Badge */}
             {discountPercent > 0 && (
-              <div className="absolute top-2 left-2 bg-[#171717] text-[#F1F0EE] text-xs px-2 py-1 rounded-sm">
+              <div className="absolute top-2 left-2 bg-[#171717] font-['EB_Garamond'] text-[#F1F0EE] text-xs px-2 py-1 rounded-sm z-10">
                 SPAR {discountPercent}%
               </div>
             )}
 
+            {/* Like Button - Hidden by default, show on hover */}
             <button
               onClick={handleLikeClick}
-              className="absolute top-2 right-2 h-8 w-8 bg-[#171717] rounded-full flex items-center justify-center text-white"
+              className="absolute top-2 right-2 h-8 w-8 bg-[#171717] rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
             >
               {isLiked ? (
                 <HeartIconSolid className="h-5 w-5 text-white" />
@@ -168,10 +200,32 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 <HeartIconOutline className="h-5 w-5" />
               )}
             </button>
-          </div>
+
+            {/* Quick Add Container */}
+            <div className="absolute bottom-0 left-0 right-0 h-1/5 bg-white/60 backdrop-blur-lg flex flex-col justify-center items-center translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-in-out p-2 z-20">
+                <span className="text-xs font-semibold uppercase tracking-wider mb-1 text-[#1c1c1c]">Tilføj produkt</span>
+                <div className="flex gap-2 overflow-x-auto w-full justify-center scrollbar-hide">
+                    {sortedSizes && sortedSizes.length > 0 ? (
+                        sortedSizes.map((size) => (
+                            <button
+                                key={size.id}
+                                onClick={(e) => handleAddToCart(e, size.id, size.name)}
+                                className="min-w-[24px] h-6 flex items-center justify-center border border-[#1c1c1c] text-[10px] font-medium text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-white transition-colors rounded-sm px-1"
+                            >
+                                {size.name}
+                            </button>
+                        ))
+                    ) : (
+                        <span className="text-[10px] text-gray-500">Se varianter</span>
+                    )}
+                </div>
+            </div>
+          </Link>
 
           <div className="relative pt-3 text-center">
-            <h3 className="text-[1rem] text-[#1c1c1c] ">{name}</h3>
+            <Link to={`/product/${id}`}>
+                <h3 className="text-[1rem] text-[#1c1c1c]">{name}</h3>
+            </Link>
 
             <div className="mt-1.5 flex items-center justify-center">
               <p className="tracking-wide text-[1rem] text-[#1c1c1ca6]">
@@ -188,7 +242,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
               </p>
             </div>
           </div>
-        </Link>
+        </div>
       </animated.div>
     </>
   );

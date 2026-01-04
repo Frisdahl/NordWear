@@ -1,5 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams, Link, useOutletContext, useSearchParams } from "react-router-dom";
+import {
+  useParams,
+  Link,
+  useOutletContext,
+  useSearchParams,
+} from "react-router-dom";
 import { Product } from "../../types";
 import { fetchProducts, searchProducts } from "../../services/api";
 import FilterMenu from "../../components/customer/FilterMenu";
@@ -33,7 +38,9 @@ const Category: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [notification, setNotification] = useState({ message: "", type: "" });
   const [viewMode, setViewMode] = useState<string>(
-    typeof window !== "undefined" && window.innerWidth >= 768 ? "grid-3" : "grid-2"
+    typeof window !== "undefined" && window.innerWidth >= 768
+      ? "grid-3"
+      : "grid-2"
   );
   const [isFilterMenuOpen, setFilterMenuOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions | null>(null);
@@ -49,7 +56,7 @@ const Category: React.FC = () => {
 
   const getCategoryInfo = (slug: string | undefined) => {
     if (searchQuery) {
-       return [];
+      return [];
     }
 
     switch (slug) {
@@ -171,11 +178,16 @@ const Category: React.FC = () => {
       setLoading(true);
       try {
         let fetchedProducts: Product[] = [];
-        
+
         if (searchQuery) {
-            fetchedProducts = await searchProducts(searchQuery);
+          fetchedProducts = await searchProducts(searchQuery);
         } else {
-            fetchedProducts = await fetchProducts(categorySlug, filters, undefined, sortOption);
+          fetchedProducts = await fetchProducts(
+            categorySlug,
+            filters,
+            undefined,
+            sortOption
+          );
         }
 
         const productArray = Array.isArray(fetchedProducts)
@@ -184,7 +196,9 @@ const Category: React.FC = () => {
         setProducts(productArray);
         setTotalPages(Math.ceil(productArray.length / productsPerPage));
       } catch (err) {
-        setError(`Failed to load products for ${searchQuery ? "search" : categorySlug}`);
+        setError(
+          `Failed to load products for ${searchQuery ? "search" : categorySlug}`
+        );
       } finally {
         setLoading(false);
       }
@@ -217,7 +231,7 @@ const Category: React.FC = () => {
 
   const getCategoryDescription = (slug: string | undefined) => {
     if (searchQuery) {
-        return `${products.length} resultater for "${searchQuery}"`;
+      return `${products.length} resultater for "${searchQuery}"`;
     }
     switch (slug) {
       case "sneakers":
@@ -242,16 +256,13 @@ const Category: React.FC = () => {
       pants: "Bukser",
       deals: "Tilbud",
     };
-    return (
-      translations[slug?.toLowerCase() || ""]
-      || slug
-      || "Alle Produkter"
-    );
+    return translations[slug?.toLowerCase() || ""] || slug || "Alle Produkter";
   };
 
-  const categoryName = searchQuery
-    ? "Søg"
-    : getCategoryName(categorySlug);
+  const categoryName = searchQuery ? "Søg" : getCategoryName(categorySlug);
+
+  const capitalizedCategoryName =
+    categoryName.charAt(0).toUpperCase() + categoryName.slice(1);
 
   const gridClasses: { [key: string]: string } = {
     "grid-1": "grid-cols-1",
@@ -280,7 +291,9 @@ const Category: React.FC = () => {
     { label: "Dato, nyere til ældre", value: "newest" },
   ];
 
-  const currentSortLabel = sortOptions.find(opt => opt.value === sortOption)?.label || "Sorter efter";
+  const currentSortLabel =
+    sortOptions.find((opt) => opt.value === sortOption)?.label ||
+    "Sorter efter";
 
   return (
     <div className="py-6">
@@ -298,7 +311,7 @@ const Category: React.FC = () => {
           onClose={() => setNotification({ message: "", type: "" })}
         />
       )}
-      
+
       {/* Top Header Section with padding */}
       <div className="px-6 md:px-12 mx-auto">
         {/* Breadcrumbs */}
@@ -320,7 +333,7 @@ const Category: React.FC = () => {
         </nav>
 
         <h1 className="font-['EB_Garamond'] text-center mb-4 text-[clamp(2rem,5vw,2.625rem)]">
-          {categoryName}
+          {capitalizedCategoryName}
         </h1>
         <p className="text-center text-[#1c1c1c] mb-8 text-base max-w-4xl mx-auto">
           {getCategoryDescription(categorySlug)}
@@ -330,7 +343,8 @@ const Category: React.FC = () => {
       {/* Filter and View Controls Bar */}
       <div
         ref={filterRef}
-        className={`border-b mb-8 transition-all duration-300 ${isFilterSticky
+        className={`border-b mb-8 transition-all duration-300 ${
+          isFilterSticky
             ? "fixed left-0 right-0 z-10 bg-[#f2f1f0] shadow-md border-t-0"
             : "relative border-t"
         }`}
@@ -346,47 +360,63 @@ const Category: React.FC = () => {
                 Filtrer
               </button>
               <div className="border-r border-[#00000026] flex items-center px-4 md:px-8">
-                 <Dropdown label={<span className="text-sm font-medium">{currentSortLabel}</span>}>
-                    <div className="flex flex-col">
-                      {sortOptions.map((option) => (
-                        <button
-                          key={option.label}
-                          className={`text-left px-4 py-2 hover:bg-gray-100 text-sm ${sortOption === option.value ? 'font-bold' : ''}`}
-                          onClick={() => handleSortChange(option.value)}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
-                 </Dropdown>
+                <Dropdown
+                  label={
+                    <span className="text-sm font-medium">
+                      {currentSortLabel}
+                    </span>
+                  }
+                >
+                  <div className="flex flex-col">
+                    {sortOptions.map((option) => (
+                      <button
+                        key={option.label}
+                        className={`text-left px-4 py-2 hover:bg-gray-100 text-sm ${
+                          sortOption === option.value ? "font-bold" : ""
+                        }`}
+                        onClick={() => handleSortChange(option.value)}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </Dropdown>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-2 py-4">
               {/* Responsive column icons */}
               <div className="flex items-center space-x-2">
                 <img
                   src={oneColumnIcon}
                   alt="1 column"
-                  className={`cursor-pointer w-5 h-5 md:hidden ${viewMode !== "grid-1" ? "opacity-30" : ""}`}
+                  className={`cursor-pointer w-5 h-5 md:hidden ${
+                    viewMode !== "grid-1" ? "opacity-30" : ""
+                  }`}
                   onClick={() => setViewMode("grid-1")}
                 />
                 <img
                   src={twoColumnIcon}
                   alt="2 column"
-                  className={`cursor-pointer w-5 h-5 md:hidden ${viewMode !== "grid-2" ? "opacity-30" : ""}`}
+                  className={`cursor-pointer w-5 h-5 md:hidden ${
+                    viewMode !== "grid-2" ? "opacity-30" : ""
+                  }`}
                   onClick={() => setViewMode("grid-2")}
                 />
                 <img
                   src={threeColumnIcon}
                   alt="3 column"
-                  className={`cursor-pointer w-5 h-5 hidden md:block ${viewMode !== "grid-3" ? "opacity-30" : ""}`}
+                  className={`cursor-pointer w-5 h-5 hidden md:block ${
+                    viewMode !== "grid-3" ? "opacity-30" : ""
+                  }`}
                   onClick={() => setViewMode("grid-3")}
                 />
                 <img
                   src={multipleColumnIcon}
                   alt="6 column"
-                  className={`cursor-pointer w-5 h-5 hidden lg:block ${viewMode !== "grid-6" ? "opacity-30" : ""}`}
+                  className={`cursor-pointer w-5 h-5 hidden lg:block ${
+                    viewMode !== "grid-6" ? "opacity-30" : ""
+                  }`}
                   onClick={() => setViewMode("grid-6")}
                 />
               </div>
@@ -394,7 +424,7 @@ const Category: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {isFilterSticky && (
         <div style={{ height: filterRef.current?.offsetHeight || 0 }} />
       )}
@@ -402,7 +432,9 @@ const Category: React.FC = () => {
       {/* Products Grid with aligned padding */}
       <div className="px-6 md:px-12 mx-auto">
         {error ? (
-          <div className="text-center text-red-500 py-20">Der opstod en fejl under indlæsning af produkter.</div>
+          <div className="text-center text-red-500 py-20">
+            Der opstod en fejl under indlæsning af produkter.
+          </div>
         ) : (
           <>
             <div
@@ -428,7 +460,8 @@ const Category: React.FC = () => {
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className={`px-4 py-2 border border-[#00000026] rounded-sm ${currentPage === 1
+                  className={`px-4 py-2 border border-[#00000026] rounded-sm ${
+                    currentPage === 1
                       ? "opacity-30 cursor-not-allowed"
                       : "hover:bg-gray-100"
                   }`}
@@ -448,7 +481,8 @@ const Category: React.FC = () => {
                         <button
                           key={pageNumber}
                           onClick={() => handlePageChange(pageNumber)}
-                          className={`px-4 py-2 border rounded-sm transition-colors ${currentPage === pageNumber
+                          className={`px-4 py-2 border rounded-sm transition-colors ${
+                            currentPage === pageNumber
                               ? "bg-[#1c1c1c] text-white border-[#1c1c1c]"
                               : "border-[#00000026] hover:bg-gray-100"
                           }`}
@@ -460,7 +494,11 @@ const Category: React.FC = () => {
                       pageNumber === currentPage - 2 ||
                       pageNumber === currentPage + 2
                     ) {
-                      return <span key={pageNumber} className="px-2">...</span>;
+                      return (
+                        <span key={pageNumber} className="px-2">
+                          ...
+                        </span>
+                      );
                     }
                     return null;
                   }
@@ -469,7 +507,8 @@ const Category: React.FC = () => {
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className={`px-4 py-2 border border-[#00000026] rounded-sm ${currentPage === totalPages
+                  className={`px-4 py-2 border border-[#00000026] rounded-sm ${
+                    currentPage === totalPages
                       ? "opacity-30 cursor-not-allowed"
                       : "hover:bg-gray-100"
                   }`}

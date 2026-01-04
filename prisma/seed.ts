@@ -6,32 +6,37 @@ const prisma = new PrismaClient();
 function generateProducts(categories: {id: number, name: string}[]) {
     const products = [];
     let productId = 1;
-    const adjectives = ['Basic', 'Klassisk', 'Urban', 'Nordisk', 'Viking', 'Fjord', 'Arktisk', 'Asgård'];
+    const adjectives = ['Essential', 'Premium', 'Signatur', 'Klassisk', 'Urban', 'Nordisk', 'Limitless', 'Timeless'];
+    const suffixes = ['Walnut', 'Midnight', 'Forest', 'Onyx', 'Slate', 'Sand', 'Navy', 'Charcoal', 'Ivory', 'Olive', 'Stone'];
+    const pricePoints = [299, 349, 399, 449, 499, 549, 599, 649, 699, 749, 799, 899, 999, 1099, 1199, 1299, 1499];
+
     const nouns: { [key: string]: string[] } = {
-        'Skjorter': ['T-shirt', 'Skjorte', 'Top', 'Polo'],
-        'Hættetrøjer': ['Hættetrøje', 'Crewneck', 'Sweatshirt', 'Zip-up'],
-        'Jakker': ['Jakke', 'Parka', 'Vindjakke', 'Bomber'],
-        'Bukser': ['Bukser', 'Jeans', 'Chinos', 'Shorts'],
-        'Sneakers': ['Sneakers', 'Støvler', 'Sko', 'Loafers'],
-        'Tilbud': ['Tilbud T-shirt', 'Tilbud Hættetrøje', 'Tilbud Jakke', 'Tilbud Bukser']
+        'Skjorter': ['Oxford Skjorte', 'Hørblanding Skjorte', 'Denim Skjorte', 'Polo', 'Business Skjorte'],
+        'Hættetrøjer': ['Heavyweight Hoodie', 'Zip Hoodie', 'Oversized Sweatshirt', 'Crewneck', 'Fleece Hoodie'],
+        'Jakker': ['Puffer Jakke', 'Uldfrakke', 'Regnjakke', 'Bomber Jakke', 'Vindjakke'],
+        'Bukser': ['Chinos', 'Slim Fit Jeans', 'Cargo Bukser', 'Joggers', 'Shorts'],
+        'Sneakers': ['Low Top Sneaker', 'High Top Sneaker', 'Læder Sneaker', 'Canvas Sko', 'Runner'],
+        'Tilbud': ['Outlet T-shirt', 'Outlet Hoodie', 'Sæson Jakke', 'Restparti Bukser']
     };
 
     for (const category of categories) {
         for (let i = 0; i < 20; i++) {
             const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+            const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
             const nounList = nouns[category.name] || ['Produkt'];
             const noun = nounList[Math.floor(Math.random() * nounList.length)];
-            const name = `${adj} ${noun} #${i + 1}`;
-            const price = Math.floor(Math.random() * 501) + 299;
+            
+            const name = `${adj} ${noun} - ${suffix}`;
+            const price = pricePoints[Math.floor(Math.random() * pricePoints.length)];
             
             products.push({
                 id: productId++,
                 name,
                 price,
-                offer_price: Math.random() < 0.3 ? +(price * 0.8).toFixed(2) : null,
+                offer_price: Math.random() < 0.2 ? Math.floor(price * 0.7) : null, // 20% chance of offer, round down
                 category_Id: category.id,
                 status: ProductStatus.ONLINE,
-                description: `En lækker ${noun.toLowerCase()} i høj kvalitet.`
+                description: `En ${adj.toLowerCase()} ${noun.toLowerCase()} i farven ${suffix.toLowerCase()}. Perfekt til enhver lejlighed.`
             });
         }
     }

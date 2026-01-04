@@ -14,6 +14,7 @@ import CustomerFavorites from "./pages/Customer/CustomerFavorites";
 import ScrollToTop from "./components/ScrollToTop";
 
 const Dashboard = lazy(() => import("./pages/Admin/Dashboard"));
+const Analytics = lazy(() => import("./pages/Admin/Analytics"));
 const AllProducts = lazy(() => import("./pages/Admin/AllProducts"));
 const AddProduct = lazy(() => import("./pages/Admin/AddProduct"));
 const Orders = lazy(() => import("./pages/Admin/Orders"));
@@ -25,6 +26,8 @@ const Product = lazy(() => import("./pages/Customer/Product"));
 const Category = lazy(() => import("./pages/Customer/Category"));
 const Login = lazy(() => import("./pages/Auth/Login"));
 const CreateUser = lazy(() => import("./pages/Auth/CreateUser"));
+const ForgotPassword = lazy(() => import("./pages/Auth/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/Auth/ResetPassword"));
 const CheckoutLayout = lazy(() => import("./layouts/CheckoutLayout"));
 const Checkout = lazy(() => import("./pages/Customer/Checkout"));
 const Success = lazy(() => import("./pages/Customer/Success"));
@@ -67,6 +70,8 @@ const App: React.FC = () => (
           <Route path="/login" element={<Login />} />{" "}
           {/* Login route is not protected */}
           <Route path="/create-user" element={<CreateUser />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/success" element={<Success />} />
           <Route path="/cancel" element={<Cancel />} />
           {/* Customer Routes */}
@@ -106,6 +111,7 @@ const App: React.FC = () => (
             }
           >
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="analytics" element={<Analytics />} />
             <Route path="all-products" element={<AllProducts />} />
             <Route path="add-product" element={<AddProduct />} />
             <Route path="add-product/:id" element={<AddProduct />} />

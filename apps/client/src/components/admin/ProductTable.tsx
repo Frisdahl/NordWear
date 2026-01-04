@@ -21,6 +21,7 @@ type Props = {
   onSelectedChange: React.Dispatch<React.SetStateAction<number[]>>;
   onTotalChange?: (n: number) => void;
   onDeleteSelected?: () => void;
+  onStatusChange?: (status: "ONLINE" | "OFFLINE" | "DRAFT") => void;
   activeTab: string;
   sortField: string;
   sortOrder: string;
@@ -70,6 +71,7 @@ export default function ProductTable({
   onSelectedChange,
   onTotalChange,
   onDeleteSelected,
+  onStatusChange,
   activeTab,
   sortField,
   sortOrder,
@@ -85,7 +87,7 @@ export default function ProductTable({
     // Filter
     if (activeTab === "Aktive") {
       result = result.filter((p) => p.status === "ONLINE");
-    } else if (activeTab === "Draft") {
+    } else if (activeTab === "Kladde") {
       result = result.filter((p) => p.status === "DRAFT");
     } else if (activeTab === "Arkiveret") {
       result = result.filter((p) => p.status === "OFFLINE");
@@ -160,8 +162,14 @@ export default function ProductTable({
   const handleBulkAction = (action: string) => {
     if (action === "delete" && onDeleteSelected) {
         onDeleteSelected();
+    } else if (action === "draft" && onStatusChange) {
+        onStatusChange("DRAFT");
+    } else if (action === "archive" && onStatusChange) {
+        onStatusChange("OFFLINE");
+    } else if (action === "active" && onStatusChange) {
+        onStatusChange("ONLINE");
     } else {
-        alert(`Bulk action: ${action} - Not implemented yet`);
+        // alert(`Bulk action: ${action} - Not implemented yet`);
     }
   };
 
@@ -223,6 +231,14 @@ export default function ProductTable({
                   disableArrowRotation={true}
                   hideChevron={true}
                 >
+                   <DropdownItem onClick={() => handleBulkAction("active")}>
+                      <div className="flex items-center gap-2 font-normal">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                        Aktiver produkter
+                      </div>
+                   </DropdownItem>
                    <DropdownItem onClick={() => handleBulkAction("archive")}>
                       <div className="flex items-center gap-2 font-normal">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">

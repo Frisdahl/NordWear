@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import clockSvg from "@/assets/admin/svgs/clock-icon.svg?raw";
-import ArrowSvg from "@/assets/admin/svgs/arrow-down-icon.svg?raw";
 import Icon from "../Icon";
 import { useAuth } from "@/contexts/AuthContext";
 import { searchProducts, searchOrders, searchGiftCards } from "../../services/api";
 
 const searchIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>`;
+const logoutIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
+</svg>`;
 
 interface SearchResults {
   orders: any[];
@@ -15,14 +17,17 @@ interface SearchResults {
 }
 
 const AdminHeader: React.FC = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [searchResults, setSearchResults] = useState<SearchResults>({ orders: [], products: [], giftCards: [] });
   const [loading, setLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   const filters = ["Ordrer", "Produkter", "Gavekort"];
   const availableFilters = filters.filter((f) => f !== activeFilter);
@@ -35,6 +40,12 @@ const AdminHeader: React.FC = () => {
       ) {
         setIsSearchOpen(false);
         setIsExpanded(false);
+      }
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
+        setIsProfileOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -82,6 +93,11 @@ const AdminHeader: React.FC = () => {
     setSearchQuery("");
     setSearchResults({ orders: [], products: [], giftCards: [] });
     setIsExpanded(false);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
   };
 
   const getInitials = (name: string) => {
@@ -273,21 +289,34 @@ const AdminHeader: React.FC = () => {
             strokeWidth={2}
           />
 
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 bg-[#25e82c] rounded-md flex items-center justify-center text-black font-semibold text-xs">
-              {initials}
-            </div>
-            <Link
-              to="/admin/new"
-              className="flex items-center gap-2 whitespace-nowrap text-sm"
+          <div className="relative" ref={profileRef}>
+            <div 
+              className="flex items-center gap-3 cursor-pointer" 
+              onClick={() => setIsProfileOpen(!isProfileOpen)}
             >
-              {displayName}
-              <Icon
-                src={ArrowSvg}
-                className="h-4 w-4 stroke-[#e3e3e3]"
-                strokeWidth={2}
-              />
-            </Link>
+              <div className="h-8 w-8 bg-[#25e82c] rounded-md flex items-center justify-center text-black font-semibold text-xs">
+                {initials}
+              </div>
+              <span className="whitespace-nowrap text-sm font-bold">
+                {displayName}
+              </span>
+            </div>
+
+            {isProfileOpen && (
+              <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl py-1 z-50 border border-gray-200">
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                >
+                  <Icon
+                    src={logoutIconSvg}
+                    className="h-5 w-5 stroke-gray-700"
+                    strokeWidth={1.5}
+                  />
+                  Log ud
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </nav>

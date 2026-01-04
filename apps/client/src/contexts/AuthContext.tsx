@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import axios from 'axios';
-import { getMe } from '../services/api';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getMe, apiClient } from '../services/api';
 
 // Define the shape of the user object
 interface AuthUser {
@@ -30,18 +30,40 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
-      const apiBase = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-      await axios.post(`${apiBase}/logout`, {}, { withCredentials: true });
+      await apiClient.post('/logout');
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
       setUser(null);
       localStorage.removeItem('user');
+      navigate('/login');
     }
-  };
+  }, [navigate]);
+
+  // Setup Axios interceptor to handle 401 responses globally
+  useEffect(() => {
+    const interceptor = apiClient.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response && error.response.status === 401) {
+          const url = error.config?.url;
+          // Ignore 401s from check-auth (getMe) and logout endpoints to avoid redirect loops or unwanted redirects on public load
+          if (url && !url.includes('/auth/me') && !url.includes('/logout')) {
+            logout();
+          }
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      apiClient.interceptors.response.eject(interceptor);
+    };
+  }, [logout]);
 
   useEffect(() => {
     let inactivityTimer: NodeJS.Timeout;
@@ -72,7 +94,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       window.removeEventListener('keypress', handleActivity);
       window.removeEventListener('click', handleActivity);
     };
-  }, [user]);
+  }, [user, logout]);
 
   useEffect(() => {
     const initializeAuth = async () => {

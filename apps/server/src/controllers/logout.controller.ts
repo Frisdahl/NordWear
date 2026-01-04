@@ -1,9 +1,13 @@
 import { Request, Response } from 'express';
 
 export const logout = async (req: Request, res: Response): Promise<void> => {
-  res.clearCookie('token', {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const clientUrl = process.env.CLIENT_URL || '';
+  const isSecure = isProduction && clientUrl.startsWith('https');
+
+  res.clearCookie('auth_token', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: isSecure,
     sameSite: 'lax',
   });
   res.status(200).json({ message: 'Logged out successfully.' });

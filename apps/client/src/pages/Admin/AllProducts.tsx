@@ -9,7 +9,7 @@ import Notification from "@/components/Notification";
 
 const productActiveSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" /></svg>`;
 
-const tabs = ["Alle", "Aktive", "Draft", "Arkiveret"];
+const tabs = ["Alle", "Aktive", "Kladde", "Arkiveret"];
 const sortOptions = ["Product title", "Lavet", "Opdateret", "Lager", "Type"];
 
 const AllProducts = () => {
@@ -21,7 +21,12 @@ const AllProducts = () => {
   const [productCount, setProductCount] = useState(0);
   const [activeTab, setActiveTab] = useState("Alle");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [notification, setNotification] = useState({ show: false, type: "success" as "success" | "error", heading: "", subtext: "" });
+  const [notification, setNotification] = useState({
+    show: false,
+    type: "success" as "success" | "error",
+    heading: "",
+    subtext: "",
+  });
 
   // Sorting State
   const [sortField, setSortField] = useState("Product title");
@@ -31,7 +36,13 @@ const AllProducts = () => {
     (async () => {
       setLoading(true);
       try {
-        const res = await fetch("/api/products");
+        const res = await fetch("/api/admin/products", {
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        });
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
         const data = await res.json();
         setProducts(data);
@@ -48,7 +59,10 @@ const AllProducts = () => {
     try {
       const res = await fetch("/api/products", {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+        },
         body: JSON.stringify({ ids: selected }),
       });
       if (!res.ok) {
@@ -63,7 +77,9 @@ const AllProducts = () => {
         show: true,
         type: "success",
         heading: "Produkter slettet",
-        subtext: `${deletedCount} ${deletedCount === 1 ? "produkt er" : "produkter er"} blevet slettet.`
+        subtext: `${deletedCount} ${
+          deletedCount === 1 ? "produkt er" : "produkter er"
+        } blevet slettet.`,
       });
     } catch (err) {
       console.error("Delete failed:", err);
@@ -71,7 +87,51 @@ const AllProducts = () => {
         show: true,
         type: "error",
         heading: "Fejl ved sletning",
-        subtext: "Kunne ikke slette produkterne. Prøv igen senere."
+        subtext: "Kunne ikke slette produkterne. Prøv igen senere.",
+      });
+    }
+  };
+
+  const confirmStatusChange = async (
+    status: "ONLINE" | "OFFLINE" | "Kladde"
+  ) => {
+    try {
+      const res = await fetch("/api/products/bulk-status", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        body: JSON.stringify({ ids: selected, status }),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Status ${res.status}: ${text}`);
+      }
+      const count = selected.length;
+      setSelected([]);
+      setRefreshKey((k) => k + 1);
+
+      let statusText = "";
+      if (status === "ONLINE") statusText = "aktiveret";
+      if (status === "OFFLINE") statusText = "arkiveret";
+      if (status === "DRAFT") statusText = "sat til kladde";
+
+      setNotification({
+        show: true,
+        type: "success",
+        heading: "Status opdateret",
+        subtext: `${count} ${
+          count === 1 ? "produkt er" : "produkter er"
+        } blevet ${statusText}.`,
+      });
+    } catch (err) {
+      console.error("Status update failed:", err);
+      setNotification({
+        show: true,
+        type: "error",
+        heading: "Fejl ved opdatering",
+        subtext: "Kunne ikke opdatere status. Prøv igen senere.",
       });
     }
   };
@@ -82,7 +142,7 @@ const AllProducts = () => {
 
   return (
     <div className="container mx-auto px-3 pt-8 min-h-screen relative">
-      <Notification 
+      <Notification
         show={notification.show}
         type={notification.type}
         heading={notification.heading}
@@ -93,16 +153,34 @@ const AllProducts = () => {
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-[#303030]/40 backdrop-blur-sm" onClick={() => setShowDeleteModal(false)}></div>
+          <div
+            className="absolute inset-0 bg-[#303030]/40 backdrop-blur-sm"
+            onClick={() => setShowDeleteModal(false)}
+          ></div>
           <div className="bg-white rounded-2xl shadow-2xl z-10 w-full max-w-md overflow-hidden animate-fade-in-up">
             {/* Header */}
             <div className="bg-[#f2f2f2] px-6 py-4 flex justify-between items-center border-b border-[#e6e6e6]">
               <h2 className="text-base font-bold text-[#303030]">
-                Slet {selected.length} {selected.length === 1 ? "produkt" : "produkter"}?
+                Slet {selected.length}{" "}
+                {selected.length === 1 ? "produkt" : "produkter"}?
               </h2>
-              <button onClick={() => setShowDeleteModal(false)} className="text-[#a0a0a0] hover:text-[#303030] transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="text-[#a0a0a0] hover:text-[#303030] transition-colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18 18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
@@ -110,19 +188,20 @@ const AllProducts = () => {
             {/* Body */}
             <div className="p-6">
               <p className="text-sm text-[#606060]">
-                Dette kan ikke fortrydes. Alle medier, der kun bruges af dette produkt, vil også blive slettet.
+                Dette kan ikke fortrydes. Alle medier, der kun bruges af dette
+                produkt, vil også blive slettet.
               </p>
             </div>
 
             {/* Footer */}
             <div className="px-6 py-4 border-t border-[#e6e6e6] flex justify-end gap-3">
-              <button 
+              <button
                 onClick={() => setShowDeleteModal(false)}
                 className="px-4 py-2 rounded-lg border border-[#c7c7c7] text-[#303030] text-sm font-medium hover:bg-gray-50 transition-colors"
               >
                 Tilbage
               </button>
-              <button 
+              <button
                 onClick={confirmDelete}
                 className="px-4 py-2 rounded-lg bg-[#8e0e21] text-white text-sm font-medium hover:bg-[#6e0a1a] transition-colors"
               >
@@ -174,6 +253,7 @@ const AllProducts = () => {
           onSelectedChange={setSelected}
           onTotalChange={setProductCount}
           onDeleteSelected={() => setShowDeleteModal(true)}
+          onStatusChange={confirmStatusChange}
           activeTab={activeTab}
           sortField={sortField}
           sortOrder={sortOrder}

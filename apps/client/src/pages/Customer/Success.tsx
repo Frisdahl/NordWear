@@ -16,6 +16,18 @@ const Success: React.FC = () => {
         try {
           const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/checkout-session?session_id=${sessionId}`);
           const data = await response.json();
+          console.log("DEBUG: Raw Stripe Session Data:", data);
+          
+          // Normalize address from shipping_details if available (Stripe structure)
+          // Stripe sometimes puts it in collected_information depending on API version or configuration
+          const shippingSource = data.shipping_details || data.collected_information?.shipping_details;
+
+          if (shippingSource?.address) {
+             if (!data.customer_details) data.customer_details = {};
+             data.customer_details.address = shippingSource.address;
+          }
+          console.log("DEBUG: Normalized Session Data:", data);
+
           setSession(data);
 
           await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/send-order-confirmation`, {
@@ -35,9 +47,21 @@ const Success: React.FC = () => {
         try {
           const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/orders/${orderId}`);
           const data = await response.json();
+          console.log("DEBUG: Raw Order Data (DB):", data);
+
           // Transform order data to match session structure enough for rendering
+          const shippingAddress = data.shippingDetails?.address || {};
           setSession({
-            customer_details: data.customerDetails,
+            customer_details: {
+                ...data.customerDetails,
+                address: {
+                    line1: shippingAddress.line1 || shippingAddress.address || "",
+                    line2: shippingAddress.line2 || shippingAddress.apartment || "",
+                    city: shippingAddress.city || "",
+                    postal_code: shippingAddress.postal_code || shippingAddress.zipcode || "",
+                    country: shippingAddress.country || "DK"
+                }
+            },
             amount_total: data.amount,
             line_items: {
               data: data.order_item.map((item: any) => ({
@@ -85,17 +109,23 @@ const Success: React.FC = () => {
             </div>
             <div className="mb-4">
               <h3 className="text-lg font-semibold">Leveringsadresse</h3>
-              <p>
-                {session.customer_details?.address?.line1}
-                {session.customer_details?.address?.line2
-                  ? `, ${session.customer_details?.address?.line2}`
-                  : ""}
-              </p>
-              <p>
-                {session.customer_details?.address?.postal_code}{" "}
-                {session.customer_details?.address?.city}
-              </p>
-              <p>{session.customer_details?.address?.country}</p>
+              {session.customer_details?.address ? (
+                <>
+                  <p>
+                    {session.customer_details.address.line1}
+                    {session.customer_details.address.line2
+                      ? `, ${session.customer_details.address.line2}`
+                      : ""}
+                  </p>
+                  <p>
+                    {session.customer_details.address.postal_code}{" "}
+                    {session.customer_details.address.city}
+                  </p>
+                  <p>{session.customer_details.address.country}</p>
+                </>
+              ) : (
+                <p className="text-gray-500 italic">Ingen adresse oplysninger fundet</p>
+              )}
             </div>
             {session.line_items?.data.map((item: any) => {
               const imageUrl = item.imageUrl || item.price?.product?.images?.[0] || "";

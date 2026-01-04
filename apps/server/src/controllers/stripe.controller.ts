@@ -54,7 +54,10 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
   const line_items = cart.map((item: any) => ({
     price_data: {
       currency: "dkk",
-      product_data: { name: item.name },
+      product_data: { 
+        name: item.name,
+        images: item.imageUrl ? [item.imageUrl] : [],
+      },
       unit_amount: Math.round(item.price * 100),
     },
     quantity: item.quantity,
@@ -232,7 +235,7 @@ const createOrderInDB = async (
           status: "COMPLETED",
           paymentIntentId: paymentIntentId,
           customerDetails: (session.customer_details as any) || null,
-          shippingDetails: ((session as any).shipping_details as any) || null,
+          shippingDetails: (session as any).shipping_details || (session as any).collected_information?.shipping_details || null,
           discountAmount: discountAmount,
           giftCardCode: giftCardCode,
           order_item: {

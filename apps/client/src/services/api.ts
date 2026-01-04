@@ -2,7 +2,7 @@ import axios from "axios";
 import { Product } from "../types";
 import { buildProductQueryParams } from "../utils/apiUtils";
 
-const apiClient = axios.create({
+export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
   withCredentials: true,
   headers: {
@@ -12,6 +12,8 @@ const apiClient = axios.create({
 });
 
 // ✅ Security: Attach JWT token to requests if it exists
+// Removed manual Authorization header injection because we now use httpOnly cookies.
+/*
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token && config.headers) {
@@ -21,6 +23,7 @@ apiClient.interceptors.request.use((config) => {
 }, (error) => {
   return Promise.reject(error);
 });
+*/
 
 export const fetchProducts = async (
   category?: string,

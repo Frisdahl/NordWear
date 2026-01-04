@@ -14,6 +14,9 @@ import { csrfProtection } from "./middleware/csrf";
 const app = express();
 const prisma = new PrismaClient();
 
+// Enable trust proxy for DigitalOcean Load Balancer
+app.set("trust proxy", 1);
+
 const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
 
 // 1. CORS - MUST be first to handle preflight requests correctly

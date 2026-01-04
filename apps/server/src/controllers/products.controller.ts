@@ -13,6 +13,7 @@ import {
   getLikedProducts as getLikedProductsService,
   getCustomerByUserId as getCustomerByUserIdService,
   searchProducts as searchProductsService,
+  updateProductsStatus as updateProductsStatusService,
 } from "../services/product.service";
 
 export const searchProducts = async (
@@ -31,6 +32,32 @@ export const searchProducts = async (
     console.error("GET /api/products/search error:", error);
     const msg = error instanceof Error ? error.message : String(error);
     res.status(500).json({ message: "Error searching for products", error: msg });
+  }
+};
+
+export const updateProductsStatus = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { ids, status } = req.body;
+    
+    if (!Array.isArray(ids) || ids.some((id) => typeof id !== "number")) {
+      res.status(400).json({ message: "Invalid 'ids' array in request body." });
+      return;
+    }
+
+    if (!['ONLINE', 'OFFLINE', 'DRAFT'].includes(status)) {
+      res.status(400).json({ message: "Invalid status. Must be ONLINE, OFFLINE, or DRAFT." });
+      return;
+    }
+
+    const result = await updateProductsStatusService(ids, status);
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("PUT /api/products/bulk-status error:", error);
+    const msg = error instanceof Error ? error.message : String(error);
+    res.status(500).json({ message: "Error updating products status", error: msg });
   }
 };
 

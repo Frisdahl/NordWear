@@ -391,9 +391,9 @@ const Checkout: React.FC = () => {
   const total = subtotal + shippingCost - discountAmount;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2">
+    <div className="flex flex-col-reverse lg:grid lg:grid-cols-2">
       <div className="lg:col-span-1 bg-white">
-        <div className="max-w-[550px] ml-auto pr-8 py-8">
+        <div className="max-w-[550px] w-full mx-auto lg:ml-auto lg:mr-0 px-6 md:px-12 lg:pr-8 py-8">
           <div className="mb-8">
             <div className="flex w-full items-center justify-between mb-4">
               <h2 className="text-2xl font-semibold">Kontaktoplysninger</h2>
@@ -930,8 +930,8 @@ const Checkout: React.FC = () => {
           </button>
         </div>
       </div>
-      <div className="lg:col-span-1 bg-[#f2f1f0]">
-        <div className="max-w-[550px] mr-auto pl-8 py-8 sticky top-24">
+      <div className="lg:col-span-1 bg-[#f2f1f0] border-b lg:border-b-0 border-gray-300">
+        <div className="max-w-[550px] w-full mx-auto lg:mr-auto lg:ml-0 px-6 md:px-12 lg:pl-8 py-8 lg:sticky lg:top-24">
           <div className=" pb-4">
             {cart.map((item) => (
               <div

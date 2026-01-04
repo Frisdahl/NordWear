@@ -4,6 +4,7 @@ import { Product } from "../../types";
 import { fetchProducts, searchProducts } from "../../services/api";
 import FilterMenu from "../../components/customer/FilterMenu";
 import ProductCard from "../../components/customer/ProductCard";
+import ProductCardSkeleton from "../../components/customer/ProductCardSkeleton";
 import Notification from "../../components/Notification";
 import Dropdown from "../../components/Dropdown";
 import oneColumnIcon from "../../assets/customer/1-column.svg";
@@ -23,7 +24,7 @@ interface OutletContextType {
 
 const Category: React.FC = () => {
   const { headerHeight } = useOutletContext<OutletContextType>();
-  const { categoryName } = useParams<{ categoryName: string }>();
+  const { categoryName: categorySlug } = useParams<{ categoryName: string }>();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get("search");
 
@@ -31,7 +32,9 @@ const Category: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [notification, setNotification] = useState({ message: "", type: "" });
-  const [viewMode, setViewMode] = useState<string>("grid-2"); // Default to 2 columns on mobile
+  const [viewMode, setViewMode] = useState<string>(
+    typeof window !== "undefined" && window.innerWidth >= 768 ? "grid-3" : "grid-2"
+  );
   const [isFilterMenuOpen, setFilterMenuOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions | null>(null);
   const [sortOption, setSortOption] = useState<string>("");
@@ -44,12 +47,12 @@ const Category: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const productsPerPage = 18;
 
-  const getCategoryInfo = (categoryName: string | undefined) => {
+  const getCategoryInfo = (slug: string | undefined) => {
     if (searchQuery) {
        return [];
     }
 
-    switch (categoryName) {
+    switch (slug) {
       case "sneakers":
         return [
           {
@@ -72,19 +75,57 @@ const Category: React.FC = () => {
       case "shirts":
         return [
           {
-            title: "Kvalitets Trøjer til Enhver Stil",
+            title: "Kvalitets Skjorter til Enhver Stil",
             description:
-              "Vores trøjer er designet med fokus på kvalitet og pasform. Uanset om du er til et klassisk eller moderne look, har vi en trøje til dig. \n\n Alle vores trøjer er lavet af de bedste materialer for at sikre komfort hele dagen.",
+              "Vores skjorter er designet med fokus på kvalitet og pasform. Uanset om du er til et klassisk eller moderne look, har vi en skjorte til dig. \n\n Alle vores skjorter er lavet af de bedste materialer for at sikre komfort hele dagen.",
           },
           {
-            title: "Stilfulde Trøjer til Mænd",
+            title: "Stilfulde Skjorter til Mænd",
             description:
-              "Opdag vores eksklusive udvalg af trøjer, der kombinerer tidløst design med moderne trends. Hver trøje er fremstillet af førsteklasses materialer for at sikre både komfort og holdbarhed. \n\n Uanset om du har brug for en trøje til arbejde eller fritid, har vi det perfekte valg til dig.",
+              "Opdag vores eksklusive udvalg af skjorter, der kombinerer tidløst design med moderne trends. Hver skjorte er fremstillet af førsteklasses materialer for at sikre både komfort og holdbarhed. \n\n Uanset om du har brug for en skjorte til arbejde eller fritid, har vi det perfekte valg til dig.",
           },
           {
             title: "Til Enhver Lejlighed",
             description:
-              "Vores trøjer er skabt med en passion for detaljer og kvalitet. Med et bredt udvalg af stilarter og farver, finder du nemt en trøje, der passer til din personlige stil. \n\n Perfekt til både formelle og afslappede begivenheder, vores trøjer sikrer, at du altid ser skarp ud.",
+              "Vores skjorter er skabt med en passion for detaljer og kvalitet. Med et bredt udvalg af stilarter og farver, finder du nemt en skjorte, der passer til din personlige stil. \n\n Perfekt til både formelle og afslappede begivenheder, vores skjorter sikrer, at du altid ser skarp ud.",
+          },
+        ];
+
+      case "hoodies":
+        return [
+          {
+            title: "Komfortable Hættetrøjer",
+            description:
+              "Vores hættetrøjer er indbegrebet af afslappet stil og komfort. Designet til at holde dig varm og komfortabel, uden at gå på kompromis med udseendet. \n\n Lavet i bløde kvalitetsmaterialer der holder pasformen vask efter vask.",
+          },
+          {
+            title: "Dansk Designet Streetwear",
+            description:
+              "Hver hoodie i vores kollektion er designet i Danmark med fokus på rene linjer og funktionalitet. Den perfekte balance mellem moderne streetwear og klassisk nordisk minimalisme. \n\n Brug den til hverdag, træning eller afslapning derhjemme.",
+          },
+          {
+            title: "Kvalitet der Holder",
+            description:
+              "Vi bruger kun kraftige metervarer til vores hættetrøjer for at sikre en premium følelse. Detaljer som forstærkede sømme og kvalitets lynlåse er standard hos os. \n\n En hættetrøje fra NordWear er en investering i din basisgarderobe.",
+          },
+        ];
+
+      case "jackets":
+        return [
+          {
+            title: "Jakker til Alt Slags Vejr",
+            description:
+              "Vores jakker er skabt til at modstå det skiftende nordiske vejr. Fra lette overgangsjakker til varme vinterjakker - vi kombinerer tekniske materialer med stilrent design. \n\n Hold dig tør og varm med stil uanset årstiden.",
+          },
+          {
+            title: "Tidløst Overtøj",
+            description:
+              "En god jakke skal kunne bruges sæson efter sæson. Derfor fokuserer vi på klassiske silhuetter og holdbare materialer, der ikke går af mode. \n\n Vores kollektion byder på alt fra elegante frakker til praktiske hverdagsjakker.",
+          },
+          {
+            title: "Funktionalitet og Stil",
+            description:
+              "Vi mener ikke, man skal vælge mellem at se godt ud og være praktisk klædt på. Vores jakker har smarte detaljer som inderlommer, justerbare manchetter og vandafvisende overflader. \n\n Det perfekte valg til den moderne mand på farten.",
           },
         ];
 
@@ -134,7 +175,7 @@ const Category: React.FC = () => {
         if (searchQuery) {
             fetchedProducts = await searchProducts(searchQuery);
         } else {
-            fetchedProducts = await fetchProducts(categoryName, filters, undefined, sortOption);
+            fetchedProducts = await fetchProducts(categorySlug, filters, undefined, sortOption);
         }
 
         const productArray = Array.isArray(fetchedProducts)
@@ -143,18 +184,18 @@ const Category: React.FC = () => {
         setProducts(productArray);
         setTotalPages(Math.ceil(productArray.length / productsPerPage));
       } catch (err) {
-        setError(`Failed to load products for ${searchQuery ? "search" : categoryName}`);
+        setError(`Failed to load products for ${searchQuery ? "search" : categorySlug}`);
       } finally {
         setLoading(false);
       }
     };
 
     loadProducts();
-  }, [categoryName, filters, searchQuery, sortOption]);
+  }, [categorySlug, filters, searchQuery, sortOption]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters, categoryName, searchQuery, sortOption]);
+  }, [filters, categorySlug, searchQuery, sortOption]);
 
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
@@ -174,45 +215,43 @@ const Category: React.FC = () => {
     setFilters(newFilters);
   };
 
-  const getCategoryDescription = (categoryName: string | undefined) => {
+  const getCategoryDescription = (slug: string | undefined) => {
     if (searchQuery) {
         return `${products.length} resultater for "${searchQuery}"`;
     }
-    switch (categoryName) {
+    switch (slug) {
       case "sneakers":
         return "Alt vores footwear - sneakers, dress sko, loafers og støvler er udviklet i et stilrent og klassisk design, hvilket gør at de passer til ethvert outfit. Komfort og kvalitet er noget vi ikke vil gå på kompromis med og derfor er alle produkter håndlavet i Portugal.";
       case "shirts":
         return "Vores skjorter er designet med fokus på kvalitet og pasform. Uanset om du er til et klassisk eller moderne look, har vi en skjorte til dig. Alle vores skjorter er lavet af de bedste materialer for at sikre komfort hele dagen.";
       default:
-        if (categoryName) {
-          return `Udforsk vores udvalg af ${categoryName} i høj kvalitet. Designet i Danmark og produceret i Europa.`;
+        if (slug) {
+          return `Udforsk vores udvalg af ${slug} i høj kvalitet. Designet i Danmark og produceret i Europa.`;
         }
         return "Udforsk vores store udvalg af produkter i høj kvalitet. Designet i Danmark og produceret i Europa.";
     }
   };
 
-  const categoryNameToDanish = (categoryName: string | undefined): string => {
+  const getCategoryName = (slug: string | undefined): string => {
     if (searchQuery) return "SØG";
     const translations: { [key: string]: string } = {
       sneakers: "Sneakers",
-      shirts: "Shirts",
-      hoodies: "Hoodies",
+      shirts: "Skjorter",
+      hoodies: "Hættetrøjer",
       jackets: "Jakker",
       pants: "Bukser",
       deals: "Tilbud",
     };
     return (
-      translations[categoryName?.toLowerCase() || ""]
-      || categoryName
+      translations[slug?.toLowerCase() || ""]
+      || slug
       || "Alle Produkter"
     );
   };
 
-  const capitalizedCategoryName = searchQuery
+  const categoryName = searchQuery
     ? "Søg"
-    : categoryName
-    ? categoryName.charAt(0).toUpperCase() + categoryName.slice(1)
-    : "Alle Produkter";
+    : getCategoryName(categorySlug);
 
   const gridClasses: { [key: string]: string } = {
     "grid-1": "grid-cols-1",
@@ -276,15 +315,15 @@ const Category: React.FC = () => {
           </Link>
           <span>/</span>
           <span className="text-[#1c1c1c] font-medium">
-            {categoryNameToDanish(categoryName).toUpperCase()}
+            {getCategoryName(categorySlug).toUpperCase()}
           </span>
         </nav>
 
         <h1 className="font-['EB_Garamond'] text-center mb-4 text-[clamp(2rem,5vw,2.625rem)]">
-          {capitalizedCategoryName}
+          {categoryName}
         </h1>
         <p className="text-center text-[#1c1c1c] mb-8 text-base max-w-4xl mx-auto">
-          {getCategoryDescription(categoryName)}
+          {getCategoryDescription(categorySlug)}
         </p>
       </div>
 
@@ -329,13 +368,13 @@ const Category: React.FC = () => {
                 <img
                   src={oneColumnIcon}
                   alt="1 column"
-                  className={`cursor-pointer w-5 h-5 ${viewMode !== "grid-1" ? "opacity-30" : ""}`}
+                  className={`cursor-pointer w-5 h-5 md:hidden ${viewMode !== "grid-1" ? "opacity-30" : ""}`}
                   onClick={() => setViewMode("grid-1")}
                 />
                 <img
                   src={twoColumnIcon}
                   alt="2 column"
-                  className={`cursor-pointer w-5 h-5 ${viewMode !== "grid-2" ? "opacity-30" : ""}`}
+                  className={`cursor-pointer w-5 h-5 md:hidden ${viewMode !== "grid-2" ? "opacity-30" : ""}`}
                   onClick={() => setViewMode("grid-2")}
                 />
                 <img
@@ -362,27 +401,29 @@ const Category: React.FC = () => {
 
       {/* Products Grid with aligned padding */}
       <div className="px-6 md:px-12 mx-auto">
-        {loading ? (
-          <div className="text-center py-20">Loading products...</div>
-        ) : error ? (
-          <div className="text-center text-red-500 py-20">{error}</div>
+        {error ? (
+          <div className="text-center text-red-500 py-20">Der opstod en fejl under indlæsning af produkter.</div>
         ) : (
           <>
             <div
               className={`grid gap-x-4 gap-y-12 md:gap-y-16 ${gridClasses[viewMode]}`}
             >
-              {currentProducts.map((product, index) => (
-                <ProductCard
-                  key={`${product.id}-${viewMode}`}
-                  product={product}
-                  onAuthRequired={handleAuthRequired}
-                  index={index}
-                />
-              ))}
+              {loading
+                ? Array.from({ length: productsPerPage }).map((_, index) => (
+                    <ProductCardSkeleton key={index} />
+                  ))
+                : currentProducts.map((product, index) => (
+                    <ProductCard
+                      key={`${product.id}-${viewMode}`}
+                      product={product}
+                      onAuthRequired={handleAuthRequired}
+                      index={index}
+                    />
+                  ))}
             </div>
 
             {/* Pagination */}
-            {totalPages > 1 && (
+            {!loading && totalPages > 1 && (
               <div className="flex justify-center items-center space-x-2 mt-16 mb-8">
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
@@ -444,7 +485,7 @@ const Category: React.FC = () => {
       {/* Responsive Category Info Section */}
       <section className="px-6 md:px-12 mt-20 bg-[#181c2e] text-white py-16 md:py-24">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 md:gap-16 lg:gap-24">
-          {getCategoryInfo(categoryName).map((element, index) => (
+          {getCategoryInfo(categorySlug).map((element, index) => (
             <div key={index} className="space-y-4">
               <h2 className="text-2xl md:text-3xl text-white font-['EB_Garamond'] leading-tight">
                 {element.title}

@@ -79,7 +79,7 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
 
   useEffect(() => {
     if (isRendered) {
-      const t = setTimeout(() => inputRef.current?.focus(), 0);
+      const t = setTimeout(() => inputRef.current?.focus(), 100);
       return () => clearTimeout(t);
     }
   }, [isRendered]);
@@ -120,13 +120,22 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
         }`}
         style={{ paddingTop: `${headerHeight}px` }}
       >
-        <div className="px-12 py-2 md:py-4">
+        <div className="px-6 md:px-12 py-2 md:py-4">
           <div className="flex items-center justify-center">
-            <Icon
-              src={loopSvg}
-              className="h-5 w-5 stroke-[#f1f0ee]"
-              strokeWidth={2}
-            />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="size-6 text-[#1c1c1c] mr-2"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+              />
+            </svg>
             <form onSubmit={handleSearchSubmit} className="w-full">
               <input
                 ref={inputRef}
@@ -134,7 +143,7 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
                 placeholder="Søg efter..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full p-3 bg-[#f2f1f0] font-[EB-Garamond] text-3xl rounded-md focus:outline-none focus:ring-2 focus:ring-[transparent]"
+                className="w-full py-2 md:py-3 bg-[#f2f1f0] font-sans text-lg md:text-3xl rounded-md focus:outline-none focus:ring-2 focus:ring-[transparent]"
               />
             </form>
             <button onClick={onClose} className="p-2">
@@ -144,16 +153,21 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
           {searchResults.length > 0 && (
             <>
               <div className="mt-8 mb-8">
-                <p className="font-[EB-Garamond] text-[#1c1c1c] text-md pb-2 border-b border-[#d4d2cf] w-full">
-                  Produkter
+                <p className="font-sans text-[#1c1c1c] text-xs pb-2 border-b border-[#d4d2cf] w-full uppercase tracking-widest">
+                  Produkter ({searchResults.length})
                 </p>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mb-4 overflow-y-auto">
+              <div className="flex md:grid md:grid-cols-5 gap-4 mb-4 overflow-x-auto md:overflow-visible pb-4 md:pb-0 snap-x md:snap-none">
                 {(showAllResults
                   ? searchResults
                   : searchResults.slice(0, 5)
                 ).map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <div
+                    key={product.id}
+                    className="min-w-[160px] md:min-w-0 snap-center md:snap-align-none"
+                  >
+                    <ProductCard product={product} />
+                  </div>
                 ))}
               </div>
               {!showAllResults && searchResults.length > 5 && (

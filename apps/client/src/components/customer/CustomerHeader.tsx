@@ -15,9 +15,9 @@ interface MenuItem {
 
 const mainMenuItems: MenuItem[] = [
   { name: "Sneakers", path: "/category/sneakers" },
-  { name: "Shirts", path: "/category/shirts" },
-  { name: "Hoodies", path: "/category/hoodies" },
-  { name: "Jackets", path: "/category/jackets" },
+  { name: "Skjorter", path: "/category/skjorter" },
+  { name: "Hættetrøjer", path: "/category/hættetrøjer" },
+  { name: "Jakker", path: "/category/jakker" },
 ];
 
 const staticMenuItems: MenuItem[] = [{ name: "Om os", path: "/about" }];

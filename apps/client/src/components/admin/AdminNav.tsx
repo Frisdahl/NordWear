@@ -33,8 +33,6 @@ const items = [
     activeSvg: productActiveSvg,
     activeStroke: 1.5,
     subItems: [
-      { label: "Kollektioner", path: "/admin/categories" },
-      { label: "Lager", path: "/admin/inventory" },
       { label: "Ordrer", path: "/admin/orders" },
       { label: "Gavekort", path: "/admin/giftcards" },
     ],
@@ -111,7 +109,9 @@ const AdminNav: React.FC = () => {
                           to={sub.path}
                           className={({ isActive }: { isActive: boolean }) =>
                             `flex items-center gap-2 pl-8 pr-2 py-2 rounded-lg transition-colors text-[clamp(11px,1.2vw,13px)] group relative ${
-                              isActive ? "bg-[#1a1a1a] text-[#f2f2f2]" : "text-[#303030] hover:bg-[#f2f2f2]"
+                              isActive
+                                ? "bg-[#1a1a1a] text-[#f2f2f2]"
+                                : "text-[#303030] hover:bg-[#f2f2f2]"
                             }`
                           }
                         >
@@ -127,7 +127,9 @@ const AdminNav: React.FC = () => {
                                 >
                                   <Icon
                                     src={subLinkIcon}
-                                    className={`h-5 w-5 ${isActive ? "text-[#f2f2f2]" : ""}`}
+                                    className={`h-5 w-5 ${
+                                      isActive ? "text-[#f2f2f2]" : ""
+                                    }`}
                                     strokeWidth={1.5}
                                   />
                                 </div>

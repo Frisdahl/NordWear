@@ -12,20 +12,20 @@ if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
 
 const SECRET = JWT_SECRET || 'dev-secret-key';
 
-export const login = async (email: string, password: string): Promise<{ token: string; user: { id: number; email: string; role: Role; name: string; } } | null> => {
+export const login = async (email: string, password: string): Promise<{ token: string; user: { id: number; email: string; role: Role; name: string; } }> => {
   const user = await prisma.user.findUnique({
     where: { email },
   });
 
   if (!user) {
-    return null; // User not found
+    throw new Error('USER_NOT_FOUND');
   }
 
   // Compare provided password with hashed password in DB
   const isPasswordValid = await bcrypt.compare(password, user.password);
 
   if (!isPasswordValid) {
-    return null; // Invalid credentials
+    throw new Error('INVALID_PASSWORD');
   }
 
   // Generate JWT
@@ -79,5 +79,19 @@ export const getUserById = async (id: number) => {
       name: true,
       role: true,
     },
+  });
+};
+
+export const getUserByEmail = async (email: string) => {
+  return prisma.user.findUnique({
+    where: { email },
+  });
+};
+
+export const updatePassword = async (userId: number, password: string) => {
+  const hashedPassword = await bcrypt.hash(password, 10);
+  return prisma.user.update({
+    where: { id: userId },
+    data: { password: hashedPassword },
   });
 };

@@ -15,10 +15,11 @@
     "test": "npm test --workspaces"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts"
   },
   "devDependencies": {
     "prisma": "^4.16.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.7.2",
     "vite": "^2.6.0"
   },

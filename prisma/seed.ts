@@ -6,20 +6,20 @@ const prisma = new PrismaClient();
 function generateProducts(categories: {id: number, name: string}[]) {
     const products = [];
     let productId = 1;
-    const adjectives = ['Basic', 'Classic', 'Urban', 'Nordic', 'Viking', 'Fjörd', 'Arctic', 'Asgardian'];
+    const adjectives = ['Basic', 'Klassisk', 'Urban', 'Nordisk', 'Viking', 'Fjord', 'Arktisk', 'Asgård'];
     const nouns: { [key: string]: string[] } = {
-        'Shirts': ['Tee', 'Shirt', 'Top', 'Polo'],
-        'Hoodies': ['Hoodie', 'Crewneck', 'Sweatshirt', 'Zip-up'],
-        'Jackets': ['Jacket', 'Parka', 'Windbreaker', 'Bomber'],
-        'Pants': ['Pants', 'Jeans', 'Chinos', 'Shorts'],
-        'Sneakers': ['Sneakers', 'Boots', 'Shoes', 'Loafers'],
-        'Deals': ['Deal Tee', 'Deal Hoodie', 'Deal Jacket', 'Deal Pants']
+        'Skjorter': ['T-shirt', 'Skjorte', 'Top', 'Polo'],
+        'Hættetrøjer': ['Hættetrøje', 'Crewneck', 'Sweatshirt', 'Zip-up'],
+        'Jakker': ['Jakke', 'Parka', 'Vindjakke', 'Bomber'],
+        'Bukser': ['Bukser', 'Jeans', 'Chinos', 'Shorts'],
+        'Sneakers': ['Sneakers', 'Støvler', 'Sko', 'Loafers'],
+        'Tilbud': ['Tilbud T-shirt', 'Tilbud Hættetrøje', 'Tilbud Jakke', 'Tilbud Bukser']
     };
 
     for (const category of categories) {
         for (let i = 0; i < 20; i++) {
             const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-            const nounList = nouns[category.name] || ['Product'];
+            const nounList = nouns[category.name] || ['Produkt'];
             const noun = nounList[Math.floor(Math.random() * nounList.length)];
             const name = `${adj} ${noun} #${i + 1}`;
             const price = Math.floor(Math.random() * 501) + 299;
@@ -75,12 +75,12 @@ async function main() {
 
   // 2. Insert Categories
   const categoriesToSeed = [
-      { id: 1, name: 'Shirts' },
-      { id: 2, name: 'Hoodies' },
-      { id: 3, name: 'Jackets' },
-      { id: 4, name: 'Pants' },
+      { id: 1, name: 'Skjorter' },
+      { id: 2, name: 'Hættetrøjer' },
+      { id: 3, name: 'Jakker' },
+      { id: 4, name: 'Bukser' },
       { id: 5, name: 'Sneakers' },
-      { id: 6, name: 'Deals' },
+      { id: 6, name: 'Tilbud' },
   ];
   await prisma.category.createMany({ data: categoriesToSeed, skipDuplicates: true });
   console.log('Categories seeded.');

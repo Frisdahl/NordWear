@@ -4,6 +4,7 @@ import {
   getProduct,
   createProduct,
   updateProduct,
+  updateProductsStatus,
   getCategories,
   getCategory,
   deleteProducts,
@@ -20,7 +21,7 @@ import {
   getShipmentRates,
 } from "../controllers/shipping.controller";
 import { uploadImage } from "../controllers/upload.controller";
-import { login, register, getMe } from "../controllers/auth.controller";
+import { login, register, getMe, forgotPassword, resetPassword } from "../controllers/auth.controller";
 import { logout } from "../controllers/logout.controller";
 
 import {
@@ -40,6 +41,8 @@ const router = Router();
 
 // Public routes
 router.post("/login", validate(loginSchema), login);
+router.post("/auth/forgot-password", forgotPassword);
+router.post("/auth/reset-password", resetPassword);
 router.post("/logout", logout);
 router.post("/register", validate(registerSchema), register);
 router.get("/auth/me", authenticate, getMe);
@@ -66,7 +69,9 @@ router.get("/customer/by-user/:userId", authenticate, getCustomerByUserId);
 router.post("/orders/create-free", authenticate, createFreeOrder);
 
 // Admin only routes
+router.get("/admin/products", authenticate, authorize(Role.ADMIN), getProducts);
 router.post("/products", authenticate, authorize(Role.ADMIN), validate(productSchema), createProduct);
+router.put("/products/bulk-status", authenticate, authorize(Role.ADMIN), updateProductsStatus);
 router.put("/products/:id", authenticate, authorize(Role.ADMIN), validate(productSchema.partial()), updateProduct);
 router.delete("/products", authenticate, authorize(Role.ADMIN), deleteProducts);
 router.post("/upload", authenticate, authorize(Role.ADMIN), uploadImage);

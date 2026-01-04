@@ -346,6 +346,17 @@ export const deleteProducts = async (ids: number[]) => {
   return result;
 };
 
+export const updateProductsStatus = async (ids: number[], status: 'ONLINE' | 'OFFLINE' | 'DRAFT') => {
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return { count: 0 };
+  }
+
+  return await prisma.product.updateMany({
+    where: { id: { in: ids } },
+    data: { status },
+  });
+};
+
 export const likeProduct = async (customerId: number, productId: number) => {
     return await prisma.customer_likes.create({
         data: {

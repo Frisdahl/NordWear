@@ -51,6 +51,7 @@ export interface Product {
   selectedSize?: string;
   selectedSizeId?: number;
   selectedColorId?: number;
+  quantity?: number;
 }
 
 export interface Category {

@@ -92,11 +92,11 @@ const AllProducts = () => {
     }
   };
 
-  const confirmStatusChange = async (
-    status: "ONLINE" | "OFFLINE" | "Kladde"
-  ) => {
-    try {
-      const res = await fetch("/api/products/bulk-status", {
+    const confirmStatusChange = async (status: "ONLINE" | "OFFLINE" | "DRAFT") => {
+
+      try {
+
+        const res = await fetch("/api/products/bulk-status", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

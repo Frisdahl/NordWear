@@ -184,7 +184,7 @@ const Analytics = () => {
                   axisLine={false}
                   tickLine={false}
                   tick={{ fontSize: 12, fill: "#9ca3af" }}
-                  tickFormatter={(value) => `${value} kr.`}
+                  tickFormatter={(value: number) => `${value} kr.`}
                 />
                 <Tooltip
                   contentStyle={{
@@ -194,7 +194,7 @@ const Analytics = () => {
                     boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                   }}
                   itemStyle={{ color: "#303030", fontWeight: "bold" }}
-                  formatter={(value: number) => [`${value} kr.`, "Salg"]}
+                  formatter={(value: any) => [`${value} kr.`, "Salg"]}
                 />
                 <Area
                   type="monotone"
@@ -238,7 +238,7 @@ const Analytics = () => {
                     borderRadius: "8px",
                     border: "1px solid #e0e0e0",
                   }}
-                  formatter={(value: number) => [`${value} kr.`, "Salg"]}
+                  formatter={(value: any) => [`${value} kr.`, "Salg"]}
                 />
                 <Bar
                   dataKey="value"

@@ -248,6 +248,7 @@ const createOrderInDB = async (
           discountAmount: discountAmount,
           giftCardCode: giftCardCode,
           order_item: {
+            create: cartItems.map((item: any) => {
               const pid = parseInt(item.id);
               const priceRaw = parseFloat(item.price);
               if (isNaN(pid)) {
@@ -265,6 +266,7 @@ const createOrderInDB = async (
                 sizeId: item.sizeId ? parseInt(item.sizeId) : null,
                 colorId: item.colorId ? parseInt(item.colorId) : null,
               };
+            }),
           },
         },
       });

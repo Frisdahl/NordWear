@@ -3,6 +3,11 @@ FROM node:20-alpine
 # Install OpenSSL for Prisma
 RUN apk add --no-cache openssl
 
+# Disable Prisma and NPM update checks to prevent build cache issues
+ENV PRISMA_SKIP_CHECKPOINT_CHECK=true
+ENV PRISMA_HIDE_UPDATE_MESSAGE=true
+ENV NPM_CONFIG_UPDATE_NOTIFIER=false
+
 WORKDIR /app
 
 # Copy package files for the server

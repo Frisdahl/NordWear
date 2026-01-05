@@ -11,7 +11,7 @@ import CategoryCard from "../../components/customer/CategoryCard";
 
 const categories = [
   {
-    name: "Jackets",
+    name: "Jakker",
     imageUrl:
       "https://images.unsplash.com/photo-1562009578-0eb8ea8a26ce?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
@@ -22,15 +22,15 @@ const categories = [
   },
 
   {
-    name: "Hoodies",
+    name: "Hættetrøjer",
     imageUrl:
       "https://images.unsplash.com/photo-1523124006244-a37848c6002c?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
 
   {
-    name: "Pants",
+    name: "Skjorter",
     imageUrl:
-      "https://images.unsplash.com/photo-1730463527791-772d413cad69?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://plus.unsplash.com/premium_photo-1661627681947-4431c8c97659?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
 ];
 
@@ -49,7 +49,9 @@ const Home: React.FC = () => {
   const [nextBtnEnabled, setNextBtnEnabled] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [emailInput, setEmailInput] = useState("");
-  const [subscribeStatus, setSubscribeStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [subscribeStatus, setSubscribeStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
 
   useEffect(() => {
     const popupShown = sessionStorage.getItem("popupShown");
@@ -67,14 +69,19 @@ const Home: React.FC = () => {
     if (!emailInput || !emailInput.includes("@")) return;
     setSubscribeStatus("loading");
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/newsletter/subscribe`, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "X-Requested-With": "XMLHttpRequest"
-        },
-        body: JSON.stringify({ email: emailInput }),
-      });
+      const res = await fetch(
+        `${
+          import.meta.env.VITE_API_URL || "http://localhost:5000/api"
+        }/newsletter/subscribe`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+          },
+          body: JSON.stringify({ email: emailInput }),
+        }
+      );
       if (res.ok) {
         setSubscribeStatus("success");
         setTimeout(() => setShowPopup(false), 3000);
@@ -134,7 +141,7 @@ const Home: React.FC = () => {
       {notification.message && (
         <Notification
           show={!!notification.message}
-          heading={notification.type === 'error' ? 'Fejl' : 'Success'}
+          heading={notification.type === "error" ? "Fejl" : "Success"}
           subtext={notification.message}
           type={notification.type as "success" | "error"}
           onClose={() => setNotification({ message: "", type: "" })}
@@ -251,8 +258,9 @@ const Home: React.FC = () => {
       </div>
 
       <h1 className="text-2xl md:text-[2.625rem] text-center mt-14 px-6 font-['EB_Garamond'] mb-14 leading-tight">
-        Hos NordWear tror vi på forfinelse frem for forandring - <br className="hidden md:block"></br>{" "}
-        tidløst design, kvalitet og bæredygtighed.
+        Hos NordWear tror vi på forfinelse frem for forandring -{" "}
+        <br className="hidden md:block"></br> tidløst design, kvalitet og
+        bæredygtighed.
       </h1>
 
       {/* Overproduction Section */}

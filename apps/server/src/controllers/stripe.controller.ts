@@ -227,9 +227,17 @@ const createOrderInDB = async (
       }
 
       // Create the order
+      let parsedCustomerId: number | null = null;
+      if (customerId && customerId !== "null" && customerId !== "undefined" && customerId !== "") {
+        const parsed = parseInt(customerId);
+        if (!isNaN(parsed)) {
+          parsedCustomerId = parsed;
+        }
+      }
+
       const order = await tx.order.create({
         data: {
-          customerId: (customerId && customerId !== "null" && customerId !== "") ? parseInt(customerId) : null,
+          customerId: parsedCustomerId,
           amount: session.amount_total || 0,
           currency: session.currency || "dkk",
           status: "COMPLETED",
@@ -242,6 +250,7 @@ const createOrderInDB = async (
             create: cartItems.map((item: any) => {
               const pid = parseInt(item.id);
               if (isNaN(pid)) {
+                console.error(`Invalid Product ID found in cart item:`, item);
                 throw new Error(`Invalid Product ID: ${item.id}`);
               }
               return {

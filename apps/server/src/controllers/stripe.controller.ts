@@ -141,31 +141,43 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
 // New webhook handler
 export const stripeWebhookHandler = async (req: Request, res: Response) => {
   const sig = req.headers["stripe-signature"];
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  console.log(`[Webhook] Received request. Signature present: ${!!sig}, Secret set: ${!!webhookSecret}`);
+  
+  if (!sig || !webhookSecret) {
+    console.error("[Webhook] Missing signature or secret. Check environment variables.");
+    return res.status(400).send("Webhook Error: Missing signature or secret");
+  }
+
   let event: Stripe.Event;
 
   try {
+    // req.body must be the raw buffer from express.raw()
     event = stripe.webhooks.constructEvent(
       req.body,
       sig as string,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      webhookSecret
     );
   } catch (err: any) {
-    console.error(`Webhook signature verification failed: ${err.message}`);
+    console.error(`[Webhook] Signature verification failed: ${err.message}`);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
+
+  console.log(`[Webhook] Event verified: ${event.type} [${event.id}]`);
 
   // Handle the event
   try {
     switch (event.type) {
       case "checkout.session.completed":
         const session = event.data.object as Stripe.Checkout.Session;
-        console.log(`Processing checkout.session.completed for session: ${session.id}`);
+        console.log(`[Webhook] Processing session.completed: ${session.id}`);
         
         const customerId = session.metadata?.customerId;
         const cartItemsRaw = session.metadata?.cart;
         
         if (!cartItemsRaw) {
-          console.error(`No cart items found in metadata for session ${session.id}`);
+          console.error(`[Webhook] No cart items in metadata for session ${session.id}`);
           break;
         }
 
@@ -173,28 +185,27 @@ export const stripeWebhookHandler = async (req: Request, res: Response) => {
         try {
           cartItems = JSON.parse(cartItemsRaw);
         } catch (e) {
-          console.error(`Failed to parse cart metadata for session ${session.id}: ${cartItemsRaw}`);
+          console.error(`[Webhook] Failed to parse cart JSON: ${cartItemsRaw}`);
           break;
         }
 
         if (Array.isArray(cartItems) && cartItems.length > 0) {
-          // IMPORTANT: Use await here to ensure DB transaction finishes before responding
+          console.log(`[Webhook] Calling createOrderInDB for session ${session.id}`);
           await createOrderInDB(session, customerId, cartItems);
         } else {
-          console.warn(`Cart items empty or invalid for session ${session.id}`);
+          console.warn(`[Webhook] Cart items empty or invalid for session ${session.id}`);
         }
         break;
 
       case "payment_intent.succeeded":
-        console.log(`PaymentIntent succeeded: ${event.data.object.id}`);
+        console.log(`[Webhook] PaymentIntent succeeded: ${event.data.object.id}`);
         break;
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        console.log(`[Webhook] Unhandled event type: ${event.type}`);
     }
   } catch (error: any) {
-    console.error(`Error handling webhook event ${event.type}:`, error);
-    // Return 500 so Stripe retries if it's a transient error
+    console.error(`[Webhook] Error handling event ${event.type}:`, error);
     return res.status(500).json({ error: error.message });
   }
 

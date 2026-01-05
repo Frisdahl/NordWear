@@ -56,6 +56,11 @@ export const fetchProduct = async (id: number | string) => {
   return response.data;
 };
 
+export const fetchAdminProduct = async (id: number | string) => {
+  const response = await apiClient.get(`/admin/products/${id}`);
+  return response.data;
+};
+
 export const addProduct = async (productData: Partial<Product>) => {
   const response = await apiClient.post("/products", productData);
   return response.data;

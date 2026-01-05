@@ -93,7 +93,7 @@ export const getProducts = async (
     take: limit, // Apply the limit here
   });
 
-  return products.map((product) => {
+  const mappedProducts = products.map((product) => {
     const total_stock = product.product_quantity.reduce(
       (acc, item) => acc + item.quantity,
       0
@@ -131,6 +131,13 @@ export const getProducts = async (
       sizes: sizes,
     };
   });
+
+  // Filter out out-of-stock products for customer views (ONLINE status)
+  if (status === 'ONLINE') {
+    return mappedProducts.filter(p => p.total_stock > 0);
+  }
+
+  return mappedProducts;
 };
 
 export const getProduct = async (id: number) => {

@@ -70,6 +70,7 @@ router.post("/orders/create-free", authenticate, createFreeOrder);
 
 // Admin only routes
 router.get("/admin/products", authenticate, authorize(Role.ADMIN), getProducts);
+router.get("/admin/products/:id", authenticate, authorize(Role.ADMIN), getProduct);
 router.post("/products", authenticate, authorize(Role.ADMIN), validate(productSchema), createProduct);
 router.put("/products/bulk-status", authenticate, authorize(Role.ADMIN), updateProductsStatus);
 router.put("/products/:id", authenticate, authorize(Role.ADMIN), validate(productSchema.partial()), updateProduct);

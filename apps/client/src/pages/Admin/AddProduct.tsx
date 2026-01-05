@@ -11,7 +11,7 @@ import Notification from "@/components/Notification";
 import {
   addProduct,
   uploadImage,
-  fetchProduct,
+  fetchAdminProduct,
   updateProduct,
 } from "../../services/api";
 
@@ -147,7 +147,7 @@ const AddProduct = () => {
     if (id) {
       const loadProductData = async () => {
         try {
-          const product = await fetchProduct(id);
+          const product = await fetchAdminProduct(id);
           if (product) {
             // Populate basic fields
             setName(product.name || "");
@@ -715,10 +715,12 @@ const AddProduct = () => {
                     backgroundSize: "1.5em 1.5em",
                   }}
                 >
-                  <option value="1">T-Shirts</option>
-                  <option value="2">Hoodies</option>
-                  <option value="3">Jackets</option>
-                  <option value="4">Pants</option>
+                  <option value="1">Skjorter</option>
+                  <option value="2">Hættetrøjer</option>
+                  <option value="3">Jakker</option>
+                  <option value="4">Bukser</option>
+                  <option value="5">Sneakers</option>
+                  <option value="6">Tilbud</option>
                 </select>
               </div>
             </div>

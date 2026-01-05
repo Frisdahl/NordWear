@@ -202,9 +202,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
             </button>
 
             {/* Quick Add Container - Hidden on mobile */}
-            <div className="absolute bottom-0 left-0 right-0 h-1/5 bg-white/60 backdrop-blur-lg hidden md:flex flex-col justify-center items-center translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-in-out p-2 z-20">
-                <span className="text-xs font-semibold uppercase tracking-wider mb-1 text-[#1c1c1c]">Tilføj produkt</span>
-                <div className="flex gap-2 overflow-x-auto w-full justify-center scrollbar-hide">
+            <div className="absolute bottom-0 left-0 right-0 h-auto max-h-[150px] bg-white/40 backdrop-blur-2xl border-t border-white/20 hidden md:flex flex-col justify-center items-center translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-in-out py-3 px-2 z-20">
+                <span className="text-xs font-semibold uppercase tracking-wider mb-2 text-[#1c1c1c]">Tilføj produkt</span>
+                <div className="flex gap-2 overflow-x-auto w-full justify-center scrollbar-hide pb-1">
                     {sortedSizes && sortedSizes.length > 0 ? (
                         sortedSizes.map((size) => (
                             <button

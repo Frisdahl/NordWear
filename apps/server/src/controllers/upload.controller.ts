@@ -18,8 +18,12 @@ export const uploadImage = async (req: Request, res: Response): Promise<void> =>
     }
 
     // Upload the image to Cloudinary
+    const timestamp = Math.round(new Date().getTime() / 1000);
+    console.log(`[Upload] Starting upload. Timestamp: ${timestamp}`);
+
     const result = await cloudinary.uploader.upload(image, {
       folder: "nordwear-products", // Optional: organize uploads in a specific folder
+      timestamp: timestamp,
     });
 
     res.status(200).json({ url: result.secure_url });

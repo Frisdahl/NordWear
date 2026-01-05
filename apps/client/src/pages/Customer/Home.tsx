@@ -142,7 +142,7 @@ const Home: React.FC = () => {
       )}
 
       {/* Hero Section */}
-      <section className="h-[100svh] max-h-[75vh] md:max-h-[85vh] bg-gray-800 flex items-end text-white relative -mt-24">
+      <section className="h-[80svh] md:h-[90svh] bg-gray-800 flex items-end text-white relative -mt-24">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{

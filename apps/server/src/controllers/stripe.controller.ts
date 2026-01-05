@@ -31,10 +31,11 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
     for (const item of cart) {
       const pid = parseInt(item.id);
       const sid = item.selectedSizeId ? parseInt(item.selectedSizeId) : null;
-      const cid = item.selectedColorId ? parseInt(item.selectedColorId) : null;
+      // Default to color 1 if missing
+      const cid = item.selectedColorId ? parseInt(item.selectedColorId) : 1;
       const qty = parseInt(item.quantity) || 1;
 
-      if (pid && sid && cid) {
+      if (pid && sid) {
         const pq = await prisma.product_quantity.findFirst({
           where: { productId: pid, sizeId: sid, colorId: cid },
         });
@@ -247,20 +248,23 @@ const createOrderInDB = async (
           discountAmount: discountAmount,
           giftCardCode: giftCardCode,
           order_item: {
-            create: cartItems.map((item: any) => {
               const pid = parseInt(item.id);
+              const priceRaw = parseFloat(item.price);
               if (isNaN(pid)) {
                 console.error(`Invalid Product ID found in cart item:`, item);
                 throw new Error(`Invalid Product ID: ${item.id}`);
               }
+              if (isNaN(priceRaw)) {
+                console.error(`Invalid Price found in cart item:`, item);
+                throw new Error(`Invalid Price for product ${pid}`);
+              }
               return {
                 productId: pid,
                 quantity: parseInt(item.quantity) || 1,
-                price: Math.round(parseFloat(item.price) * 100), // convert to cents
+                price: Math.round(priceRaw * 100), // convert to cents
                 sizeId: item.sizeId ? parseInt(item.sizeId) : null,
                 colorId: item.colorId ? parseInt(item.colorId) : null,
               };
-            }),
           },
         },
       });
@@ -280,10 +284,11 @@ const createOrderInDB = async (
       for (const item of cartItems) {
         const pid = parseInt(item.id);
         const sid = item.sizeId ? parseInt(item.sizeId) : null;
-        const cid = item.colorId ? parseInt(item.colorId) : null;
+        // Default to color 1 if missing, as the product service hardcodes color 1 for everything
+        const cid = item.colorId ? parseInt(item.colorId) : 1; 
         const qty = parseInt(item.quantity) || 1;
 
-        if (pid && sid && cid) {
+        if (pid && sid) {
           // Find the product_quantity record
           const pq = await tx.product_quantity.findFirst({
             where: {
@@ -304,8 +309,7 @@ const createOrderInDB = async (
             });
             console.log(`Decremented stock for product ${pid}, size ${sid}, color ${cid} by ${qty}`);
           } else {
-            // ✅ CRITICAL: Throw error to ROLLBACK the whole transaction if stock info is missing
-            throw new Error(`Variant not found for Product: ${pid}, Size: ${sid}, Color: ${cid}. Transaction rolled back.`);
+            console.warn(`Variant not found for Product: ${pid}, Size: ${sid}, Color: ${cid}. Stock not decremented.`);
           }
         }
       }

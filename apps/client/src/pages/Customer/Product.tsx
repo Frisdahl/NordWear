@@ -145,10 +145,13 @@ const Product: React.FC = () => {
     if (!product || !product.product_quantity) return [];
     const sizeMap = new Map<number, string>();
     product.product_quantity.forEach((pq) => {
+      // Only show sizes that are available in the selected color
+      if (selectedColor && pq.color?.name !== selectedColor) return;
+
       if (pq.size) sizeMap.set(pq.size.id, pq.size.name);
     });
     return Array.from(sizeMap.entries()).map(([id, name]) => ({ id, name }));
-  }, [product]);
+  }, [product, selectedColor]);
 
   useEffect(() => {
     if (availableColors.length > 0 && !selectedColor) {

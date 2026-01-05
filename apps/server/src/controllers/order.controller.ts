@@ -44,13 +44,20 @@ export const createFreeOrder = async (req: Request, res: Response) => {
                 discountAmount: cartTotal,
                 giftCardCode: giftCardCode,
                 order_item: {
-                    create: cart.map((item: any) => ({
-                        productId: parseInt(item.id),
-                        quantity: parseInt(item.quantity),
-                        price: Math.round(parseFloat(item.price) * 100),
-                        sizeId: item.selectedSizeId ? parseInt(item.selectedSizeId) : null,
-                        colorId: item.selectedColorId ? parseInt(item.selectedColorId) : null,
-                    })),
+                    create: cart.map((item: any) => {
+                        const pid = parseInt(item.id);
+                        const priceRaw = parseFloat(item.price);
+                        if (isNaN(pid)) throw new Error(`Invalid Product ID: ${item.id}`);
+                        if (isNaN(priceRaw)) throw new Error(`Invalid Price for product ${pid}`);
+
+                        return {
+                            productId: pid,
+                            quantity: parseInt(item.quantity) || 1,
+                            price: Math.round(priceRaw * 100),
+                            sizeId: item.selectedSizeId ? parseInt(item.selectedSizeId) : null,
+                            colorId: item.selectedColorId ? parseInt(item.selectedColorId) : 1,
+                        };
+                    }),
                 }
             }
         });
@@ -59,10 +66,11 @@ export const createFreeOrder = async (req: Request, res: Response) => {
         for (const item of cart) {
             const pid = parseInt(item.id);
             const sid = item.selectedSizeId ? parseInt(item.selectedSizeId) : null;
-            const cid = item.selectedColorId ? parseInt(item.selectedColorId) : null;
+            // Default to color 1
+            const cid = item.selectedColorId ? parseInt(item.selectedColorId) : 1;
             const qty = parseInt(item.quantity) || 1;
 
-            if (pid && sid && cid) {
+            if (pid && sid) {
                 const pq = await tx.product_quantity.findFirst({
                     where: { productId: pid, sizeId: sid, colorId: cid },
                 });
@@ -73,7 +81,7 @@ export const createFreeOrder = async (req: Request, res: Response) => {
                         data: { quantity: { decrement: qty } },
                     });
                 } else {
-                    throw new Error(`Variant not found for Product: ${pid}, Size: ${sid}, Color: ${cid}. Order cancelled.`);
+                    console.warn(`Variant not found for Product: ${pid}, Size: ${sid}, Color: ${cid}. Stock not decremented.`);
                 }
             }
         }

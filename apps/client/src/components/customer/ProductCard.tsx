@@ -137,10 +137,15 @@ const ProductCard: React.FC<ProductCardProps> = ({
     e.preventDefault();
     e.stopPropagation();
     
+    // Find a valid color for this product from product_quantity
+    const variant = product.product_quantity?.find(pq => pq.sizeId === sizeId);
+    const colorId = variant?.colorId || (product.product_quantity?.[0]?.colorId) || 1;
+
     addToCart({
         ...product,
         selectedSizeId: sizeId,
         selectedSize: sizeName,
+        selectedColorId: colorId,
         quantity: 1
     });
     

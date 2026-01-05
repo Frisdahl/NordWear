@@ -142,7 +142,7 @@ const Home: React.FC = () => {
       )}
 
       {/* Hero Section */}
-      <section className="h-[80svh] md:h-[90svh] bg-gray-800 flex items-end text-white relative -mt-24">
+      <section className="h-[600px] md:h-[90svh] bg-gray-800 flex items-end text-white relative -mt-24">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
@@ -224,7 +224,7 @@ const Home: React.FC = () => {
       {/* Design Showcase 1 */}
       <div className="relative border-y border-gray-300">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-0 items-center">
-          <div className="h-72 md:h-[100svh] overflow-hidden">
+          <div className="h-[600px] md:h-[900px] overflow-hidden">
             <img
               src="https://images.unsplash.com/photo-1603787081207-362bcef7c144?q=80&w=1965&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
               alt="Design"
@@ -258,7 +258,7 @@ const Home: React.FC = () => {
       {/* Overproduction Section */}
       <div className="border-y border-gray-300">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-14 items-center">
-          <div className="h-72 md:h-[100svh] overflow-hidden">
+          <div className="h-[600px] md:h-[900px] overflow-hidden">
             <img
               src="https://images.unsplash.com/photo-1556906781-9a412961c28c?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
               alt="Design"

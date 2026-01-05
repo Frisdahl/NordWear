@@ -14,7 +14,7 @@ WORKDIR /app
 COPY apps/server/package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm install && rm -rf /root/.cache
 
 # Copy prisma schema from root
 COPY prisma ./prisma
@@ -23,7 +23,7 @@ COPY prisma ./prisma
 COPY apps/server ./
 
 # Generate Prisma client
-RUN npx prisma generate
+RUN npx prisma generate && rm -rf /root/.cache
 
 # Build the server
 RUN npm run build

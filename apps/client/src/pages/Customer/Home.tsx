@@ -96,9 +96,22 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     const loadProducts = async () => {
+      // 1. Check sessionStorage first
+      const cachedProducts = sessionStorage.getItem("homepageProducts");
+      if (cachedProducts) {
+        setProducts(JSON.parse(cachedProducts));
+        setLoading(false);
+        return; // Exit if we found cached data
+      }
+
+      // 2. If no cache, fetch from API
       try {
         const fetchedProducts = await fetchProducts(undefined, undefined, 12);
-        setProducts(Array.isArray(fetchedProducts) ? fetchedProducts : []);
+        if (Array.isArray(fetchedProducts)) {
+            setProducts(fetchedProducts);
+            // 3. Save to sessionStorage for next time
+            sessionStorage.setItem("homepageProducts", JSON.stringify(fetchedProducts));
+        }
       } catch (err) {
         setError("Failed to load products");
       } finally {

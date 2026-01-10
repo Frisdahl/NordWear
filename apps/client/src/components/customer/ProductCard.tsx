@@ -12,6 +12,8 @@ import {
   getCustomerByUserId,
 } from "../../services/api";
 import { useSpring, animated } from "react-spring";
+import Notification from "../Notification";
+import { formatPrice } from "../../utils/formatPrice";
 
 interface ProductCardProps {
   product: Product;
@@ -221,27 +223,23 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </Link>
 
         <div className="relative pt-3 text-center h-28 flex flex-col justify-center">
-          <Link to={`/product/${id}`}>
-            <h3 className="text-[14px] md:text-[1rem] text-[#1c1c1c] truncate">
-              {name}
-            </h3>
-          </Link>
-
-          <div className="mt-1.5 flex items-center justify-center">
-            <p className="tracking-wide text-[1rem] text-[#1c1c1ca6]">
-              {offer_price ? (
-                <span className="flex items-center space-x-2">
-                  <span>{offer_price} kr.</span>
-                  <span className="line-through text-[#1c1c1ca6]">
-                    {price} kr.
-                  </span>
-                </span>
-              ) : (
-                `${price} kr.`
-              )}
-            </p>
-          </div>
-        </div>
+                                  <Link to={`/product/${id}`} className="w-fit mx-auto">
+                                      <h3 className="text-[14px] md:text-[1rem] text-[#1c1c1c] truncate">{name}</h3>
+                                  </Link>
+                                  <Link to={`/product/${id}`} className="w-fit mx-auto mt-1.5">
+                                    <p className="tracking-wide text-[1rem] text-[#1c1c1ca6]">
+                                      {offer_price ? (
+                                        <span className="flex items-center space-x-2">
+                                          <span>{formatPrice(offer_price)}</span>
+                                          <span className="line-through text-[#1c1c1ca6]">
+                                            {formatPrice(price)}
+                                          </span>
+                                        </span>
+                                      ) : (
+                                        `${formatPrice(price)}`
+                                      )}
+                                    </p>
+                                  </Link>        </div>
       </div>
     </animated.div>
   );

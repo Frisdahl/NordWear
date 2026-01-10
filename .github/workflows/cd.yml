@@ -17,9 +17,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # This is a generic step. Most services (DigitalOcean, Railway, Render)
-      # have a "Deploy Hook" or a specific Action. 
-      # Below is the DigitalOcean example:
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Prisma Migrate
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:

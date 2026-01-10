@@ -156,7 +156,7 @@ const Home: React.FC = () => {
           <div className="text-center mt-8 md:mt-12">
             <Link
               to="/category"
-              className="bg-[#181c2e] text-white py-3 font-semibold px-8 transition-transform transform hover:scale-105"
+              className="bg-[#181c2e] text-white rounded-full py-3 font-semibold px-8 transition-transform transform hover:bg-white hover:text-[#1c1c1c] hover:scale-105"
             >
               Se alle produkter
             </Link>
@@ -186,7 +186,7 @@ const Home: React.FC = () => {
           <div className="text-center mt-8 md:mt-12">
             <Link
               to="/category"
-              className="bg-[#181c2e] text-white py-3 font-semibold px-8 transition-transform transform hover:scale-105"
+              className="bg-[#181c2e] rounded-full text-white py-3 font-semibold px-8 border border-[#1c1c1c] transition-colors transition-transform duration-500 ease-out transform hover:bg-transparent hover:text-[#1c1c1c] hover:scale-105"
             >
               Se alle
             </Link>

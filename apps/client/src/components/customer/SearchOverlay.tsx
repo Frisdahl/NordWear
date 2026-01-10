@@ -171,6 +171,7 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
                   <div
                     key={product.id}
                     className="min-w-[160px] md:min-w-0 snap-center md:snap-align-none"
+                    onClick={onClose}
                   >
                     <ProductCard product={product} onNotify={onNotify} />
                   </div>

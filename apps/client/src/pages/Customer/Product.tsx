@@ -480,7 +480,7 @@ const Product: React.FC = () => {
           <div className="text-center mt-12">
             <Link
               to={`/category/${categoryName.toLowerCase()}`}
-              className="bg-[#1c1c1c] text-white px-8 py-3 font-semibold rounded-sm hover:bg-opacity-90 transition-all"
+              className="bg-[#1c1c1c] border border-[#1c1c1c] rounded-full text-white px-8 py-3 font-semibold hover:bg-transparent hover:text-[#1c1c1c] transition-all"
             >
               Se alle {categoryName.toLowerCase()}
             </Link>

@@ -141,7 +141,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       selectedSizeId: sizeId,
       selectedSize: sizeName,
       selectedColorId: colorId,
-      quantity: 1
+      quantity: 1,
     });
 
     onNotify({
@@ -162,10 +162,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   });
 
   return (
-    <animated.div
-      style={{ ...style, ...animation }}
-      className="h-full w-full"
-    >
+    <animated.div style={{ ...style, ...animation }} className="h-full w-full">
       <div
         className={`flex flex-col h-full overflow-hidden w-full group relative ${className}`}
       >
@@ -205,25 +202,20 @@ const ProductCard: React.FC<ProductCardProps> = ({
             )}
           </button>
 
-          <div className="absolute bottom-0 left-0 right-0 h-auto max-h-[150px] bg-white/40 backdrop-blur-2xl border-t border-white/20 hidden md:flex flex-col justify-center items-center translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-in-out py-3 px-2 z-20">
-            <span className="text-xs font-semibold uppercase tracking-wider mb-2 text-[#1c1c1c]">
-              Tilføj produkt
-            </span>
+          <div className="absolute rounded-full bottom-2 left-1/2 -translate-x-1/2 py-2 px-3 bg-white hidden md:flex flex-col justify-center items-center translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-in-out z-20 rounded shadow-sm">
             <div className="flex gap-2 overflow-x-auto w-full justify-center scrollbar-hide pb-1">
               {sortedSizes && sortedSizes.length > 0 ? (
                 sortedSizes.map((size) => (
                   <button
                     key={size.id}
                     onClick={(e) => handleAddToCart(e, size.id, size.name)}
-                    className="min-w-[24px] h-6 flex items-center justify-center border border-[#1c1c1c] text-[10px] font-medium text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-white transition-colors rounded-sm px-1"
+                    className="h-6 w-6 flex items-center justify-center text-[10px] font-medium text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-white transition-colors rounded-full"
                   >
                     {size.name}
                   </button>
                 ))
               ) : (
-                <span className="text-[10px] text-gray-500">
-                  Se varianter
-                </span>
+                <span className="text-[10px] text-gray-500">Se varianter</span>
               )}
             </div>
           </div>

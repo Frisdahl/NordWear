@@ -37,15 +37,13 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
   useEffect(() => {
     if (isOpen) {
       setIsRendered(true);
-      const timer = setTimeout(() => {
-        setIsAnimating(true);
-        // Add focus after animation starts
-        setTimeout(() => inputRef.current?.focus(), 150); // A slightly longer delay for focus
-      }, 10); // Small delay to ensure the transition is applied
-      return () => clearTimeout(timer);
+      setIsAnimating(true);
+      // Focus immediately. The timeout is removed to comply with mobile browser restrictions.
+      inputRef.current?.focus();
     } else {
       setIsAnimating(false);
-      const timer = setTimeout(() => setIsRendered(false), 300); // Match duration of the animation
+      // Keep the timer for the closing animation to complete before un-rendering
+      const timer = setTimeout(() => setIsRendered(false), 300); 
       return () => clearTimeout(timer);
     }
   }, [isOpen]);

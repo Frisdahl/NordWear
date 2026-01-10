@@ -30,5 +30,8 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
-      - name: Trigger DigitalOcean Deploy Hook
-        run: curl -X POST "${{ secrets.DO_API_TOKEN_DEPLOY }}"
+      - name: Trigger DigitalOcean Deployment
+        run: |
+          curl -X POST "https://api.digitalocean.com/v2/apps/${{ secrets.DO_APP_ID }}/deployments" \
+            -H "Authorization: Bearer ${{ secrets.DO_API_TOKEN_DEPLOY }}" \
+            -H "Content-Type: application/json"

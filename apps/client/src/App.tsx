@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useState } from "react";
+import React, { Suspense, lazy, useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -70,6 +70,19 @@ const App: React.FC = () => {
     sessionStorage.setItem("loaderShown", "true");
     setShowLoader(false);
   };
+
+  // Effect to prevent body scrolling when loader is active
+  useEffect(() => {
+    if (showLoader) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = ""; // Reset to default
+    }
+    // Cleanup function to ensure overflow is reset if component unmounts unexpectedly
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showLoader]);
 
   return (
     <Router>

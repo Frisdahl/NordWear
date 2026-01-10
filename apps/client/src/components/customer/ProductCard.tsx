@@ -163,12 +163,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   return (
     <animated.div style={{ ...style, ...animation }} className="h-full w-full">
-      <div
-        className={`flex flex-col h-full overflow-hidden w-full group relative ${className}`}
-      >
-        <Link
+              <div
+                className={`flex flex-col h-full overflow-hidden w-full relative ${className}`}
+              >        <Link
           to={`/product/${id}`}
-          className="block relative w-full aspect-square overflow-hidden flex-shrink-0"
+          className="block relative w-full aspect-square overflow-hidden flex-shrink-0 group"
         >
           <img
             src={

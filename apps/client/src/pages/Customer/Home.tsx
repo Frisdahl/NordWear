@@ -146,7 +146,7 @@ const Home: React.FC = () => {
           }}
         ></div>
         <div className="text-center z-10 px-6 pb-12 md:pb-16 w-full">
-          <h1 className="text-3xl md:text-5xl font-normal font-['EB-Garamond'] tracking-tighter mb-4">
+          <h1 className="text-3xl md:text-5xl text-[#f2f1f0] font-normal font-['EB-Garamond'] tracking-tighter mb-4">
             Tidløst design. Skabt til at holde.
           </h1>
           <p className="text-base md:text-xl text-gray-200 font-['figtree'] mb-8 max-w-lg mx-auto">
@@ -156,7 +156,7 @@ const Home: React.FC = () => {
           <div className="text-center mt-8 md:mt-12">
             <Link
               to="/category"
-              className="bg-[#181c2e] text-white rounded-full py-3 font-semibold px-8 transition-transform transform hover:bg-white hover:text-[#1c1c1c] hover:scale-105"
+              className="bg-[#181c2e] text-white rounded-full py-3 font-semibold px-8 transition-transform transform hover:bg-[#f2f1f0] hover:text-[#1c1c1c] hover:scale-105"
             >
               Se alle produkter
             </Link>

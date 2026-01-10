@@ -11,12 +11,18 @@ interface SearchOverlayProps {
   isOpen: boolean;
   onClose: () => void;
   headerHeight: number;
+  onNotify: (notification: {
+    heading: string;
+    subtext: string;
+    type: "success" | "error";
+  }) => void;
 }
 
 const SearchOverlay: React.FC<SearchOverlayProps> = ({
   isOpen,
   onClose,
   headerHeight,
+  onNotify,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Product[]>([]);
@@ -166,7 +172,7 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
                     key={product.id}
                     className="min-w-[160px] md:min-w-0 snap-center md:snap-align-none"
                   >
-                    <ProductCard product={product} />
+                    <ProductCard product={product} onNotify={onNotify} />
                   </div>
                 ))}
               </div>

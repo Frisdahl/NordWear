@@ -36,12 +36,17 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
     ...staticMenuItems,
   ]);
   const [notification, setNotification] = useState<{
-    message: string;
-    type: "success" | "error";
-  } | null>(null);
+    heading: string;
+    subtext: string;
+    type: "success" | "error" | "";
+  }>({ heading: "", subtext: "", type: "" });
   const { isAuthenticated } = useAuth();
   const { cartCount } = useCart();
   const [headerHeight, setHeaderHeight] = useState(0);
+
+  const handleNotification = (data: { heading: string; subtext: string; type: "success" | "error" }) => {
+    setNotification({ heading: data.heading, subtext: data.subtext, type: data.type as "success" | "error" });
+  };
 
   const handleSearchClick = () => {
     setIsSearchOverlayOpen(!isSearchOverlayOpen);
@@ -92,6 +97,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
         isOpen={isSearchOverlayOpen}
         onClose={() => setIsSearchOverlayOpen(false)}
         headerHeight={headerHeight}
+        onNotify={handleNotification}
       />
 
       <div
@@ -266,13 +272,13 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
         </div>
       </div>
 
-      {notification && (
+      {notification.subtext && (
         <Notification
-          heading={notification.type === "success" ? "Success" : "Fejl"}
-          subtext={notification.message}
-          type={notification.type}
+          heading={notification.heading}
+          subtext={notification.subtext}
+          type={notification.type as "success" | "error"}
           show={true}
-          onClose={() => setNotification(null)}
+          onClose={() => setNotification({ heading: "", subtext: "", type: "" })}
         />
       )}
     </>

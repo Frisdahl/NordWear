@@ -31,4 +31,4 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Trigger DigitalOcean Deploy Hook
-        run: curl -X POST ${{ secrets.DO_API_TOKEN_DEPLOY }}
+        run: curl -X POST "${{ secrets.DO_API_TOKEN_DEPLOY }}"

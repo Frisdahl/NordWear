@@ -9,8 +9,9 @@ jobs:
   validate:
     uses: ./.github/workflows/ci.yml
 
-  # 2. If validation passes, we deploy
-  deploy:
+  # 2. If validation passes, we migrate the database.
+  # This job must pass before code can be pushed to the 'prod' branch (via branch protection rules).
+  migrate:
     needs: validate
     runs-on: ubuntu-latest
     steps:
@@ -29,10 +30,3 @@ jobs:
         run: npx prisma migrate deploy
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
-      - name: Trigger DigitalOcean Deployment
-        run: |
-          curl -X POST "https://api.digitalocean.com/v2/apps/${{ secrets.DO_APP_ID }}/deployments" \
-            -H "Authorization: Bearer ${{ secrets.DO_API_TOKEN_DEPLOY }}" \
-            -H "Content-Type: application/json" \
-            -d '{"force_build": true}'

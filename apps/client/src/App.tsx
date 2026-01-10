@@ -74,14 +74,22 @@ const App: React.FC = () => {
   // Effect to prevent body scrolling when loader is active
   useEffect(() => {
     if (showLoader) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = ""; // Reset to default
+      // Get the current scroll position
+      const scrollY = window.scrollY;
+      // Apply styles to "freeze" the body
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+
+      // Return a cleanup function to reset styles and scroll position
+      return () => {
+        const scrollYRestored = document.body.style.top;
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        window.scrollTo(0, parseInt(scrollYRestored || '0') * -1);
+      };
     }
-    // Cleanup function to ensure overflow is reset if component unmounts unexpectedly
-    return () => {
-      document.body.style.overflow = "";
-    };
   }, [showLoader]);
 
   return (

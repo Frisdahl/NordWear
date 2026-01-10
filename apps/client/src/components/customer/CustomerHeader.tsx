@@ -102,7 +102,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
 
       <div
         ref={headerRef}
-        className="fixed top-0 left-0 right-0 z-50 text-[#1c1c1c] group"
+        className="fixed top-0 left-0 right-0 z-50 text-[#1c1c1c] group pr-[var(--scrollbar-width)]"
       >
         {/* Red Top Bar */}
         <div className="bg-[#630D0D] text-[#Fff] text-[0.875rem] md:text-[1rem] text-center py-2 px-4">

@@ -37,7 +37,11 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
   useEffect(() => {
     if (isOpen) {
       setIsRendered(true);
-      const timer = setTimeout(() => setIsAnimating(true), 10); // Small delay to ensure the transition is applied
+      const timer = setTimeout(() => {
+        setIsAnimating(true);
+        // Add focus after animation starts
+        setTimeout(() => inputRef.current?.focus(), 150); // A slightly longer delay for focus
+      }, 10); // Small delay to ensure the transition is applied
       return () => clearTimeout(timer);
     } else {
       setIsAnimating(false);
@@ -83,12 +87,7 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
     };
   }, [searchQuery, isRendered]);
 
-  useEffect(() => {
-    if (isRendered) {
-      const t = setTimeout(() => inputRef.current?.focus(), 100);
-      return () => clearTimeout(t);
-    }
-  }, [isRendered]);
+
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();

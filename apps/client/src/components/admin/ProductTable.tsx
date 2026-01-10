@@ -11,7 +11,7 @@ type ProductItem = {
   status?: "ONLINE" | "OFFLINE" | "DRAFT";
   category?: { id: number; name: string } | null;
   type?: string;
-  imageUrl?: string | null;
+  images?: { url: string }[];
 };
 
 type Props = {
@@ -296,9 +296,9 @@ export default function ProductTable({
 
               <td className="py-4">
                 <div className="flex items-center gap-3">
-                  {product.imageUrl ? (
+                  {product.images && product.images.length > 0 ? (
                     <img
-                      src={product.imageUrl}
+                      src={product.images[0].url}
                       alt={product.name}
                       className="w-10 h-10 rounded-md object-cover bg-gray-100"
                     />

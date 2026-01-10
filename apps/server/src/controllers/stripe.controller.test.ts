@@ -62,6 +62,7 @@ describe('Stripe Controller', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.STRIPE_WEBHOOK_SECRET = 'test_secret';
+    process.env.STRIPE_SECRET_KEY = 'sk_test_123';
     req = {
       body: {},
       query: {},

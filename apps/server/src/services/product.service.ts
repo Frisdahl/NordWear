@@ -79,15 +79,12 @@ export const getProducts = async (
     orderBy,
     include: {
       category: true,
+      images: true,
       product_quantity: {
         include: {
           color: true,
           size: true,
         },
-      },
-      images: {
-        where: { isThumbnail: true },
-        take: 1,
       },
     },
     take: limit, // Apply the limit here
@@ -123,12 +120,13 @@ export const getProducts = async (
       offer_price: product.offer_price,
       status: product.status,
       category_Id: product.category_Id,
-      imageUrl: imageUrl,
+      images: product.images, // Pass the full images array
       category: product.category,
       total_stock: total_stock,
       num_variants: num_variants,
       colors: colors,
       sizes: sizes,
+      product_quantity: product.product_quantity,
     };
   });
 
@@ -189,15 +187,11 @@ export const searchProducts = async (query: string) => {
     },
     include: {
       category: true,
-      images: {
-        where: { isThumbnail: true },
-        take: 1,
-      },
+      images: true,
     },
   });
 
   return products.map((product) => {
-    const imageUrl = product.images.length > 0 ? product.images[0].url : null;
     return {
       id: product.id,
       name: product.name,
@@ -205,7 +199,7 @@ export const searchProducts = async (query: string) => {
       offer_price: product.offer_price,
       status: product.status,
       category_Id: product.category_Id,
-      imageUrl: imageUrl,
+      images: product.images,
       category: product.category,
     };
   });

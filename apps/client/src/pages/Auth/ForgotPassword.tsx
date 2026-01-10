@@ -26,36 +26,37 @@ const ForgotPassword: React.FC = () => {
     setNotification({ ...notification, show: false });
 
     try {
-        // Assuming endpoint exists or mocking it for now as per "we need a new page" request
-        // If backend endpoint is needed, I would create it. 
-        // For now, I will try to call it, if it fails with 404 I will still show success to avoid enumeration if that's the desired security model, 
-        // OR if the user wants strict error handling.
-        // User said: "if succeed or fail we should see the toast message we have"
-        
-        await apiClient.post("/auth/forgot-password", { email });
-        
-        setNotification({
-            show: true,
-            type: "success",
-            heading: "Email sendt",
-            subtext: "Hvis en konto findes med denne email, modtager du instruktioner om nulstilling.",
-        });
-    } catch (err: any) {
-        console.error("Forgot password error:", err);
-        
-        let subtext = "Kunne ikke sende email. Prøv venligst igen senere.";
-        if (err.response && err.response.status === 404) {
-            subtext = "Ingen konto fundet med denne email.";
-        }
+      // Assuming endpoint exists or mocking it for now as per "we need a new page" request
+      // If backend endpoint is needed, I would create it.
+      // For now, I will try to call it, if it fails with 404 I will still show success to avoid enumeration if that's the desired security model,
+      // OR if the user wants strict error handling.
+      // User said: "if succeed or fail we should see the toast message we have"
 
-        setNotification({
-            show: true,
-            type: "error",
-            heading: "Fejl",
-            subtext: subtext,
-        });
+      await apiClient.post("/auth/forgot-password", { email });
+
+      setNotification({
+        show: true,
+        type: "success",
+        heading: "Email sendt",
+        subtext:
+          "Hvis en konto findes med denne email, modtager du instruktioner om nulstilling.",
+      });
+    } catch (err: any) {
+      console.error("Forgot password error:", err);
+
+      let subtext = "Kunne ikke sende email. Prøv venligst igen senere.";
+      if (err.response && err.response.status === 404) {
+        subtext = "Ingen konto fundet med denne email.";
+      }
+
+      setNotification({
+        show: true,
+        type: "error",
+        heading: "Fejl",
+        subtext: subtext,
+      });
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -68,22 +69,25 @@ const ForgotPassword: React.FC = () => {
         subtext={notification.subtext}
         onClose={() => setNotification({ ...notification, show: false })}
       />
-      
+
       <button
         onClick={() => navigate("/login")}
         className="absolute top-4 left-4 md:top-8 md:left-8 p-2 text-gray-600 hover:text-black transition-colors"
       >
         <ArrowLeftIcon className="h-6 w-6" />
       </button>
-      
+
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mx-auto">
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-[#1c1c1c] font-['EB_Garamond']">
+          <h1 className="text-3xl font-bold text-[#1c1c1c] font-['figtree']">
             NORDWEAR
           </h1>
-          <h2 className="text-lg font-medium text-gray-700 mt-4">Nulstil adgangskode</h2>
+          <h2 className="text-lg font-medium text-gray-700 mt-4">
+            Nulstil adgangskode
+          </h2>
           <p className="text-sm text-gray-500 mt-2">
-            Indtast din email adresse, så sender vi dig et link til at nulstille din adgangskode.
+            Indtast din email adresse, så sender vi dig et link til at nulstille
+            din adgangskode.
           </p>
         </div>
 
@@ -113,11 +117,14 @@ const ForgotPassword: React.FC = () => {
           >
             {loading ? "Sender..." : "Send email"}
           </button>
-          
+
           <div className="mt-4 text-center">
-              <Link to="/login" className="text-sm text-gray-600 hover:text-black hover:underline">
-                  Tilbage til log ind
-              </Link>
+            <Link
+              to="/login"
+              className="text-sm text-gray-600 hover:text-black hover:underline"
+            >
+              Tilbage til log ind
+            </Link>
           </div>
         </form>
       </div>

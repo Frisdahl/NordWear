@@ -59,7 +59,7 @@ const Login: React.FC = () => {
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mx-auto">
         <div className="text-center mb-6">
           {/* Company Logo */}
-          <h1 className="text-3xl font-bold text-[#1c1c1c] font-['EB_Garamond']">
+          <h1 className="text-3xl font-bold text-[#1c1c1c] font-['figtree']">
             NORDWEAR
           </h1>
         </div>
@@ -125,7 +125,10 @@ const Login: React.FC = () => {
               <p className="text-red-500 text-sm mt-1">{passwordError}</p>
             )}
             <div className="flex justify-between mt-2">
-              <Link to="/forgot-password" className="text-sm text-black hover:opacity-75">
+              <Link
+                to="/forgot-password"
+                className="text-sm text-black hover:opacity-75"
+              >
                 Glemt adgangskode?
               </Link>
               <Link

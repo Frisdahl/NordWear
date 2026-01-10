@@ -387,6 +387,101 @@ export const sendOrderConfirmation = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * Sends an order confirmation email directly using a Stripe Session object.
+ * This version is designed to be called from backend logic (like webhooks) 
+ * where req/res objects are not available or needed for the email trigger.
+ */
+export const sendOrderConfirmationEmailFromWebhook = async (session: Stripe.Checkout.Session) => {
+  try {
+    // Re-retrieve to ensure line items are expanded (they usually aren't in the webhook event object)
+    const expandedSession = await stripe.checkout.sessions.retrieve(
+      session.id,
+      {
+        expand: ["line_items.data.price.product"],
+      }
+    );
+
+    console.log(`[Email] Sending confirmation for session: ${session.id}`);
+
+    if (!expandedSession.customer_details?.email) {
+      console.warn(`[Email] No customer email found for session: ${session.id}`);
+      return false;
+    }
+
+    const shippingAddress = (expandedSession as any).shipping_details?.address || 
+                            (expandedSession as any).collected_information?.shipping_details?.address || 
+                            expandedSession.customer_details?.address;
+
+    const msg = {
+      to: expandedSession.customer_details.email,
+      from: "nordwear.kundeservice@gmail.com",
+      subject: `Ordrebekræftelse - NordWear`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+            .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 4px; overflow: hidden; }
+            .header { background-color: #1c1c1c; padding: 30px; text-align: center; }
+            .header h1 { color: #ffffff; margin: 0; font-size: 24px; letter-spacing: 2px; }
+            .content { padding: 40px 30px; }
+            .table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            .table th { text-align: left; padding: 10px; border-bottom: 2px solid #eeeeee; }
+            .table td { padding: 15px 10px; border-bottom: 1px solid #eeeeee; }
+            .total { font-weight: bold; font-size: 18px; text-align: right; padding-top: 20px; }
+            .footer { background-color: #f9f9f9; padding: 20px; text-align: center; color: #999999; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header"><h1>NORDWEAR</h1></div>
+            <div class="content">
+              <h2>Tak for din ordre, ${expandedSession.customer_details.name}!</h2>
+              <p>Vi har modtaget din betaling og er gået i gang med at pakke din ordre.</p>
+              
+              <table class="table">
+                <thead><tr><th>Produkt</th><th>Antal</th><th>Pris</th></tr></thead>
+                <tbody>
+                  ${expandedSession.line_items?.data.map((item: any) => `
+                    <tr>
+                      <td>${item.description}</td>
+                      <td>${item.quantity}</td>
+                      <td>${(item.price.unit_amount / 100).toLocaleString("da-DK")} kr.</td>
+                    </tr>
+                  `).join("")}
+                </tbody>
+              </table>
+              
+              <div class="total">Total: ${(expandedSession.amount_total! / 100).toLocaleString("da-DK")} kr.</div>
+
+              <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+                <strong>Leveringsadresse:</strong><br>
+                ${expandedSession.customer_details.name}<br>
+                ${shippingAddress?.line1 || ''}<br>
+                ${shippingAddress?.postal_code || ''} ${shippingAddress?.city || ''}
+              </div>
+            </div>
+            <div class="footer">
+              <p>&copy; ${new Date().getFullYear()} NordWear. Alle rettigheder forbeholdes.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    };
+
+    await sgMail.send(msg);
+    console.log(`[Email] Confirmation sent to ${expandedSession.customer_details.email}`);
+    return true;
+  } catch (error) {
+    console.error("[Email] Error sending confirmation from webhook:", error);
+    return false;
+  }
+};
+
 export const sendGiftCardEmail = async (
   email: string,
   code: string,

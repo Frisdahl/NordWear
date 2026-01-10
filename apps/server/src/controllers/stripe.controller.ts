@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client"; // Import PrismaClient
 import "express"; // Import to ensure custom type declarations for Express Request are picked up
+import { sendOrderConfirmationEmailFromWebhook } from "./email.controller";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 const prisma = new PrismaClient(); // Initialize PrismaClient
@@ -24,10 +25,20 @@ export const getCheckoutSession = async (req: Request, res: Response) => {
 };
 
 export const createCheckoutSession = async (req: Request, res: Response) => {
-  const { cart, customerId, giftCardCode } = req.body; // Expect customerId and giftCardCode
+  const { cart, customerId, giftCardCode } = req.body;
+  const stripeKey = process.env.STRIPE_SECRET_KEY;
+
+  console.log(`[Checkout] Starting session creation. Items in cart: ${cart?.length || 0}`);
+  console.log(`[Checkout] Stripe Key present: ${!!stripeKey}, format valid: ${stripeKey?.startsWith('sk_')}`);
+
+  if (!stripeKey || !stripeKey.startsWith('sk_')) {
+    console.error("[Checkout] Invalid or missing STRIPE_SECRET_KEY. It should start with 'sk_'.");
+    return res.status(500).json({ error: "Server configuration error: Invalid Stripe Key" });
+  }
 
   // ✅ 1. Pre-payment Stock Check
   try {
+    console.log("[Checkout] Starting stock check...");
     for (const item of cart) {
       const pid = parseInt(item.id);
       const sid = item.selectedSizeId ? parseInt(item.selectedSizeId) : null;
@@ -41,14 +52,16 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
         });
 
         if (!pq || pq.quantity < qty) {
+          console.warn(`[Checkout] Insufficient stock for product ${pid}`);
           return res.status(400).json({ 
             error: `Beklager, der er ikke nok på lager af ${item.name}. (Tilgængelig: ${pq?.quantity || 0})` 
           });
         }
       }
     }
+    console.log("[Checkout] Stock check passed.");
   } catch (error) {
-    console.error("Stock check error:", error);
+    console.error("[Checkout] Stock check error:", error);
     return res.status(500).json({ error: "Fejl ved lager-tjek" });
   }
 
@@ -67,9 +80,6 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
   const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
 
   const condensedCart = cart.map((item: any) => {
-    if (!item.id) {
-      console.warn(`Item missing ID in cart: ${item.name}`);
-    }
     return {
       id: item.id,
       quantity: item.quantity,
@@ -80,14 +90,12 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
   });
 
   const cartJson = JSON.stringify(condensedCart);
-  if (cartJson.length > 500) {
-    console.warn("Metadata 'cart' exceeds 500 characters. Order creation via webhook might fail.");
-  }
-
+  
   let discounts = undefined;
   let discountAmount = 0;
 
   if (giftCardCode) {
+    console.log(`[Checkout] Applying gift card: ${giftCardCode}`);
     const giftCard = await prisma.giftCard.findUnique({
       where: { code: giftCardCode },
     });
@@ -99,12 +107,11 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
       );
       discountAmount = Math.min(giftCard.balance, cartTotal);
 
-      // Check if order is fully covered
       if (cartTotal - discountAmount <= 0) {
+        console.log("[Checkout] Order fully covered by gift card.");
         return res.json({ freeOrder: true, giftCardCode });
       }
 
-      // Create a unique coupon for this session
       if (discountAmount > 0) {
         const coupon = await stripe.coupons.create({
           amount_off: Math.round(discountAmount),
@@ -117,25 +124,31 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
     }
   }
 
-  const session = await stripe.checkout.sessions.create({
-    mode: "payment",
-    line_items,
-    discounts,
-    success_url: `${clientUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${clientUrl}/cancel`,
-    shipping_address_collection: {
-      allowed_countries: ["DK", "SE", "DE", "NO", "NL", "FR", "BE"],
-    },
-    phone_number_collection: { enabled: true },
-    metadata: {
-      customerId: customerId ? customerId.toString() : "", 
-      cart: cartJson,
-      giftCardCode: giftCardCode || "",
-      discountAmount: discountAmount.toString(),
-    },
-  });
-
-  res.json({ url: session.url }); // <- brug url
+  try {
+    console.log("[Checkout] Creating Stripe session...");
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      line_items,
+      discounts,
+      success_url: `${clientUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${clientUrl}/cancel`,
+      shipping_address_collection: {
+        allowed_countries: ["DK", "SE", "DE", "NO", "NL", "FR", "BE"],
+      },
+      phone_number_collection: { enabled: true },
+      metadata: {
+        customerId: customerId ? customerId.toString() : "", 
+        cart: cartJson,
+        giftCardCode: giftCardCode || "",
+        discountAmount: discountAmount.toString(),
+      },
+    });
+    console.log(`[Checkout] Session created: ${session.id}`);
+    res.json({ url: session.url });
+  } catch (error) {
+    console.error("[Checkout] Stripe API error:", error);
+    res.status(500).json({ error: "Kunne ikke oprette betalingssession" });
+  }
 };
 
 // New webhook handler
@@ -192,6 +205,11 @@ export const stripeWebhookHandler = async (req: Request, res: Response) => {
         if (Array.isArray(cartItems) && cartItems.length > 0) {
           console.log(`[Webhook] Calling createOrderInDB for session ${session.id}`);
           await createOrderInDB(session, customerId, cartItems);
+          
+          // Trigger order confirmation email directly from webhook for robustness
+          // This matches our documentation/diagrams and ensures the email is sent 
+          // even if the user closes their browser before the success page loads.
+          await sendOrderConfirmationEmailFromWebhook(session);
         } else {
           console.warn(`[Webhook] Cart items empty or invalid for session ${session.id}`);
         }

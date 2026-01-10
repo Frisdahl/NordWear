@@ -104,7 +104,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
         </div>
 
         <header className={headerClasses}>
-          <nav className="px-6 md:px-12 mx-auto py-2 lg:py-4 flex justify-between items-center relative">
+          <nav className="px-6 md:px-12 mx-auto py-2 lg:py-5 flex justify-between items-center relative">
             <div className="flex items-center">
               <div className="lg:hidden">
                 <button
@@ -114,7 +114,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
                   <Bars3Icon className="h-6 w-6" />
                 </button>
               </div>
-              
+
               <Link
                 to="/"
                 className="text-xl md:text-2xl font-bold tracking-widest uppercase hidden lg:block"
@@ -122,7 +122,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
                 NORDWEAR
               </Link>
 
-              <div className="hidden lg:block h-5 w-[1px] bg-[#1c1c1c] mx-6"></div>
+              <div className="hidden lg:block h-[1px] w-8 [1px] bg-[#1c1c1c] mx-6"></div>
 
               <div className="hidden lg:flex items-center space-x-6 text-[0.875rem]">
                 {menuItems.map((item) => (

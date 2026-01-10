@@ -32,7 +32,7 @@ const Notification: React.FC<NotificationProps> = ({
   if (!show) return null;
 
   return createPortal(
-    <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-[9999] animate-fade-in-up">
+    <div className="fixed inset-x-0 bottom-12 z-[9999] flex justify-center animate-fade-in-up">
       <div className="bg-[#1a1a1a] text-[#f2f2f2] rounded-xl shadow-2xl p-4 flex items-center gap-4 min-w-[320px] border border-[#333]">
         <div
           className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${

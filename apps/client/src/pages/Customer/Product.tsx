@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Product as ProductType } from "../../types";
 import { fetchProduct } from "../../services/api";
 import {
@@ -17,6 +17,13 @@ import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { fetchCategory } from "../../services/api";
 import ProductCard from "../../components/customer/ProductCard";
 import { fetchProducts } from "../../services/api";
+
+// icons for sidepanel
+
+import boxIconUrl from "../../assets/customer/box-icon.svg";
+import starIconUrl from "../../assets/customer/star-icon.svg";
+import materialIconUrl from "../../assets/customer/material-icon.svg";
+import sizeIconUrl from "../../assets/customer/size-icon.svg";
 
 const sneakerspoints = [
   {
@@ -59,9 +66,10 @@ const Product: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [notification, setNotification] = useState<{
-    message: string;
-    type: "success" | "error";
-  } | null>(null);
+    heading: string;
+    subtext: string;
+    type: "success" | "error" | "";
+  }>({ heading: "", subtext: "", type: "" });
   const { addToCart } = useCart();
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -162,25 +170,35 @@ const Product: React.FC = () => {
     }
   }, [availableColors, availableSizes, selectedColor, selectedSize]);
 
+  const handleNotification = (data: {
+    heading: string;
+    subtext: string;
+    type: "success" | "error";
+  }) => {
+    setNotification({
+      heading: data.heading,
+      subtext: data.subtext,
+      type: data.type as "success" | "error",
+    });
+  };
+
   const handleAddToCart = () => {
     if (product) {
-      const colorId = availableColors.find(c => c.name === selectedColor)?.id;
-      const sizeId = availableSizes.find(s => s.name === selectedSize)?.id;
+      const colorId = availableColors.find((c) => c.name === selectedColor)?.id;
+      const sizeId = availableSizes.find((s) => s.name === selectedSize)?.id;
 
-      addToCart({ 
-        ...product, 
-        selectedSize: selectedSize || undefined, 
+      addToCart({
+        ...product,
+        selectedSize: selectedSize || undefined,
         selectedSizeId: sizeId,
         selectedColorId: colorId,
-        imageUrl: selectedImage as any 
+        imageUrl: selectedImage as any,
       });
-      setNotification({
-        message: "Produkt tilføjet til kurv!",
+      handleNotification({
+        heading: "Lagt i kurv",
+        subtext: `${product.name} er lagt i din kurv.`,
         type: "success",
       });
-      setTimeout(() => {
-        setNotification(null);
-      }, 2000);
     }
   };
 
@@ -194,16 +212,18 @@ const Product: React.FC = () => {
 
   return (
     <div className="bg-[#f2f1f0] overflow-x-hidden">
-      {notification && (
+      {notification.subtext && (
         <Notification
-          heading={notification.type === "success" ? "Success" : "Fejl"}
-          subtext={notification.message}
-          type={notification.type}
+          heading={notification.heading}
+          subtext={notification.subtext}
+          type={notification.type as "success" | "error"}
           show={true}
-          onClose={() => setNotification(null)}
+          onClose={() =>
+            setNotification({ heading: "", subtext: "", type: "" })
+          }
         />
       )}
-      
+
       <div className="px-6 md:px-12 py-8 md:py-12">
         <div className="lg:grid lg:grid-cols-[1.5fr_1fr] lg:gap-16 xl:gap-24">
           {/* Image gallery */}
@@ -227,10 +247,10 @@ const Product: React.FC = () => {
 
           {/* Product info */}
           <div className="mt-8 lg:mt-0">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl text-gray-800 font-['EB_Garamond'] mb-4">
+            <h1 className="text-3xl md:text-4xl lg:text-4xl text-gray-800 font-['EB_Garamond'] mb-4">
               {name}
             </h1>
-            
+
             <div className="flex items-center mb-6">
               <div className="flex items-center">
                 {[...Array(5)].map((_, i) => (
@@ -238,7 +258,7 @@ const Product: React.FC = () => {
                     key={i}
                     className={`h-4 w-4 md:h-5 md:w-5 ${
                       i < Math.floor(rating.value)
-                        ? "text-yellow-400"
+                        ? "text-[#c9a326]"
                         : "text-gray-300"
                     }`}
                   />
@@ -263,7 +283,7 @@ const Product: React.FC = () => {
               <p className="font-['EB_Garamond']">
                 {offer_price ? (
                   <span className="flex items-baseline gap-3">
-                    <span className="text-2xl md:text-3xl font-bold text-[rgb(48,122,7)]">
+                    <span className="font-normal text-[clamp(1rem,4vw,1.5rem)] text-[rgb(48,122,7)]">
                       {formatPrice(offer_price)}
                     </span>
                     <span className="line-through text-lg text-[#1c1c1ca6]">
@@ -271,7 +291,7 @@ const Product: React.FC = () => {
                     </span>
                   </span>
                 ) : (
-                  <span className="text-2xl md:text-3xl font-bold text-[#1c1c1ca6]">
+                  <span className="font-normal text-[clamp(1.5rem,5vw,1.5rem)] text-[#1c1c1ca6]">
                     {formatPrice(price)}
                   </span>
                 )}
@@ -280,70 +300,74 @@ const Product: React.FC = () => {
 
             {/* Selection Controls */}
             <div className="space-y-6 mb-10">
-                          {/* Color Swatches */}
-                          {availableColors.length > 0 && (
-                            <div>
-                              <h3 className="text-sm font-medium text-gray-900 mb-3">Farve</h3>
-                              <div className="flex items-center space-x-3">
-                                {availableColors.map((color) => (
-                                  <button
-                                    key={color.id}
-                                    onClick={() => setSelectedColor(color.name)}
-                                    className={`h-8 w-8 rounded-full border-2 p-0.5 transition-all ${
-                                      selectedColor === color.name
-                                        ? "border-[#1c1c1c]"
-                                        : "border-transparent hover:border-gray-300"
-                                    }`}
-                                  >
-                                    <div
-                                      className="h-full w-full rounded-full border border-gray-200"
-                                      style={{ backgroundColor: color.name }}
-                                    ></div>
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-              
-                          {/* Size Dropdown */}
-                          <div>
-                            <h3 className="text-sm font-medium text-gray-900 mb-3">Størrelse</h3>
-                            <div className="relative" ref={dropdownRef}>
-                              <button
-                                onClick={() => setSizeDropdownOpen(!sizeDropdownOpen)}
-                                className="w-full flex justify-between items-center px-4 py-3 text-base border border-[#00000026] bg-white hover:bg-gray-50 focus:outline-none rounded-sm transition-colors"
-                              >
-                                <span>{selectedSize || "Vælg størrelse"}</span>
-                                <ChevronDownIcon
-                                  className={`h-4 w-4 text-gray-700 transition-transform duration-200 ${
-                                    sizeDropdownOpen ? "rotate-180" : ""
-                                  }`}
-                                />
-                              </button>
-              
-                              {sizeDropdownOpen && (
-                                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#00000026] z-20 shadow-lg rounded-sm">
-                                  {availableSizes.map((size) => (
-                                    <button
-                                      key={size.id}
-                                      onClick={() => {
-                                        setSelectedSize(size.name);
-                                        setSizeDropdownOpen(false);
-                                      }}
-                                      className={`w-full text-left px-4 py-3 text-base transition-colors ${
-                                        selectedSize === size.name
-                                          ? "bg-[#1c1c1c] text-white"
-                                          : "bg-white text-gray-900 hover:bg-gray-100"
-                                      }`}
-                                    >
-                                      {size.name}
-                                    </button>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                            {/* Add to Cart Button */}
+              {/* Color Swatches */}
+              {availableColors.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900 mb-3">
+                    Farve
+                  </h3>
+                  <div className="flex items-center space-x-3">
+                    {availableColors.map((color) => (
+                      <button
+                        key={color.id}
+                        onClick={() => setSelectedColor(color.name)}
+                        className={`h-8 w-8 rounded-full border-2 p-0.5 transition-all ${
+                          selectedColor === color.name
+                            ? "border-[#1c1c1c]"
+                            : "border-transparent hover:border-gray-300"
+                        }`}
+                      >
+                        <div
+                          className="h-full w-full rounded-full border border-gray-200"
+                          style={{ backgroundColor: color.name }}
+                        ></div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Size Dropdown */}
+              <div>
+                <h3 className="text-sm font-medium text-gray-900 mb-3">
+                  Størrelse
+                </h3>
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setSizeDropdownOpen(!sizeDropdownOpen)}
+                    className="w-full flex justify-between items-center px-4 py-3 text-base border border-[#00000026] bg-white hover:bg-gray-50 focus:outline-none rounded-sm transition-colors"
+                  >
+                    <span>{selectedSize || "Vælg størrelse"}</span>
+                    <ChevronDownIcon
+                      className={`h-4 w-4 text-gray-700 transition-transform duration-200 ${
+                        sizeDropdownOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+
+                  {sizeDropdownOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#00000026] z-20 shadow-lg rounded-sm">
+                      {availableSizes.map((size) => (
+                        <button
+                          key={size.id}
+                          onClick={() => {
+                            setSelectedSize(size.name);
+                            setSizeDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-4 py-3 text-base transition-colors ${
+                            selectedSize === size.name
+                              ? "bg-[#1c1c1c] text-white"
+                              : "bg-white text-gray-900 hover:bg-gray-100"
+                          }`}
+                        >
+                          {size.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+              {/* Add to Cart Button */}
               <button
                 onClick={handleAddToCart}
                 className="w-full bg-[#1c1c1c] text-white text-[1rem] py-4 font-semibold hover:bg-opacity-90 transition-all rounded-sm shadow-sm"
@@ -362,34 +386,49 @@ const Product: React.FC = () => {
               <Accordion
                 id="shipping"
                 isOpen={openAccordion === "shipping"}
-                onToggle={() => setOpenAccordion(openAccordion === "shipping" ? null : "shipping")}
-                icon={<TruckIcon className="h-5 w-5 text-gray-700" />}
+                onToggle={() =>
+                  setOpenAccordion(
+                    openAccordion === "shipping" ? null : "shipping"
+                  )
+                }
+                icon={<img src={boxIconUrl} className="h-5 w-5" />}
                 title="Gratis fragt | Gratis ombytning"
                 content="Altid gratis fragt til Bring Pakkeshop ved køb over 499,-."
               />
               <Accordion
                 id="trustpilot"
                 isOpen={openAccordion === "trustpilot"}
-                onToggle={() => setOpenAccordion(openAccordion === "trustpilot" ? null : "trustpilot")}
-                icon={<ShieldCheckIcon className="h-5 w-5 text-gray-700" />}
+                onToggle={() =>
+                  setOpenAccordion(
+                    openAccordion === "trustpilot" ? null : "trustpilot"
+                  )
+                }
+                icon={<img src={starIconUrl} className="h-5 w-5" />}
                 title="Fremragende | Trustpilot"
                 content="Læs alle vores +500 anmeldelser på Trustpilot. Vi vægter kundeservice og kvalitet højere end alt andet."
               />
               <Accordion
                 id="materials"
                 isOpen={openAccordion === "materials"}
-                onToggle={() => setOpenAccordion(openAccordion === "materials" ? null : "materials")}
-                icon={<ShieldCheckIcon className="h-5 w-5 text-gray-700" />}
+                onToggle={() =>
+                  setOpenAccordion(
+                    openAccordion === "materials" ? null : "materials"
+                  )
+                }
+                icon={<img src={materialIconUrl} className="h-5 w-5" />}
                 title="Materialer"
                 content={
                   <ul className="list-none space-y-3 text-sm md:text-base text-gray-700 pt-2">
                     <li className="flex items-start gap-3">
-                      <CheckIcon className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Premium europæiske materialer udvalgt for holdbarhed og komfort.</span>
+                      <span>
+                        ✔ Premium europæiske materialer udvalgt for holdbarhed
+                        og komfort.
+                      </span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <CheckIcon className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Håndlavet i Portugal under ansvarlige arbejdsforhold.</span>
+                      <span>
+                        ✔ Håndlavet i Portugal under ansvarlige arbejdsforhold.
+                      </span>
                     </li>
                   </ul>
                 }
@@ -400,7 +439,7 @@ const Product: React.FC = () => {
       </div>
 
       {/* Detail Points Section */}
-      <section className="px-6 md:px-12 py-16 border-t border-[#00000026] bg-white">
+      <section className="px-6 md:px-12 py-16 border-t border-[#00000026] bg-transparent">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16">
           {sneakerspoints.map((point) => (
             <div key={point.title}>
@@ -430,20 +469,27 @@ const Product: React.FC = () => {
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {relatedProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard
+              key={product.id}
+              product={product}
+              onNotify={handleNotification}
+            />
           ))}
         </div>
         {categoryName && (
           <div className="text-center mt-12">
-            <button className="bg-[#1c1c1c] text-white px-8 py-3 font-semibold rounded-sm hover:bg-opacity-90 transition-all">
+            <Link
+              to={`/category/${categoryName.toLowerCase()}`}
+              className="bg-[#1c1c1c] text-white px-8 py-3 font-semibold rounded-sm hover:bg-opacity-90 transition-all"
+            >
               Se alle {categoryName.toLowerCase()}
-            </button>
+            </Link>
           </div>
         )}
       </section>
 
       {/* Brand Values Block */}
-      <div className="border-y border-[#00000026] bg-white">
+      <div className="border-y border-[#00000026] bg-transparent">
         <div className="grid grid-cols-1 md:grid-cols-2 items-center">
           <div className="h-72 md:h-[600px] overflow-hidden order-1 md:order-none">
             <img
@@ -452,7 +498,7 @@ const Product: React.FC = () => {
               className="w-full h-full object-cover"
             />
           </div>
-          <div className="p-8 md:p-16 lg:p-24 bg-white">
+          <div className="p-8 md:p-16 lg:p-24 bg-transparent">
             <h2 className="text-3xl md:text-4xl font-['EB_Garamond'] mb-6">
               Skandinavisk design - Håndarbejde fra Portugal
             </h2>

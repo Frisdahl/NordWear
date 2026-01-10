@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import { register as registerApi } from '../../services/api';
-import Notification from '../../components/Notification';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { register as registerApi } from "../../services/api";
+import Notification from "../../components/Notification";
 
 type NotificationState = {
   message: string;
-  type: 'success' | 'error';
+  type: "success" | "error";
 } | null;
 
 const CreateUser: React.FC = () => {
-  const [navn, setNavn] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [navn, setNavn] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [notification, setNotification] = useState<NotificationState>(null);
   const navigate = useNavigate();
 
@@ -22,16 +22,22 @@ const CreateUser: React.FC = () => {
 
     try {
       await registerApi(navn, email, password);
-      setNotification({ message: 'Bruger oprettet med succes!', type: 'success' });
+      setNotification({
+        message: "Bruger oprettet med succes!",
+        type: "success",
+      });
       setTimeout(() => {
-        navigate('/login');
+        navigate("/login");
       }, 2000);
     } catch (err: any) {
-      console.error('Registration error:', err);
+      console.error("Registration error:", err);
       if (err.response && err.response.data && err.response.data.message) {
-        setNotification({ message: err.response.data.message, type: 'error' });
+        setNotification({ message: err.response.data.message, type: "error" });
       } else {
-        setNotification({ message: 'Oprettelse af bruger mislykkedes.', type: 'error' });
+        setNotification({
+          message: "Oprettelse af bruger mislykkedes.",
+          type: "error",
+        });
       }
     }
   };
@@ -42,7 +48,7 @@ const CreateUser: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F0F0F0] relative">
-      <button 
+      <button
         onClick={() => navigate(-1)}
         className="absolute top-4 left-4 md:top-8 md:left-8 p-2 text-gray-600 hover:text-black transition-colors"
       >
@@ -50,7 +56,7 @@ const CreateUser: React.FC = () => {
       </button>
       {notification && (
         <Notification
-          heading={notification.type === 'success' ? 'Success' : 'Fejl'}
+          heading={notification.type === "success" ? "Success" : "Fejl"}
           subtext={notification.message}
           type={notification.type}
           show={true}
@@ -59,12 +65,17 @@ const CreateUser: React.FC = () => {
       )}
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mx-auto">
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-[#1c1c1c] font-['EB_Garamond']">NORDWEAR</h1>
+          <h1 className="text-3xl font-bold text-[#1c1c1c] font-['figtree']">
+            NORDWEAR
+          </h1>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="navn" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="navn"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Navn
             </label>
             <input
@@ -79,7 +90,10 @@ const CreateUser: React.FC = () => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Email
             </label>
             <input
@@ -94,7 +108,10 @@ const CreateUser: React.FC = () => {
           </div>
 
           <div className="mb-6">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Adgangskode
             </label>
             <input
@@ -106,10 +123,10 @@ const CreateUser: React.FC = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-             <div className="flex justify-between mt-2">
-                <a href="/login" className="text-sm text-black hover:opacity-75">
-                    Allerede bruger? Log ind
-                </a>
+            <div className="flex justify-between mt-2">
+              <a href="/login" className="text-sm text-black hover:opacity-75">
+                Allerede bruger? Log ind
+              </a>
             </div>
           </div>
 
@@ -126,4 +143,3 @@ const CreateUser: React.FC = () => {
 };
 
 export default CreateUser;
-

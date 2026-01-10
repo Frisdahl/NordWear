@@ -36,7 +36,11 @@ const Category: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [notification, setNotification] = useState({ message: "", type: "" });
+  const [notification, setNotification] = useState({
+    heading: "",
+    subtext: "",
+    type: "",
+  });
   const [viewMode, setViewMode] = useState<string>(
     typeof window !== "undefined" && window.innerWidth >= 768
       ? "grid-3"
@@ -218,10 +222,15 @@ const Category: React.FC = () => {
     indexOfLastProduct
   );
 
-  const handleAuthRequired = () => {
+  const handleNotification = (data: {
+    heading: string;
+    subtext: string;
+    type: "success" | "error";
+  }) => {
     setNotification({
-      message: "Du skal være logget ind for at tilføje til ønskelisten.",
-      type: "error",
+      heading: data.heading,
+      subtext: data.subtext,
+      type: data.type as "success" | "error",
     });
   };
 
@@ -302,13 +311,15 @@ const Category: React.FC = () => {
         onClose={() => setFilterMenuOpen(false)}
         onApply={handleApplyFilters}
       />
-      {notification.message && (
+      {notification.subtext && (
         <Notification
-          heading={notification.type === "success" ? "Success" : "Fejl"}
-          subtext={notification.message}
+          heading={notification.heading}
+          subtext={notification.subtext}
           type={notification.type as "success" | "error"}
           show={true}
-          onClose={() => setNotification({ message: "", type: "" })}
+          onClose={() =>
+            setNotification({ heading: "", subtext: "", type: "" })
+          }
         />
       )}
 
@@ -448,7 +459,7 @@ const Category: React.FC = () => {
                     <ProductCard
                       key={`${product.id}-${viewMode}`}
                       product={product}
-                      onAuthRequired={handleAuthRequired}
+                      onNotify={handleNotification}
                       index={index}
                     />
                   ))}

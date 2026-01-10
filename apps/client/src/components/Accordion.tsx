@@ -31,7 +31,10 @@ const Accordion: React.FC<AccordionProps> = ({
         onClick={handleToggle}
         className="w-full flex py-4 justify-between items-center text-left"
       >
-        <span className="font-serif text-lg">{title}</span>
+        <div className="flex items-center gap-x-4">
+          {icon}
+          <span className="font-serif text-lg">{title}</span>
+        </div>
         <div className="relative h-5 w-5">
           <PlusIcon
             className="absolute h-5 w-5 text-gray-700 transition-opacity duration-500 ease-in-out"

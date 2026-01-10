@@ -3,13 +3,29 @@
 ## 1. Introduktion
 Denne rapport beskriver den tekniske arkitektur, implementeringsstrategier og designvalg bag NordWear – en moderne, skræddersyet e-commerce platform. Systemet er udviklet fra bunden med fokus på skalerbarhed, ydeevne og en gnidningsfri brugeroplevelse. Rapporten gennemgår de centrale komponenter i full-stack løsningen, herunder frontend, backend, database og tredjepartsintegrationer, samt de omfattende sikkerheds- og infrastrukturmæssige optimeringer, der er foretaget for at gøre systemet produktionsklar.
 
-## 2. Systemarkitektur
-Projektet er bygget op omkring en **Client-Server arkitektur**, hvor frontend og backend er skarpt adskilt (Decoupled Architecture). Dette muliggør uafhængig udvikling, test og skalering af de to lag.
+## 2. Systemarkitektur og Dataflow
+Systemet er designet som en moderne **Decoupled Full-Stack applikation**, optimeret til høj ydeevne og sikkerhed. Arkitekturen er opdelt i fire primære lag, der kommunikerer via et sikkert REST API.
 
-*   **Frontend (Client):** En Single Page Application (SPA) bygget med React, der håndterer præsentationslaget og brugerinteraktionen.
-*   **Backend (Server):** Et RESTful API bygget med Node.js/Express, der håndterer forretningslogik, datavalidering, databasekald og integrationer med eksterne tjenester.
-*   **Database:** En relationel database (MySQL), der sikrer dataintegritet for kritiske forretningsdata som ordrer og kundeprofiler.
-*   **Infrastruktur:** Hele applikationen er containeriseret med **Docker** for at sikre et konsistent miljø på tværs af udvikling og produktion.
+### 2.1 Arkitekturens lag
+1.  **Præsentationslag (Frontend):** En Single Page Application (SPA) bygget med **React 18** og **Vite**. UI-laget er styret af **Tailwind CSS**, hvilket sikrer en lynhurtig indlæsning og fuld responsivitet. State-management (som f.eks. indkøbskurven) håndteres af **Zustand**, mens **React Router** styrer navigationen uden genindlæsning af siden.
+2.  **Applikationslag (Backend):** Et Node.js-baseret API bygget med **Express** og **TypeScript**. Dette lag fungerer som systemets hjerne og orkestrerer alt fra ordrestyring til integration med eksterne gateways. Backenden følger et **Controller-Service-mønster**, der sikrer, at forretningslogik er adskilt fra HTTP-håndtering.
+3.  **Data-persistens (Database):** En **MySQL** database styret via **Prisma ORM**. Brugen af en relationel database sikrer streng dataintegritet (ACID-compliance), hvilket er kritisk for korrekt lagerstyring og ordrehåndtering.
+4.  **Infrastrukturlag (Deployment):** Systemet kører i **Docker-containere** på **DigitalOcean App Platform**. Dette muliggør horisontal skalering og sikrer, at applikationen kører i præcis samme miljø under udvikling som i produktion.
+
+### 2.2 Eksterne Integrationer (Microservices)
+NordWear-platformen er ikke et isoleret system, men fungerer som en hub, der integrerer med specialiserede services via API'er:
+*   **Betaling (Stripe):** Håndterer alle finansielle transaktioner via en PCI-compliant gateway.
+*   **Billedbehandling (Cloudinary):** Bruges til dynamisk optimering og lagring af produktbilleder for at reducere båndbreddeforbrug.
+*   **Email (SendGrid):** Automatiseret udsendelse af ordrebekræftelser og transaktionelle mails.
+*   **Forsendelse (Shipmondo):** Realtids-opslag af fragtpriser og valg af afhentningssteder.
+
+### 2.3 Dataflow-eksempel: Fra klik til bekræftelse
+For at illustrere arkitekturen i praksis kan checkout-flowet ses som følgende kæde:
+1.  **Client:** Brugeren indtaster forsendelsesinfo (valideres i browseren med Zod).
+2.  **Server:** API'et modtager anmodningen, verificerer lagerstatus via Prisma, og opretter en Stripe Session.
+3.  **External:** Brugeren betaler hos Stripe. Stripe sender derefter et **Webhook-kald** tilbage til vores server.
+4.  **Database:** Serveren modtager webshooket, verificerer signaturen, og kører en **Atomic Transaction**, der gemmer ordren og nedskriver lagerbeholdningen simultant.
+5.  **Email:** Ved transaktionens afslutning trigges SendGrid til at sende en bekræftelse.
 
 ## 3. Teknologistack
 

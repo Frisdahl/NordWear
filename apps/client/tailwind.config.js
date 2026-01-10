@@ -25,6 +25,26 @@ module.exports = {
         heading: "clamp(1.4rem, 1vw + 1rem, 2.2rem)",
         body: "clamp(1rem, 0.5vw + 0.8rem, 1.2rem)",
       },
+      animation: {
+        'spin-slow': 'rotate 25s linear infinite',
+        'fade-in-up': 'fade-in-up 0.5s ease-out forwards',
+      },
+      keyframes: {
+        rotate: {
+          'from': { transform: 'rotate(0deg)' },
+          'to': { transform: 'rotate(360deg)' },
+        },
+        'fade-in-up': {
+          'from': {
+            opacity: '0',
+            transform: 'translateY(20px)'
+          },
+          'to': {
+            opacity: '1',
+            transform: 'translateY(0)'
+          },
+        }
+      }
     },
   },
   plugins: [],

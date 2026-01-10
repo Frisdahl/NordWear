@@ -1,13 +1,12 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import useEmblaCarousel from "embla-carousel-react";
-import { EmblaCarouselType } from "embla-carousel";
+import { EmblaOptionsType } from "embla-carousel";
 import { Product } from "../../types";
 import { fetchProducts } from "../../services/api";
-import ProductCard from "../../components/customer/ProductCard";
 import Notification from "../../components/Notification";
 import RatingSlider from "../../components/customer/RatingSlider";
 import CategoryCard from "../../components/customer/CategoryCard";
+import EmblaCarousel from "../../components/customer/carousel/EmblaCarousel";
 
 const categories = [
   {
@@ -34,19 +33,21 @@ const categories = [
   },
 ];
 
+const OPTIONS: EmblaOptionsType = {
+  align: "start",
+  dragFree: true,
+  containScroll: "trimSnaps",
+};
+
 const Home: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [notification, setNotification] = useState({ message: "", type: "" });
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    align: "start",
-    dragFree: true,
-    containScroll: "trimSnaps",
+  const [notification, setNotification] = useState({
+    heading: "",
+    subtext: "",
+    type: "",
   });
-
-  const [prevBtnEnabled, setPrevBtnEnabled] = useState(false);
-  const [nextBtnEnabled, setNextBtnEnabled] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [emailInput, setEmailInput] = useState("");
   const [subscribeStatus, setSubscribeStatus] = useState<
@@ -93,27 +94,6 @@ const Home: React.FC = () => {
     }
   };
 
-  const scrollPrev = useCallback(() => {
-    emblaApi?.scrollPrev();
-  }, [emblaApi]);
-
-  const scrollNext = useCallback(() => {
-    emblaApi?.scrollNext();
-  }, [emblaApi]);
-
-  const onSelect = useCallback((emblaApi: EmblaCarouselType) => {
-    setPrevBtnEnabled(emblaApi.canScrollPrev());
-    setNextBtnEnabled(emblaApi.canScrollNext());
-  }, []);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-
-    onSelect(emblaApi);
-    emblaApi.on("reInit", onSelect);
-    emblaApi.on("select", onSelect);
-  }, [emblaApi, onSelect]);
-
   useEffect(() => {
     const loadProducts = async () => {
       try {
@@ -129,22 +109,29 @@ const Home: React.FC = () => {
     loadProducts();
   }, []);
 
-  const handleAuthRequired = () => {
+  const handleNotification = (data: {
+    heading: string;
+    subtext: string;
+    type: "success" | "error";
+  }) => {
     setNotification({
-      message: "Du skal være logget ind for at tilføje til ønskelisten.",
-      type: "error",
+      heading: data.heading,
+      subtext: data.subtext,
+      type: data.type as "success" | "error",
     });
   };
 
   return (
     <div className="text-[#1c1c1c] overflow-x-hidden w-full">
-      {notification.message && (
+      {notification.subtext && (
         <Notification
-          show={!!notification.message}
-          heading={notification.type === "error" ? "Fejl" : "Success"}
-          subtext={notification.message}
+          show={!!notification.subtext}
+          heading={notification.heading}
+          subtext={notification.subtext}
           type={notification.type as "success" | "error"}
-          onClose={() => setNotification({ message: "", type: "" })}
+          onClose={() =>
+            setNotification({ heading: "", subtext: "", type: "" })
+          }
         />
       )}
 
@@ -154,21 +141,26 @@ const Home: React.FC = () => {
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage:
-              "url(https://images.unsplash.com/photo-1577686330226-d71f1d510d9c?q=80&w=2076&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)",
+              "url(https://images.unsplash.com/photo-1577686330226-d71f1d510d9c?q=80&w=2076&auto=format&fit=crop&ixlib.rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)",
             filter: "brightness(0.6)",
           }}
         ></div>
         <div className="text-center z-10 px-6 pb-12 md:pb-16 w-full">
-          <h1 className="text-3xl md:text-5xl font-normal font-['EB_Garamond'] tracking-tighter mb-4">
-            Stilrene, håndlavede produkter.
+          <h1 className="text-3xl md:text-5xl font-normal font-['EB-Garamond'] tracking-tighter mb-4">
+            Tidløst design. Skabt til at holde.
           </h1>
-          <p className="text-base md:text-xl font-['EB_Garamond'] mb-8 max-w-2xl mx-auto">
-            Til den moderne eventyrer. Kompromisløs kvalitet inspireret af
-            naturen.
+          <p className="text-base md:text-xl text-gray-200 font-['figtree'] mb-8 max-w-lg mx-auto">
+            Stilrene produkter med kompromisløs kvalitet – inspireret af naturen
+            og bygget til hverdagen.
           </p>
-          <button className="bg-[#f2f1f0] text-[#1c1c1c] font-semibold py-3 px-8 hover:bg-opacity-90 transition-transform transform">
-            Se alle produkter
-          </button>
+          <div className="text-center mt-8 md:mt-12">
+            <Link
+              to="/category"
+              className="bg-[#181c2e] text-white py-3 font-semibold px-8 transition-transform transform hover:scale-105"
+            >
+              Se alle produkter
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -184,25 +176,11 @@ const Home: React.FC = () => {
             <div className="text-center text-red-500">{error}</div>
           ) : (
             <div className="relative px-6 md:px-12">
-              <div
-                className="embla overflow-hidden relative cursor-grab active:cursor-grabbing"
-                ref={emblaRef}
-              >
-                <div className="embla__container flex relative flex-row items-stretch">
-                  {products.map((product, index) => (
-                    <div
-                      className="embla__slide flex-none w-[80%] sm:w-1/2 md:w-1/2 lg:w-1/4 flex items-center justify-center p-2"
-                      key={product.id}
-                    >
-                      <ProductCard
-                        product={product}
-                        index={index}
-                        onAuthRequired={handleAuthRequired}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <EmblaCarousel
+                products={products}
+                options={OPTIONS}
+                onNotify={handleNotification}
+              />
             </div>
           )}
           <div className="text-center mt-8 md:mt-12">
@@ -257,11 +235,12 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      <h1 className="text-2xl md:text-[2.625rem] text-center mt-14 px-6 font-['EB_Garamond'] mb-14 leading-tight">
+      <h1 className="text-2xl md:text-[2.625rem] text-center mt-14 px-6 font-['EB_Garamond'] mb-6 leading-tight">
         Hos NordWear tror vi på forfinelse frem for forandring -{" "}
         <br className="hidden md:block"></br> tidløst design, kvalitet og
         bæredygtighed.
       </h1>
+      <div className="flex justify-center mb-14"></div>
 
       {/* Overproduction Section */}
       <div className="border-y border-gray-300">

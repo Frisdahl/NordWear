@@ -1,5 +1,8 @@
 import { Prisma, PrismaClient } from "@prisma/client";
+import { redisClient } from "../config/redis";
 const prisma = new PrismaClient();
+
+const CACHE_EXPIRATION = 600; // Cache for 10 minutes
 
 export const getProducts = async (
   categoryName?: string,
@@ -11,131 +14,167 @@ export const getProducts = async (
   sort?: string,
   status?: string // Added status filter
 ) => {
-  const where: Prisma.productWhereInput = {
-    deleted_at: null,
-  };
+  // 1. Create a unique cache key based on parameters
+  const cacheKey = `products:${JSON.stringify({
+    categoryName,
+    minPrice,
+    maxPrice,
+    categoryIds,
+    sizeIds,
+    limit,
+    sort,
+    status,
+  })}`;
 
-  if (status) {
-    where.status = status as any;
-  }
-
-  if (categoryIds && categoryIds.length > 0) {
-    where.category_Id = { in: categoryIds };
-  } else if (categoryName) {
-    const capitalizedCategoryName = categoryName.charAt(0).toUpperCase() + categoryName.slice(1);
-    where.category = {
-      name: {
-        equals: capitalizedCategoryName,
-      },
-    };
-  }
-
-  if (minPrice !== undefined || maxPrice !== undefined) {
-    const priceFilter: Prisma.FloatFilter = {};
-    if (minPrice !== undefined) {
-      priceFilter.gte = minPrice;
+  try {
+    // 2. Check Redis for cached data
+    const cachedProducts = await redisClient.get(cacheKey);
+    if (cachedProducts) {
+      console.log("CACHE HIT:", cacheKey);
+      return JSON.parse(cachedProducts);
     }
-    if (maxPrice !== undefined) {
-      priceFilter.lte = maxPrice;
-    }
-    where.price = priceFilter;
-  }
 
-  if (sizeIds && sizeIds.length > 0) {
-    where.product_quantity = {
-      some: {
-        sizeId: { in: sizeIds },
-      },
+    // 3. If cache miss, fetch from database
+    console.log("CACHE MISS:", cacheKey);
+    const where: Prisma.productWhereInput = {
+      deleted_at: null,
     };
-  }
 
-  let orderBy: Prisma.productOrderByWithRelationInput | undefined;
+    if (status) {
+      where.status = status as any;
+    }
 
-  switch (sort) {
-    case 'price-asc':
-      orderBy = { price: 'asc' };
-      break;
-    case 'price-desc':
-      orderBy = { price: 'desc' };
-      break;
-    case 'name-asc':
-      orderBy = { name: 'asc' };
-      break;
-    case 'name-desc':
-      orderBy = { name: 'desc' };
-      break;
-    case 'newest':
-      orderBy = { id: 'desc' };
-      break;
-    case 'oldest':
-      orderBy = { id: 'asc' };
-      break;
-    default:
-      orderBy = undefined;
-  }
+    if (categoryIds && categoryIds.length > 0) {
+      where.category_Id = { in: categoryIds };
+    } else if (categoryName) {
+      const capitalizedCategoryName =
+        categoryName.charAt(0).toUpperCase() + categoryName.slice(1);
+      where.category = {
+        name: {
+          equals: capitalizedCategoryName,
+        },
+      };
+    }
 
-  const products = await prisma.product.findMany({
-    where,
-    orderBy,
-    include: {
-      category: true,
-      images: true,
-      product_quantity: {
-        include: {
-          color: true,
-          size: true,
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      const priceFilter: Prisma.FloatFilter = {};
+      if (minPrice !== undefined) {
+        priceFilter.gte = minPrice;
+      }
+      if (maxPrice !== undefined) {
+        priceFilter.lte = maxPrice;
+      }
+      where.price = priceFilter;
+    }
+
+    if (sizeIds && sizeIds.length > 0) {
+      where.product_quantity = {
+        some: {
+          sizeId: { in: sizeIds },
+        },
+      };
+    }
+
+    let orderBy: Prisma.productOrderByWithRelationInput | undefined;
+
+    switch (sort) {
+      case "price-asc":
+        orderBy = { price: "asc" };
+        break;
+      case "price-desc":
+        orderBy = { price: "desc" };
+        break;
+      case "name-asc":
+        orderBy = { name: "asc" };
+        break;
+      case "name-desc":
+        orderBy = { name: "desc" };
+        break;
+      case "newest":
+        orderBy = { id: "desc" };
+        break;
+      case "oldest":
+        orderBy = { id: "asc" };
+        break;
+      default:
+        orderBy = undefined;
+    }
+
+    const productsFromDb = await prisma.product.findMany({
+      where,
+      orderBy,
+      include: {
+        category: true,
+        images: true,
+        product_quantity: {
+          include: {
+            color: true,
+            size: true,
+          },
         },
       },
-    },
-    take: limit, // Apply the limit here
-  });
-
-  const mappedProducts = products.map((product) => {
-    const total_stock = product.product_quantity.reduce(
-      (acc, item) => acc + item.quantity,
-      0
-    );
-    const num_variants = product.product_quantity.length;
-    const imageUrl = product.images.length > 0 ? product.images[0].url : null;
-    
-    // Get unique colors and sizes
-    const colorMap = new Map<number, string>();
-    const sizeMap = new Map<number, { id: number; name: string }>();
-
-    product.product_quantity.forEach(item => {
-      if (item.color) {
-        colorMap.set(item.color.id, item.color.name);
-      }
-      if (item.size) {
-        sizeMap.set(item.size.id, { id: item.size.id, name: item.size.name });
-      }
+      take: limit, // Apply the limit here
     });
-    const colors = Array.from(colorMap.values());
-    const sizes = Array.from(sizeMap.values());
 
-    return {
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      offer_price: product.offer_price,
-      status: product.status,
-      category_Id: product.category_Id,
-      images: product.images, // Pass the full images array
-      category: product.category,
-      total_stock: total_stock,
-      num_variants: num_variants,
-      colors: colors,
-      sizes: sizes,
-      product_quantity: product.product_quantity,
-    };
-  });
+    const mappedProducts = productsFromDb.map((product) => {
+      const total_stock = product.product_quantity.reduce(
+        (acc, item) => acc + item.quantity,
+        0
+      );
+      const num_variants = product.product_quantity.length;
+      const imageUrl = product.images.length > 0 ? product.images[0].url : null;
 
-  // Filter out out-of-stock products for customer views (ONLINE status)
-  if (status === 'ONLINE') {
-    return mappedProducts.filter(p => p.total_stock > 0);
+      // Get unique colors and sizes
+      const colorMap = new Map<number, string>();
+      const sizeMap = new Map<number, { id: number; name: string }>();
+
+      product.product_quantity.forEach((item) => {
+        if (item.color) {
+          colorMap.set(item.color.id, item.color.name);
+        }
+        if (item.size) {
+          sizeMap.set(item.size.id, { id: item.size.id, name: item.size.name });
+        }
+      });
+      const colors = Array.from(colorMap.values());
+      const sizes = Array.from(sizeMap.values());
+
+      return {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        offer_price: product.offer_price,
+        status: product.status,
+        category_Id: product.category_Id,
+        images: product.images, // Pass the full images array
+        category: product.category,
+        total_stock: total_stock,
+        num_variants: num_variants,
+        colors: colors,
+        sizes: sizes,
+        product_quantity: product.product_quantity,
+      };
+    });
+
+    // Filter out out-of-stock products for customer views (ONLINE status)
+    let finalProducts = mappedProducts;
+    if (status === "ONLINE") {
+      finalProducts = mappedProducts.filter((p) => p.total_stock > 0);
+    }
+    
+    // 4. Save the result to Redis
+    await redisClient.set(cacheKey, JSON.stringify(finalProducts), {
+      EX: CACHE_EXPIRATION,
+    });
+
+    return finalProducts;
+
+  } catch (error) {
+    console.error("Error in getProducts service:", error);
+    // In case of a Redis error, we could fall back to just fetching from DB
+    // For now, we'll just re-throw the error
+    throw error;
   }
-
-  return mappedProducts;
 };
 
 export const getProduct = async (id: number) => {

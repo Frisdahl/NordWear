@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Product } from "../../types";
-import { getLikedProducts } from "../../services/api";
-import { useAuth } from "../../contexts/AuthContext"; 
+import { getLikedProducts, getCustomerByUserId } from "../../services/api";
+import { useAuth } from "../../contexts/AuthContext";
 import ProductCard from "../../components/customer/ProductCard";
 import Notification from "../../components/Notification";
 
@@ -10,31 +10,41 @@ const CustomerFavorites: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [notification, setNotification] = useState({ heading: "", subtext: "", type: "" });
-  const { customerId } = useAuth();
+  const { user } = useAuth();
+  const [customerId, setCustomerId] = useState<number | null>(null);
 
   useEffect(() => {
-    const fetchFavorites = async () => {
-      if (!customerId) {
+    const loadFavorites = async () => {
+      if (!user) {
         setLoading(false);
         setError("You must be logged in to see your favorites.");
         return;
       }
 
-      // 1. Check sessionStorage first
-      const cachedFavorites = sessionStorage.getItem(`favoriteProducts_${customerId}`);
-      if (cachedFavorites) {
-        setProducts(JSON.parse(cachedFavorites));
-        setLoading(false);
-        return;
-      }
-
-      // 2. If no cache, fetch from API
       try {
         setLoading(true);
-        const favoriteProducts = await getLikedProducts(customerId);
+        // First, get the customerId from the userId
+        const customer = await getCustomerByUserId(user.id);
+        if (!customer || !customer.id) {
+            setError("Could not retrieve customer information.");
+            return;
+        }
+        const currentCustomerId = customer.id;
+        setCustomerId(currentCustomerId);
+
+        // 1. Check sessionStorage first
+        const cachedFavorites = sessionStorage.getItem(`favoriteProducts_${currentCustomerId}`);
+        if (cachedFavorites) {
+          setProducts(JSON.parse(cachedFavorites));
+          return;
+        }
+
+        // 2. If no cache, fetch from API
+        const favoriteProducts = await getLikedProducts(currentCustomerId);
         setProducts(favoriteProducts);
+
         // 3. Save to sessionStorage for next time
-        sessionStorage.setItem(`favoriteProducts_${customerId}`, JSON.stringify(favoriteProducts));
+        sessionStorage.setItem(`favoriteProducts_${currentCustomerId}`, JSON.stringify(favoriteProducts));
       } catch (err) {
         setError("Failed to load favorite products.");
         console.error(err);
@@ -43,8 +53,8 @@ const CustomerFavorites: React.FC = () => {
       }
     };
 
-    fetchFavorites();
-  }, [customerId]);
+    loadFavorites();
+  }, [user]);
 
   const handleNotification = (data: { heading: string; subtext: string; type: "success" | "error" }) => {
     setNotification({
@@ -56,7 +66,9 @@ const CustomerFavorites: React.FC = () => {
   
   const handleUnlike = (productId: number) => {
     setProducts(prevProducts => prevProducts.filter(p => p.id !== productId));
-    sessionStorage.removeItem(`favoriteProducts_${customerId}`);
+    if (customerId) {
+      sessionStorage.removeItem(`favoriteProducts_${customerId}`);
+    }
   };
 
   if (loading) {

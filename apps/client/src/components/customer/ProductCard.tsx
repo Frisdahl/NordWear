@@ -22,6 +22,7 @@ interface ProductCardProps {
     subtext: string;
     type: "success" | "error";
   }) => void;
+  onUnlike?: (productId: number) => void;
   className?: string;
   style?: React.CSSProperties;
   index?: number;
@@ -30,6 +31,7 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({
   product,
   onNotify,
+  onUnlike,
   className,
   style,
   index = 0,
@@ -98,6 +100,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
       try {
         if (isLiked) {
           await unlikeProduct(customerId, id);
+          if (onUnlike) {
+            onUnlike(id);
+          }
           onNotify({
             heading: "Fjernet",
             subtext: `${name} er fjernet fra din ønskeliste.`,

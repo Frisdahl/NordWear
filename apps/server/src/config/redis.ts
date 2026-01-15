@@ -1,7 +1,9 @@
 import { createClient } from "redis";
-import "dotenv/config";
 
-console.log("Attempting to connect to Redis with URL:", process.env.REDIS_URL); // Diagnostic log
+// Only load .env file in development
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 
 const redisUrl = process.env.REDIS_URL;
 

@@ -1,6 +1,8 @@
 import { createClient } from "redis";
 import "dotenv/config";
 
+console.log("Attempting to connect to Redis with URL:", process.env.REDIS_URL); // Diagnostic log
+
 const redisUrl = process.env.REDIS_URL;
 
 if (!redisUrl) {

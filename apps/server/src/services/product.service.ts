@@ -282,13 +282,25 @@ export const createProduct = async (data: any) => {
     });
   }
 
+  // After the transaction is successful, invalidate the product list cache
+  try {
+    console.log(`CACHE INVALIDATION: Clearing all product list caches after new product creation.`);
+    const keys = await redisClient.keys('products:*');
+    if (keys.length > 0) {
+      await redisClient.del(keys);
+      console.log(`CACHE INVALIDATION: Deleted ${keys.length} product list keys.`);
+    }
+  } catch (error) {
+    console.error(`CACHE INVALIDATION FAILED after creating product ${newProduct.id}:`, error);
+  }
+
   return newProduct;
 };
 
 export const updateProduct = async (id: number, data: any) => {
   const { shipment_size, variants, images, ...productData } = data;
 
-  return prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     // 1. Update the core product data
     const updatedProduct = await tx.product.update({
       where: { id },
@@ -342,6 +354,27 @@ export const updateProduct = async (id: number, data: any) => {
 
     return updatedProduct;
   });
+
+  // After the transaction is successful, invalidate the cache
+  try {
+    console.log(`CACHE INVALIDATION: Clearing cache for product ${id} and all product lists.`);
+    
+    // Invalidate the single product cache (good practice for the future)
+    await redisClient.del(`product:${id}`);
+
+    // Invalidate all product list caches
+    const keys = await redisClient.keys('products:*');
+    if (keys.length > 0) {
+      await redisClient.del(keys);
+      console.log(`CACHE INVALIDATION: Deleted ${keys.length} product list keys matching 'products:*'.`);
+    }
+  } catch (error) {
+    console.error(`CACHE INVALIDATION FAILED for product ${id}:`, error);
+    // We don't re-throw the error here because the main operation (DB update) was successful.
+    // We just log the failure to invalidate the cache.
+  }
+
+  return result;
 };
 
 export const getCategories = async () => {
@@ -391,6 +424,18 @@ export const deleteProducts = async (ids: number[]) => {
     }
   );
 
+  // After the transaction is successful, invalidate the cache
+  try {
+    console.log(`CACHE INVALIDATION: Clearing all product list caches after deleting products.`);
+    const keys = await redisClient.keys('products:*');
+    if (keys.length > 0) {
+      await redisClient.del(keys);
+      console.log(`CACHE INVALIDATION: Deleted ${keys.length} product list keys.`);
+    }
+  } catch (error) {
+    console.error(`CACHE INVALIDATION FAILED after deleting products ${ids.join(', ')}:`, error);
+  }
+
   return result;
 };
 
@@ -399,10 +444,24 @@ export const updateProductsStatus = async (ids: number[], status: 'ONLINE' | 'OF
     return { count: 0 };
   }
 
-  return await prisma.product.updateMany({
+  const result = await prisma.product.updateMany({
     where: { id: { in: ids } },
     data: { status },
   });
+
+  // After the update is successful, invalidate the cache
+  try {
+    console.log(`CACHE INVALIDATION: Clearing all product list caches after updating product status.`);
+    const keys = await redisClient.keys('products:*');
+    if (keys.length > 0) {
+      await redisClient.del(keys);
+      console.log(`CACHE INVALIDATION: Deleted ${keys.length} product list keys.`);
+    }
+  } catch (error) {
+    console.error(`CACHE INVALIDATION FAILED after updating status for products ${ids.join(', ')}:`, error);
+  }
+
+  return result;
 };
 
 export const likeProduct = async (customerId: number, productId: number) => {

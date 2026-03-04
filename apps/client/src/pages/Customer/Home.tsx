@@ -8,24 +8,26 @@ import RatingSlider from "../../components/customer/RatingSlider";
 import CategoryCard from "../../components/customer/CategoryCard";
 import EmblaCarousel from "../../components/customer/carousel/EmblaCarousel";
 import nordwearHero from "../../assets/nordwear-hero.webp";
+import productionImage from "../../assets/production.webp";
+import overProductionImage from "../../assets/over-production.webp";
+import shirtsImage from "../../assets/shirts.webp";
+import sneakersImage from "../../assets/sneakers.webp";
+import hoodiesImage from "../../assets/hoodies.webp";
 
 const categories = [
   {
     name: "Sneakers",
-    imageUrl:
-      "https://images.unsplash.com/photo-1598603784143-1b58f6d79c78?q=80&w=1526&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    imageUrl: sneakersImage,
   },
 
   {
     name: "Hættetrøjer",
-    imageUrl:
-      "https://images.unsplash.com/photo-1523124006244-a37848c6002c?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    imageUrl: hoodiesImage,
   },
 
   {
     name: "Skjorter",
-    imageUrl:
-      "https://plus.unsplash.com/premium_photo-1661627681947-4431c8c97659?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    imageUrl: shirtsImage,
   },
 
   {
@@ -213,7 +215,7 @@ const Home: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-0 items-center">
           <div className="h-[600px] md:h-[900px] overflow-hidden">
             <img
-              src="https://images.unsplash.com/photo-1603787081207-362bcef7c144?q=80&w=1965&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              src={productionImage}
               alt="Design"
               className="w-full h-full object-cover block"
             />
@@ -249,7 +251,7 @@ const Home: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-14 items-center">
           <div className="h-[600px] md:h-[900px] overflow-hidden">
             <img
-              src="https://images.unsplash.com/photo-1556906781-9a412961c28c?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              src={overProductionImage}
               alt="Design"
               className="w-full h-full object-cover block"
             />

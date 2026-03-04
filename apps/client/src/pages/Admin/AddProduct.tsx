@@ -19,6 +19,32 @@ import {
 const productActiveSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" /></svg>`;
 const chevronRightSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>`;
 
+const CLOTHING_SIZES = ["XS", "S", "M", "L", "XL"];
+const SHOE_SIZES = ["38", "39", "40", "41", "42", "43", "44", "45", "46"];
+const SNEAKERS_CATEGORY_ID = "5";
+type FieldErrorKey = "name" | "price" | "category_Id" | "status";
+
+const getSizeOptionsForCategory = (categoryId: string) => {
+  return categoryId === SNEAKERS_CATEGORY_ID ? SHOE_SIZES : CLOTHING_SIZES;
+};
+
+const getSizeSortValue = (size: string) => {
+  const numericSize = Number(size);
+  if (!Number.isNaN(numericSize)) {
+    return 100 + numericSize;
+  }
+
+  const clothingSizeOrder: { [key: string]: number } = {
+    XS: 0,
+    S: 1,
+    M: 2,
+    L: 3,
+    XL: 4,
+  };
+
+  return clothingSizeOrder[size] ?? 999;
+};
+
 // Controlled InputField
 const InputField = ({
   label,
@@ -28,6 +54,7 @@ const InputField = ({
   prefix,
   value,
   onChange,
+  hasError = false,
 }: {
   label: string;
   id: string;
@@ -36,6 +63,7 @@ const InputField = ({
   prefix?: string;
   value?: string | number;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  hasError?: boolean;
 }) => (
   <div className="flex flex-col gap-2">
     {label && (
@@ -55,9 +83,11 @@ const InputField = ({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className={`w-full h-10 px-3 border border-[#e6e6e6] rounded-lg focus:outline-none focus:border-[#303030] text-[#303030] ${
-          prefix ? "pl-10" : ""
-        }`}
+        className={`w-full h-10 px-3 border rounded-lg focus:outline-none text-[#303030] ${
+          hasError
+            ? "border-red-500 focus:border-red-500"
+            : "border-[#e6e6e6] focus:border-[#303030]"
+        } ${prefix ? "pl-10" : ""}`}
       />
     </div>
   </div>
@@ -126,22 +156,20 @@ const AddProduct = () => {
     [key: string]: { price: string; stock: string };
   }>({});
 
-  const [availableSizes, setAvailableSizes] = useState([
-    "XS",
-    "S",
-    "M",
-    "L",
-    "XL",
-  ]);
+  const [availableSizes, setAvailableSizes] = useState(CLOTHING_SIZES);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [notification, setNotification] = useState({ message: "", type: "" });
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<FieldErrorKey, string>>
+  >({});
 
-  const sizeOrder: { [key: string]: number } = {
-    XS: 0,
-    S: 1,
-    M: 2,
-    L: 3,
-    XL: 4,
+  const clearFieldError = (field: FieldErrorKey) => {
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
   };
 
   useEffect(() => {
@@ -178,10 +206,13 @@ const AddProduct = () => {
             // Populate variants
             if (product.variants && product.variants.length > 0) {
               const variantSizes = product.variants.map((v: any) => v.size);
+              const availableCategorySizes = getSizeOptionsForCategory(
+                product.category_Id.toString(),
+              );
               setVariants(variantSizes);
               setHasVariants(true);
-              setAvailableSizes((prev) =>
-                prev.filter((s) => !variantSizes.includes(s))
+              setAvailableSizes(
+                availableCategorySizes.filter((s) => !variantSizes.includes(s)),
               );
 
               const details: {
@@ -194,6 +225,10 @@ const AddProduct = () => {
                 };
               });
               setVariantDetails(details);
+            } else {
+              setAvailableSizes(
+                getSizeOptionsForCategory(product.category_Id.toString()),
+              );
             }
           }
         } catch (error) {
@@ -272,7 +307,7 @@ const AddProduct = () => {
   const handleVariantDetailChange = (
     size: string,
     field: "price" | "stock",
-    value: string
+    value: string,
   ) => {
     setVariantDetails({
       ...variantDetails,
@@ -302,7 +337,7 @@ const AddProduct = () => {
   const handleDeleteSelectedVariants = () => {
     const newVariants = variants.filter((v) => !selectedVariants.includes(v));
     const removedFromVariants = variants.filter((v) =>
-      selectedVariants.includes(v)
+      selectedVariants.includes(v),
     );
     setVariants(newVariants);
     setAvailableSizes([...availableSizes, ...removedFromVariants]);
@@ -314,15 +349,74 @@ const AddProduct = () => {
     setSelectedVariants([]);
   };
 
+  const handleCategoryChange = (nextCategory: string) => {
+    setCategory(nextCategory);
+    clearFieldError("category_Id");
+    setIsDropdownOpen(false);
+
+    const allowedSizes = getSizeOptionsForCategory(nextCategory);
+    const filteredVariants = variants.filter((variant) =>
+      allowedSizes.includes(variant),
+    );
+
+    setVariants(filteredVariants);
+    setSelectedVariants((prev) =>
+      prev.filter((variant) => allowedSizes.includes(variant)),
+    );
+    setVariantDetails((prev) => {
+      return Object.fromEntries(
+        Object.entries(prev).filter(([size]) => allowedSizes.includes(size)),
+      );
+    });
+    setAvailableSizes(
+      allowedSizes.filter((size) => !filteredVariants.includes(size)),
+    );
+  };
+
   const handleSaveProduct = async () => {
     try {
+      const nextErrors: Partial<Record<FieldErrorKey, string>> = {};
+
+      if (!name.trim()) {
+        nextErrors.name = "Titel er påkrævet";
+      }
+
+      const parsedBasePrice = parseFloat(price);
+      const variantPrices = variants
+        .map((size) => parseFloat(variantDetails[size]?.price || "0"))
+        .filter(
+          (variantPrice) => Number.isFinite(variantPrice) && variantPrice > 0,
+        );
+
+      const effectiveBasePrice =
+        Number.isFinite(parsedBasePrice) && parsedBasePrice > 0
+          ? parsedBasePrice
+          : variantPrices.length > 0
+            ? Math.min(...variantPrices)
+            : 0;
+
+      if (effectiveBasePrice <= 0) {
+        nextErrors.price = "Pris skal være større end 0";
+      }
+
+      if (Object.keys(nextErrors).length > 0) {
+        setFieldErrors(nextErrors);
+        setNotification({
+          message: Object.values(nextErrors).join(", "),
+          type: "error",
+        });
+        return;
+      }
+
+      setFieldErrors({});
+
       const finalImageUrls = await Promise.all(
         images.map((img) => {
           if (img.startsWith("data:")) {
             return uploadImage(img).then((res) => res.url);
           }
           return Promise.resolve(img);
-        })
+        }),
       );
 
       const imagesPayload = finalImageUrls.map((url, index) => ({
@@ -333,7 +427,7 @@ const AddProduct = () => {
       const productData = {
         name,
         description,
-        price: parseFloat(price) || 0,
+        price: effectiveBasePrice,
         offer_price: offerPrice ? parseFloat(offerPrice) : undefined,
         status: status as any,
         category_Id: parseInt(category),
@@ -364,8 +458,39 @@ const AddProduct = () => {
       }, 2000);
     } catch (error) {
       console.error("Failed to save product:", error);
+      const backendErrors = (error as any)?.response?.data?.errors || [];
+      const backendMessage = backendErrors
+        ?.map((validationError: any) => validationError?.message)
+        ?.filter(Boolean)
+        ?.join(", ");
+      const fallbackMessage = (error as any)?.response?.data?.message;
+
+      const pathMap: Record<string, FieldErrorKey> = {
+        name: "name",
+        price: "price",
+        category_Id: "category_Id",
+        status: "status",
+      };
+
+      if (Array.isArray(backendErrors) && backendErrors.length > 0) {
+        const mappedErrors: Partial<Record<FieldErrorKey, string>> = {};
+        backendErrors.forEach((validationError: any) => {
+          const mappedField = pathMap[validationError?.path];
+          if (mappedField && validationError?.message) {
+            mappedErrors[mappedField] = validationError.message;
+          }
+        });
+
+        if (Object.keys(mappedErrors).length > 0) {
+          setFieldErrors((prev) => ({ ...prev, ...mappedErrors }));
+        }
+      }
+
       setNotification({
-        message: `Fejl: Kunne ikke gemme produktet.`,
+        message:
+          backendMessage || fallbackMessage
+            ? `Fejl: ${backendMessage || fallbackMessage}`
+            : `Fejl: Kunne ikke gemme produktet.`,
         type: "error",
       });
     }
@@ -373,14 +498,14 @@ const AddProduct = () => {
 
   const sortedVariants = variants
     .slice()
-    .sort((a, b) => sizeOrder[a] - sizeOrder[b]);
+    .sort((a, b) => getSizeSortValue(a) - getSizeSortValue(b));
 
   return (
     <div className="container mx-auto px-3 pt-8 min-h-screen relative pb-16">
       {notification.message && (
         <Notification
           show={!!notification.message}
-          heading={notification.type === 'success' ? 'Success' : 'Fejl'}
+          heading={notification.type === "success" ? "Success" : "Fejl"}
           subtext={notification.message}
           type={notification.type as "success" | "error"}
           onClose={() => setNotification({ message: "", type: "" })}
@@ -389,8 +514,8 @@ const AddProduct = () => {
 
       {/* Header */}
       <div className="flex items-center gap-2 mb-6 text-[#303030]">
-        <div 
-          onClick={() => navigate("/admin/all-products")} 
+        <div
+          onClick={() => navigate("/admin/all-products")}
           className="cursor-pointer hover:bg-gray-200 transition-colors rounded-full p-2 flex items-center justify-center"
         >
           <Icon
@@ -422,7 +547,11 @@ const AddProduct = () => {
               label="Titel"
               placeholder="Nordwear hoodie"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              hasError={!!fieldErrors.name}
+              onChange={(e) => {
+                setName(e.target.value);
+                clearFieldError("name");
+              }}
             />
             <div className="mt-6">
               <label
@@ -536,7 +665,7 @@ const AddProduct = () => {
                 <div className="absolute z-10 mt-2 w-48 bg-white rounded-xl shadow-lg border border-[#e6e6e6] overflow-hidden">
                   {availableSizes
                     .slice()
-                    .sort((a, b) => sizeOrder[a] - sizeOrder[b])
+                    .sort((a, b) => getSizeSortValue(a) - getSizeSortValue(b))
                     .map((size) => (
                       <button
                         key={size}
@@ -619,7 +748,7 @@ const AddProduct = () => {
                               handleVariantDetailChange(
                                 size,
                                 "price",
-                                e.target.value
+                                e.target.value,
                               )
                             }
                             className="w-full h-9 px-2 border border-[#e6e6e6] rounded-md text-sm text-[#303030] focus:outline-none focus:border-[#303030]"
@@ -634,7 +763,7 @@ const AddProduct = () => {
                               handleVariantDetailChange(
                                 size,
                                 "stock",
-                                e.target.value
+                                e.target.value,
                               )
                             }
                             className="w-full h-9 px-2 border border-[#e6e6e6] rounded-md text-sm text-[#303030] focus:outline-none focus:border-[#303030]"
@@ -686,8 +815,15 @@ const AddProduct = () => {
                 <select
                   id="status"
                   value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                  className="w-full h-10 px-3 border border-[#e6e6e6] rounded-lg bg-white focus:outline-none focus:border-[#303030] text-[#303030] appearance-none"
+                  onChange={(e) => {
+                    setStatus(e.target.value);
+                    clearFieldError("status");
+                  }}
+                  className={`w-full h-10 px-3 border rounded-lg bg-white focus:outline-none text-[#303030] appearance-none ${
+                    fieldErrors.status
+                      ? "border-red-500 focus:border-red-500"
+                      : "border-[#e6e6e6] focus:border-[#303030]"
+                  }`}
                   style={{
                     backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
                     backgroundPosition: "right 0.5rem center",
@@ -710,8 +846,12 @@ const AddProduct = () => {
                 <select
                   id="category"
                   value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full h-10 px-3 border border-[#e6e6e6] rounded-lg bg-white focus:outline-none focus:border-[#303030] text-[#303030] appearance-none"
+                  onChange={(e) => handleCategoryChange(e.target.value)}
+                  className={`w-full h-10 px-3 border rounded-lg bg-white focus:outline-none text-[#303030] appearance-none ${
+                    fieldErrors.category_Id
+                      ? "border-red-500 focus:border-red-500"
+                      : "border-[#e6e6e6] focus:border-[#303030]"
+                  }`}
                   style={{
                     backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
                     backgroundPosition: "right 0.5rem center",
@@ -740,7 +880,11 @@ const AddProduct = () => {
                 prefix="kr."
                 placeholder="649"
                 value={price}
-                onChange={(e) => setPrice(e.target.value)}
+                hasError={!!fieldErrors.price}
+                onChange={(e) => {
+                  setPrice(e.target.value);
+                  clearFieldError("price");
+                }}
               />
               <InputField
                 id="offer_price"

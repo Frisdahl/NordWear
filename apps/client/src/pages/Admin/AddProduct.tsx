@@ -46,6 +46,33 @@ const getSizeSortValue = (size: string) => {
   return clothingSizeOrder[size] ?? 999;
 };
 
+const toFriendlyDanishErrorMessage = (
+  message?: string,
+  isUpdate?: boolean,
+) => {
+  if (!message) {
+    return isUpdate
+      ? "Kunne ikke opdatere produktet. Prøv igen om lidt."
+      : "Kunne ikke oprette produktet. Prøv igen om lidt.";
+  }
+
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes("error creating product")) {
+    return "Produktet kunne ikke oprettes. Tjek venligst felterne og prøv igen.";
+  }
+
+  if (normalized.includes("error updating product")) {
+    return "Produktet kunne ikke opdateres. Tjek venligst felterne og prøv igen.";
+  }
+
+  if (normalized.includes("validation failed")) {
+    return "Nogle felter er ugyldige. Ret dem og prøv igen.";
+  }
+
+  return message;
+};
+
 // Controlled InputField
 const InputField = ({
   label,
@@ -502,10 +529,10 @@ const AddProduct = () => {
       }
 
       setNotification({
-        message:
-          backendMessage || fallbackMessage
-            ? `Fejl: ${backendMessage || fallbackMessage}`
-            : `Fejl: Kunne ikke gemme produktet.`,
+        message: toFriendlyDanishErrorMessage(
+          backendMessage || fallbackMessage,
+          !!id,
+        ),
         type: "error",
       });
     }
@@ -524,7 +551,7 @@ const AddProduct = () => {
             notification.type === "loading"
               ? "Behandler"
               : notification.type === "success"
-                ? "Success"
+                ? "Succes"
                 : "Fejl"
           }
           subtext={notification.message}

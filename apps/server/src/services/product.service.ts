@@ -4,6 +4,38 @@ const prisma = new PrismaClient();
 
 const CACHE_EXPIRATION = 600; // Cache for 10 minutes
 
+const getOrCreateSizeMap = async (
+  client: Prisma.TransactionClient | PrismaClient,
+  rawSizeNames: string[],
+) => {
+  const sizeNames = [
+    ...new Set(rawSizeNames.map((size) => size?.trim()).filter(Boolean)),
+  ] as string[];
+
+  if (sizeNames.length === 0) {
+    return new Map<string, number>();
+  }
+
+  let sizes = await client.size.findMany({
+    where: { name: { in: sizeNames } },
+  });
+
+  const existingNames = new Set(sizes.map((size) => size.name));
+  const missingSizeNames = sizeNames.filter((size) => !existingNames.has(size));
+
+  if (missingSizeNames.length > 0) {
+    await client.size.createMany({
+      data: missingSizeNames.map((name) => ({ name })),
+    });
+
+    sizes = await client.size.findMany({
+      where: { name: { in: sizeNames } },
+    });
+  }
+
+  return new Map(sizes.map((size) => [size.name, size.id]));
+};
+
 export const getProducts = async (
   categoryName?: string,
   minPrice?: number,
@@ -12,7 +44,7 @@ export const getProducts = async (
   sizeIds?: number[],
   limit?: number,
   sort?: string,
-  status?: string // Added status filter
+  status?: string, // Added status filter
 ) => {
   // 1. Create a unique cache key based on parameters
   const cacheKey = `products:${JSON.stringify({
@@ -119,7 +151,7 @@ export const getProducts = async (
     const mappedProducts = productsFromDb.map((product) => {
       const total_stock = product.product_quantity.reduce(
         (acc, item) => acc + item.quantity,
-        0
+        0,
       );
       const num_variants = product.product_quantity.length;
       const imageUrl = product.images.length > 0 ? product.images[0].url : null;
@@ -161,14 +193,13 @@ export const getProducts = async (
     if (status === "ONLINE") {
       finalProducts = mappedProducts.filter((p) => p.total_stock > 0);
     }
-    
+
     // 4. Save the result to Redis
     await redisClient.set(cacheKey, JSON.stringify(finalProducts), {
       EX: CACHE_EXPIRATION,
     });
 
     return finalProducts;
-
   } catch (error) {
     console.error("Error in getProducts service:", error);
     // In case of a Redis error, we could fall back to just fetching from DB
@@ -197,11 +228,11 @@ export const getProduct = async (id: number) => {
   }
 
   // Restructure the variants data to be more frontend-friendly
-  const variants = product.product_quantity.map(item => ({
+  const variants = product.product_quantity.map((item) => ({
     size: item.size.name,
     stock: item.quantity,
     // Assuming a default or related price per variant if available
-    // price: item.price, 
+    // price: item.price,
   }));
 
   return { ...product, variants };
@@ -244,54 +275,69 @@ export const searchProducts = async (query: string) => {
   });
 };
 
-
 export const createProduct = async (data: any) => {
   const { shipment_size, variants, images, ...productData } = data;
 
-  const newProduct = await prisma.product.create({
-    data: {
-      ...productData,
-      shipment_size: {
-        create: shipment_size,
+  const newProduct = await prisma.$transaction(async (tx) => {
+    const createdProduct = await tx.product.create({
+      data: {
+        ...productData,
+        shipment_size: {
+          create: shipment_size,
+        },
+        images: {
+          create: images,
+        },
       },
-      images: {
-        create: images,
-      },
-    },
+    });
+
+    if (variants && variants.length > 0) {
+      const sizeNames = variants.map((v: any) => String(v.size ?? "").trim());
+      const sizeMap = await getOrCreateSizeMap(tx, sizeNames);
+
+      const productQuantities = variants.map((v: any) => {
+        const normalizedSize = String(v.size ?? "").trim();
+        const resolvedSizeId = sizeMap.get(normalizedSize);
+
+        if (!resolvedSizeId) {
+          throw new Error(
+            `Kunne ikke finde eller oprette størrelse '${normalizedSize}'.`,
+          );
+        }
+
+        return {
+          productId: createdProduct.id,
+          sizeId: resolvedSizeId,
+          quantity: v.stock,
+          colorId: 1,
+        };
+      });
+
+      await tx.product_quantity.createMany({
+        data: productQuantities,
+      });
+    }
+
+    return createdProduct;
   });
-
-  if (variants && variants.length > 0) {
-    const sizeNames = variants.map((v: any) => v.size);
-    const sizes = await prisma.size.findMany({
-      where: {
-        name: { in: sizeNames },
-      },
-    });
-    const sizeMap = new Map(sizes.map((s) => [s.name, s.id]));
-
-    const productQuantities = variants.map((v: any) => ({
-      productId: newProduct.id,
-      sizeId: sizeMap.get(v.size),
-      quantity: v.stock,
-      // colorId will be handled later
-      colorId: 1,
-    }));
-
-    await prisma.product_quantity.createMany({
-      data: productQuantities,
-    });
-  }
 
   // After the transaction is successful, invalidate the product list cache
   try {
-    console.log(`CACHE INVALIDATION: Clearing all product list caches after new product creation.`);
-    const keys = await redisClient.keys('products:*');
+    console.log(
+      `CACHE INVALIDATION: Clearing all product list caches after new product creation.`,
+    );
+    const keys = await redisClient.keys("products:*");
     if (keys.length > 0) {
       await redisClient.del(keys);
-      console.log(`CACHE INVALIDATION: Deleted ${keys.length} product list keys.`);
+      console.log(
+        `CACHE INVALIDATION: Deleted ${keys.length} product list keys.`,
+      );
     }
   } catch (error) {
-    console.error(`CACHE INVALIDATION FAILED after creating product ${newProduct.id}:`, error);
+    console.error(
+      `CACHE INVALIDATION FAILED after creating product ${newProduct.id}:`,
+      error,
+    );
   }
 
   return newProduct;
@@ -334,18 +380,26 @@ export const updateProduct = async (id: number, data: any) => {
 
     // 5. Create new variants
     if (variants && variants.length > 0) {
-      const sizeNames = variants.map((v: any) => v.size);
-      const sizes = await tx.size.findMany({
-        where: { name: { in: sizeNames } },
-      });
-      const sizeMap = new Map(sizes.map((s) => [s.name, s.id]));
+      const sizeNames = variants.map((v: any) => String(v.size ?? "").trim());
+      const sizeMap = await getOrCreateSizeMap(tx, sizeNames);
 
-      const productQuantities = variants.map((v: any) => ({
-        productId: id,
-        sizeId: sizeMap.get(v.size),
-        quantity: v.stock,
-        colorId: 1, // Hardcoded for now
-      }));
+      const productQuantities = variants.map((v: any) => {
+        const normalizedSize = String(v.size ?? "").trim();
+        const resolvedSizeId = sizeMap.get(normalizedSize);
+
+        if (!resolvedSizeId) {
+          throw new Error(
+            `Kunne ikke finde eller oprette størrelse '${normalizedSize}'.`,
+          );
+        }
+
+        return {
+          productId: id,
+          sizeId: resolvedSizeId,
+          quantity: v.stock,
+          colorId: 1,
+        };
+      });
 
       await tx.product_quantity.createMany({
         data: productQuantities,
@@ -357,16 +411,20 @@ export const updateProduct = async (id: number, data: any) => {
 
   // After the transaction is successful, invalidate the cache
   try {
-    console.log(`CACHE INVALIDATION: Clearing cache for product ${id} and all product lists.`);
-    
+    console.log(
+      `CACHE INVALIDATION: Clearing cache for product ${id} and all product lists.`,
+    );
+
     // Invalidate the single product cache (good practice for the future)
     await redisClient.del(`product:${id}`);
 
     // Invalidate all product list caches
-    const keys = await redisClient.keys('products:*');
+    const keys = await redisClient.keys("products:*");
     if (keys.length > 0) {
       await redisClient.del(keys);
-      console.log(`CACHE INVALIDATION: Deleted ${keys.length} product list keys matching 'products:*'.`);
+      console.log(
+        `CACHE INVALIDATION: Deleted ${keys.length} product list keys matching 'products:*'.`,
+      );
     }
   } catch (error) {
     console.error(`CACHE INVALIDATION FAILED for product ${id}:`, error);
@@ -421,25 +479,35 @@ export const deleteProducts = async (ids: number[]) => {
         where: { id: { in: ids } },
         data: { deleted_at: new Date() },
       });
-    }
+    },
   );
 
   // After the transaction is successful, invalidate the cache
   try {
-    console.log(`CACHE INVALIDATION: Clearing all product list caches after deleting products.`);
-    const keys = await redisClient.keys('products:*');
+    console.log(
+      `CACHE INVALIDATION: Clearing all product list caches after deleting products.`,
+    );
+    const keys = await redisClient.keys("products:*");
     if (keys.length > 0) {
       await redisClient.del(keys);
-      console.log(`CACHE INVALIDATION: Deleted ${keys.length} product list keys.`);
+      console.log(
+        `CACHE INVALIDATION: Deleted ${keys.length} product list keys.`,
+      );
     }
   } catch (error) {
-    console.error(`CACHE INVALIDATION FAILED after deleting products ${ids.join(', ')}:`, error);
+    console.error(
+      `CACHE INVALIDATION FAILED after deleting products ${ids.join(", ")}:`,
+      error,
+    );
   }
 
   return result;
 };
 
-export const updateProductsStatus = async (ids: number[], status: 'ONLINE' | 'OFFLINE' | 'DRAFT') => {
+export const updateProductsStatus = async (
+  ids: number[],
+  status: "ONLINE" | "OFFLINE" | "DRAFT",
+) => {
   if (!Array.isArray(ids) || ids.length === 0) {
     return { count: 0 };
   }
@@ -451,90 +519,97 @@ export const updateProductsStatus = async (ids: number[], status: 'ONLINE' | 'OF
 
   // After the update is successful, invalidate the cache
   try {
-    console.log(`CACHE INVALIDATION: Clearing all product list caches after updating product status.`);
-    const keys = await redisClient.keys('products:*');
+    console.log(
+      `CACHE INVALIDATION: Clearing all product list caches after updating product status.`,
+    );
+    const keys = await redisClient.keys("products:*");
     if (keys.length > 0) {
       await redisClient.del(keys);
-      console.log(`CACHE INVALIDATION: Deleted ${keys.length} product list keys.`);
+      console.log(
+        `CACHE INVALIDATION: Deleted ${keys.length} product list keys.`,
+      );
     }
   } catch (error) {
-    console.error(`CACHE INVALIDATION FAILED after updating status for products ${ids.join(', ')}:`, error);
+    console.error(
+      `CACHE INVALIDATION FAILED after updating status for products ${ids.join(", ")}:`,
+      error,
+    );
   }
 
   return result;
 };
 
 export const likeProduct = async (customerId: number, productId: number) => {
-    return await prisma.customer_likes.create({
-        data: {
-            customerId,
-            productId,
-        },
-    });
+  return await prisma.customer_likes.create({
+    data: {
+      customerId,
+      productId,
+    },
+  });
 };
 
 export const unlikeProduct = async (customerId: number, productId: number) => {
-    const like = await prisma.customer_likes.findUnique({
-        where: {
-            customerId_productId: {
-                customerId,
-                productId,
-            }
-        },
-    });
+  const like = await prisma.customer_likes.findUnique({
+    where: {
+      customerId_productId: {
+        customerId,
+        productId,
+      },
+    },
+  });
 
-    if (like) {
-        return await prisma.customer_likes.delete({
-            where: {
-                id: like.id,
-            },
-        });
-    }
+  if (like) {
+    return await prisma.customer_likes.delete({
+      where: {
+        id: like.id,
+      },
+    });
+  }
 };
 
 export const getLikedProducts = async (customerId: number) => {
-    const likedProducts = await prisma.customer_likes.findMany({
-        where: {
-            customerId,
-        },
+  const likedProducts = await prisma.customer_likes.findMany({
+    where: {
+      customerId,
+    },
+    include: {
+      product: {
         include: {
-            product: {
-                include: {
-                    images: {
-                        where: { isThumbnail: true },
-                        take: 1,
-                    },
-                    category: true,
-                },
-            },
+          images: {
+            where: { isThumbnail: true },
+            take: 1,
+          },
+          category: true,
         },
-    });
+      },
+    },
+  });
 
-    return likedProducts.map(lp => {
-        const product = lp.product;
-        const imageUrl = product.images.length > 0 ? product.images[0].url : null;
-        return {
-            ...lp,
-            product: {
-                ...product,
-                imageUrl,
-            },
-        };
-    });
+  return likedProducts.map((lp) => {
+    const product = lp.product;
+    const imageUrl = product.images.length > 0 ? product.images[0].url : null;
+    return {
+      ...lp,
+      product: {
+        ...product,
+        imageUrl,
+      },
+    };
+  });
 };
 
 export const getCustomerByUserId = async (userId: number) => {
-    // Upsert ensures we either find the existing customer or create a new one safely
-    // This handles the race condition where multiple requests try to create the customer at once
-    const customer = await prisma.customer.upsert({
-        where: {
-            userId: userId,
-        },
-        update: {}, // No updates needed if found
-        create: {
-            userId: userId,
-        },
-    });
+  // Upsert ensures we either find the existing customer or create a new one safely
+  // This handles the race condition where multiple requests try to create the customer at once
+  const customer = await prisma.customer.upsert({
+    where: {
+      userId: userId,
+    },
+    update: {}, // No updates needed if found
+    create: {
+      userId: userId,
+    },
+  });
 
-    return customer;
+  return customer;
 };

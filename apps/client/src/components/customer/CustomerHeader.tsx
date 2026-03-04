@@ -17,7 +17,6 @@ const mainMenuItems: MenuItem[] = [
   { name: "Sneakers", path: "/category/sneakers" },
   { name: "Skjorter", path: "/category/skjorter" },
   { name: "Hættetrøjer", path: "/category/hættetrøjer" },
-  { name: "Jakker", path: "/category/jakker" },
 ];
 
 const staticMenuItems: MenuItem[] = [{ name: "Om os", path: "/about" }];
@@ -44,8 +43,16 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
   const { cartCount } = useCart();
   const [headerHeight, setHeaderHeight] = useState(0);
 
-  const handleNotification = (data: { heading: string; subtext: string; type: "success" | "error" }) => {
-    setNotification({ heading: data.heading, subtext: data.subtext, type: data.type as "success" | "error" });
+  const handleNotification = (data: {
+    heading: string;
+    subtext: string;
+    type: "success" | "error";
+  }) => {
+    setNotification({
+      heading: data.heading,
+      subtext: data.subtext,
+      type: data.type as "success" | "error",
+    });
   };
 
   const handleSearchClick = () => {
@@ -278,7 +285,9 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
           subtext={notification.subtext}
           type={notification.type as "success" | "error"}
           show={true}
-          onClose={() => setNotification({ heading: "", subtext: "", type: "" })}
+          onClose={() =>
+            setNotification({ heading: "", subtext: "", type: "" })
+          }
         />
       )}
     </>

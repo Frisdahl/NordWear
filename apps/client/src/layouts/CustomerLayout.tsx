@@ -30,7 +30,7 @@ const CustomerLayout: React.FC = () => {
   }, [headerRef]);
 
   return (
-    <div className="bg-[#f2f1f0] min-h-screen flex flex-col">
+    <div className="customer-font bg-[#f2f1f0] min-h-screen flex flex-col">
       <CustomerHeader headerRef={headerRef} />
       <HeaderSpacer height={headerHeight} />
       <main className="flex-grow">

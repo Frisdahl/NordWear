@@ -44,7 +44,7 @@ const Category: React.FC = () => {
   const [viewMode, setViewMode] = useState<string>(
     typeof window !== "undefined" && window.innerWidth >= 768
       ? "grid-3"
-      : "grid-2"
+      : "grid-2",
   );
   const [isFilterMenuOpen, setFilterMenuOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions | null>(null);
@@ -121,25 +121,6 @@ const Category: React.FC = () => {
           },
         ];
 
-      case "jackets":
-        return [
-          {
-            title: "Jakker til Alt Slags Vejr",
-            description:
-              "Vores jakker er skabt til at modstå det skiftende nordiske vejr. Fra lette overgangsjakker til varme vinterjakker - vi kombinerer tekniske materialer med stilrent design. \n\n Hold dig tør og varm med stil uanset årstiden.",
-          },
-          {
-            title: "Tidløst Overtøj",
-            description:
-              "En god jakke skal kunne bruges sæson efter sæson. Derfor fokuserer vi på klassiske silhuetter og holdbare materialer, der ikke går af mode. \n\n Vores kollektion byder på alt fra elegante frakker til praktiske hverdagsjakker.",
-          },
-          {
-            title: "Funktionalitet og Stil",
-            description:
-              "Vi mener ikke, man skal vælge mellem at se godt ud og være praktisk klædt på. Vores jakker har smarte detaljer som inderlommer, justerbare manchetter og vandafvisende overflader. \n\n Det perfekte valg til den moderne mand på farten.",
-          },
-        ];
-
       default:
         return [
           {
@@ -190,7 +171,7 @@ const Category: React.FC = () => {
             categorySlug,
             filters,
             undefined,
-            sortOption
+            sortOption,
           );
         }
 
@@ -201,7 +182,7 @@ const Category: React.FC = () => {
         setTotalPages(Math.ceil(productArray.length / productsPerPage));
       } catch (err) {
         setError(
-          `Failed to load products for ${searchQuery ? "search" : categorySlug}`
+          `Failed to load products for ${searchQuery ? "search" : categorySlug}`,
         );
       } finally {
         setLoading(false);
@@ -219,7 +200,7 @@ const Category: React.FC = () => {
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = products.slice(
     indexOfFirstProduct,
-    indexOfLastProduct
+    indexOfLastProduct,
   );
 
   const handleNotification = (data: {
@@ -261,7 +242,6 @@ const Category: React.FC = () => {
       sneakers: "Sneakers",
       shirts: "Skjorter",
       hoodies: "Hættetrøjer",
-      jackets: "Jakker",
       pants: "Bukser",
       deals: "Tilbud",
     };
@@ -512,7 +492,7 @@ const Category: React.FC = () => {
                       );
                     }
                     return null;
-                  }
+                  },
                 )}
 
                 <button

@@ -910,7 +910,6 @@ const AddProduct = () => {
                 >
                   <option value="1">Skjorter</option>
                   <option value="2">Hættetrøjer</option>
-                  <option value="3">Jakker</option>
                   <option value="4">Bukser</option>
                   <option value="5">Sneakers</option>
                   <option value="6">Tilbud</option>

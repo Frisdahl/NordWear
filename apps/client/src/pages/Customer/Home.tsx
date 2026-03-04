@@ -7,13 +7,9 @@ import Notification from "../../components/Notification";
 import RatingSlider from "../../components/customer/RatingSlider";
 import CategoryCard from "../../components/customer/CategoryCard";
 import EmblaCarousel from "../../components/customer/carousel/EmblaCarousel";
+import nordwearHero from "../../assets/nordwear-hero.webp";
 
 const categories = [
-  {
-    name: "Jakker",
-    imageUrl:
-      "https://images.unsplash.com/photo-1562009578-0eb8ea8a26ce?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  },
   {
     name: "Sneakers",
     imageUrl:
@@ -30,6 +26,12 @@ const categories = [
     name: "Skjorter",
     imageUrl:
       "https://plus.unsplash.com/premium_photo-1661627681947-4431c8c97659?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  },
+
+  {
+    name: "Bukser",
+    imageUrl:
+      "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?q=80&w=1460&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
 ];
 
@@ -81,7 +83,7 @@ const Home: React.FC = () => {
             "X-Requested-With": "XMLHttpRequest",
           },
           body: JSON.stringify({ email: emailInput }),
-        }
+        },
       );
       if (res.ok) {
         setSubscribeStatus("success");
@@ -99,7 +101,7 @@ const Home: React.FC = () => {
       try {
         const fetchedProducts = await fetchProducts(undefined, undefined, 12);
         if (Array.isArray(fetchedProducts)) {
-            setProducts(fetchedProducts);
+          setProducts(fetchedProducts);
         }
       } catch (err) {
         setError("Failed to load products");
@@ -142,25 +144,23 @@ const Home: React.FC = () => {
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage:
-              "url(https://images.unsplash.com/photo-1577686330226-d71f1d510d9c?q=80&w=2076&auto=format&fit=crop&ixlib.rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)",
+            backgroundImage: `url(${nordwearHero})`,
             filter: "brightness(0.6)",
           }}
         ></div>
         <div className="text-center z-10 px-6 pb-12 md:pb-16 w-full">
-          <h1 className="text-3xl md:text-5xl text-[#f2f1f0] font-normal font-['EB-Garamond'] tracking-tighter mb-4">
-            Tidløst design. Skabt til at holde.
-          </h1>
-          <p className="text-base md:text-xl text-gray-200 font-['figtree'] mb-8 max-w-lg mx-auto">
-            Stilrene produkter med kompromisløs kvalitet – inspireret af naturen
-            og bygget til hverdagen.
+          <p className="text-base md:text-xl text-white font-['figtree'] font-semibold mb-4 max-w-lg mx-auto">
+            STRIK & SWEAT - 3 FOR 600 KR
           </p>
-          <div className="text-center mt-8 md:mt-12">
+          <h1 className="text-3xl md:text-6xl text-white font-bold font-['Montserrat'] tracking-[.04em]">
+            BLØDE FAVORITTER
+          </h1>
+          <div className="text-center mt-8 md:mt-8">
             <Link
               to="/category"
-              className="bg-[#181c2e] text-white rounded-full py-3 font-semibold px-8 transition-transform transform hover:bg-[#f2f1f0] hover:text-[#1c1c1c] hover:scale-105"
+              className="bg-white text-[#000101] text-sm rounded-none py-3 font-medium font-['Montserrat'] px-6 transition-colors uppercase hover:bg-[#000101] hover:text-white"
             >
-              Se alle produkter
+              se udvalget her
             </Link>
           </div>
         </div>

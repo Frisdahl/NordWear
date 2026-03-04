@@ -16,6 +16,11 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  .customer-font,
+  .customer-font * {
+    font-family: "Montserrat", sans-serif !important;
+  }
 }
 
 @layer base {

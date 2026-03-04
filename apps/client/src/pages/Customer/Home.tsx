@@ -190,7 +190,7 @@ const Home: React.FC = () => {
           <div className="text-center mt-8 md:mt-12">
             <Link
               to="/category"
-              className="bg-[#181c2e] rounded-full text-white py-3 font-semibold px-8 border border-[#1c1c1c] transition-colors transition-transform duration-500 ease-out transform hover:bg-transparent hover:text-[#1c1c1c] hover:scale-105"
+              className="bg-[#1c1c1c] rounded-none text-white py-3 font-semibold px-8 border border-[#1c1c1c] transition-colors transition-transform duration-500 ease-out transform hover:bg-[#f2f1f0] hover:text-[#1c1c1c] hover:scale-105"
             >
               Se alle
             </Link>

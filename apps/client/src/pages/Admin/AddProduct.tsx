@@ -23,6 +23,7 @@ const CLOTHING_SIZES = ["XS", "S", "M", "L", "XL"];
 const SHOE_SIZES = ["38", "39", "40", "41", "42", "43", "44", "45", "46"];
 const SNEAKERS_CATEGORY_ID = "5";
 type FieldErrorKey = "name" | "price" | "category_Id" | "status";
+type ProductNotificationType = "" | "success" | "error" | "loading";
 
 const getSizeOptionsForCategory = (categoryId: string) => {
   return categoryId === SNEAKERS_CATEGORY_ID ? SHOE_SIZES : CLOTHING_SIZES;
@@ -55,6 +56,7 @@ const InputField = ({
   value,
   onChange,
   hasError = false,
+  errorMessage,
 }: {
   label: string;
   id: string;
@@ -64,6 +66,7 @@ const InputField = ({
   value?: string | number;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   hasError?: boolean;
+  errorMessage?: string;
 }) => (
   <div className="flex flex-col gap-2">
     {label && (
@@ -90,6 +93,9 @@ const InputField = ({
         } ${prefix ? "pl-10" : ""}`}
       />
     </div>
+    {hasError && errorMessage && (
+      <p className="text-xs text-red-600">{errorMessage}</p>
+    )}
   </div>
 );
 
@@ -158,7 +164,10 @@ const AddProduct = () => {
 
   const [availableSizes, setAvailableSizes] = useState(CLOTHING_SIZES);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [notification, setNotification] = useState({ message: "", type: "" });
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: ProductNotificationType;
+  }>({ message: "", type: "" });
   const [fieldErrors, setFieldErrors] = useState<
     Partial<Record<FieldErrorKey, string>>
   >({});
@@ -409,6 +418,12 @@ const AddProduct = () => {
       }
 
       setFieldErrors({});
+      setNotification({
+        message: id
+          ? "Produktet bliver opdateret. Vent venligst..."
+          : "Produktet bliver oprettet. Vent venligst...",
+        type: "loading",
+      });
 
       const finalImageUrls = await Promise.all(
         images.map((img) => {
@@ -505,9 +520,15 @@ const AddProduct = () => {
       {notification.message && (
         <Notification
           show={!!notification.message}
-          heading={notification.type === "success" ? "Success" : "Fejl"}
+          heading={
+            notification.type === "loading"
+              ? "Behandler"
+              : notification.type === "success"
+                ? "Success"
+                : "Fejl"
+          }
           subtext={notification.message}
-          type={notification.type as "success" | "error"}
+          type={notification.type === "" ? "error" : notification.type}
           onClose={() => setNotification({ message: "", type: "" })}
         />
       )}
@@ -548,6 +569,7 @@ const AddProduct = () => {
               placeholder="Nordwear hoodie"
               value={name}
               hasError={!!fieldErrors.name}
+              errorMessage={fieldErrors.name}
               onChange={(e) => {
                 setName(e.target.value);
                 clearFieldError("name");
@@ -835,6 +857,9 @@ const AddProduct = () => {
                   <option value="ONLINE">Aktiv</option>
                   <option value="OFFLINE">Arkiveret</option>
                 </select>
+                {fieldErrors.status && (
+                  <p className="text-xs text-red-600">{fieldErrors.status}</p>
+                )}
               </div>
               <div className="flex flex-col gap-2">
                 <label
@@ -866,6 +891,11 @@ const AddProduct = () => {
                   <option value="5">Sneakers</option>
                   <option value="6">Tilbud</option>
                 </select>
+                {fieldErrors.category_Id && (
+                  <p className="text-xs text-red-600">
+                    {fieldErrors.category_Id}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -881,6 +911,7 @@ const AddProduct = () => {
                 placeholder="649"
                 value={price}
                 hasError={!!fieldErrors.price}
+                errorMessage={fieldErrors.price}
                 onChange={(e) => {
                   setPrice(e.target.value);
                   clearFieldError("price");

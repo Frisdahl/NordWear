@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { Prisma } from "@prisma/client";
 import {
   getProducts as getProductsService,
   createProduct as createProductService,
@@ -18,7 +19,7 @@ import {
 
 export const searchProducts = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const { q } = req.query;
@@ -31,24 +32,30 @@ export const searchProducts = async (
   } catch (error) {
     console.error("GET /api/products/search error:", error);
     const msg = error instanceof Error ? error.message : String(error);
-    res.status(500).json({ message: "Error searching for products", error: msg });
+    res
+      .status(500)
+      .json({ message: "Error searching for products", error: msg });
   }
 };
 
 export const updateProductsStatus = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const { ids, status } = req.body;
-    
+
     if (!Array.isArray(ids) || ids.some((id) => typeof id !== "number")) {
       res.status(400).json({ message: "Invalid 'ids' array in request body." });
       return;
     }
 
-    if (!['ONLINE', 'OFFLINE', 'DRAFT'].includes(status)) {
-      res.status(400).json({ message: "Invalid status. Must be ONLINE, OFFLINE, or DRAFT." });
+    if (!["ONLINE", "OFFLINE", "DRAFT"].includes(status)) {
+      res
+        .status(400)
+        .json({
+          message: "Invalid status. Must be ONLINE, OFFLINE, or DRAFT.",
+        });
       return;
     }
 
@@ -57,13 +64,18 @@ export const updateProductsStatus = async (
   } catch (error) {
     console.error("PUT /api/products/bulk-status error:", error);
     const msg = error instanceof Error ? error.message : String(error);
-    res.status(500).json({ message: "Error updating products status", error: msg });
+    res
+      .status(500)
+      .json({ message: "Error updating products status", error: msg });
   }
 };
 
 // ... (existing controller functions)
 
-export const likeProduct = async (req: Request, res: Response): Promise<void> => {
+export const likeProduct = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const { customerId, productId } = req.body;
     await likeProductService(customerId, productId);
@@ -75,7 +87,10 @@ export const likeProduct = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const unlikeProduct = async (req: Request, res: Response): Promise<void> => {
+export const unlikeProduct = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const { customerId, productId } = req.body;
     await unlikeProductService(customerId, productId);
@@ -87,7 +102,10 @@ export const unlikeProduct = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const getLikedProducts = async (req: Request, res: Response): Promise<void> => {
+export const getLikedProducts = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const customerId = parseInt(req.params.customerId, 10);
     if (isNaN(customerId)) {
@@ -99,11 +117,16 @@ export const getLikedProducts = async (req: Request, res: Response): Promise<voi
   } catch (error) {
     console.error(`GET /api/products/liked/:customerId error:`, error);
     const msg = error instanceof Error ? error.message : String(error);
-    res.status(500).json({ message: "Error retrieving liked products", error: msg });
+    res
+      .status(500)
+      .json({ message: "Error retrieving liked products", error: msg });
   }
 };
 
-export const getCustomerByUserId = async (req: Request, res: Response): Promise<void> => {
+export const getCustomerByUserId = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const userId = parseInt(req.params.userId, 10);
     if (isNaN(userId)) {
@@ -125,21 +148,37 @@ export const getCustomerByUserId = async (req: Request, res: Response): Promise<
 
 export const getProducts = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
-    const { category, minPrice, maxPrice, 'categories[]': categories, 'sizes[]': sizes, limit, sort } = req.query;
+    const {
+      category,
+      minPrice,
+      maxPrice,
+      "categories[]": categories,
+      "sizes[]": sizes,
+      limit,
+      sort,
+    } = req.query;
 
     const minPriceNum = minPrice ? Number(minPrice) : undefined;
     const maxPriceNum = maxPrice ? Number(maxPrice) : undefined;
     const limitNum = limit ? Number(limit) : undefined;
-    
-    const categoryIds = categories ? (Array.isArray(categories) ? categories.map(Number) : [Number(categories)]) : undefined;
-    const sizeIds = sizes ? (Array.isArray(sizes) ? sizes.map(Number) : [Number(sizes)]) : undefined;
+
+    const categoryIds = categories
+      ? Array.isArray(categories)
+        ? categories.map(Number)
+        : [Number(categories)]
+      : undefined;
+    const sizeIds = sizes
+      ? Array.isArray(sizes)
+        ? sizes.map(Number)
+        : [Number(sizes)]
+      : undefined;
 
     // ✅ Draft Filtering: Only admins see DRAFT/OFFLINE
     const user = (req as any).user;
-    const statusFilter = (user && user.role === 'ADMIN') ? undefined : 'ONLINE';
+    const statusFilter = user && user.role === "ADMIN" ? undefined : "ONLINE";
 
     const products: any[] = await getProductsService(
       category as string,
@@ -149,7 +188,7 @@ export const getProducts = async (
       sizeIds,
       limitNum,
       sort as string,
-      statusFilter
+      statusFilter,
     );
     res.status(200).json(products);
   } catch (error) {
@@ -161,7 +200,7 @@ export const getProducts = async (
 
 export const getProduct = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -177,7 +216,7 @@ export const getProduct = async (
 
     // ✅ Draft Protection: Prevent viewing offline products via direct URL
     const user = (req as any).user;
-    if (product.status !== 'ONLINE' && (!user || user.role !== 'ADMIN')) {
+    if (product.status !== "ONLINE" && (!user || user.role !== "ADMIN")) {
       res.status(404).json({ message: "Product not found." });
       return;
     }
@@ -192,7 +231,7 @@ export const getProduct = async (
 
 export const updateProduct = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -205,6 +244,22 @@ export const updateProduct = async (
     res.status(200).json(updatedProduct);
   } catch (error) {
     console.error(`PUT /api/products/${req.params.id} error:`, error);
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2000"
+    ) {
+      const columnName = (error.meta?.column_name as string) || "ukendt felt";
+      res.status(400).json({
+        message: `Værdien er for lang for feltet '${columnName}'.`,
+        errors: [
+          {
+            path: columnName,
+            message: `Værdien er for lang for feltet '${columnName}'.`,
+          },
+        ],
+      });
+      return;
+    }
     const msg = error instanceof Error ? error.message : String(error);
     res.status(500).json({ message: "Error updating product", error: msg });
   }
@@ -212,7 +267,7 @@ export const updateProduct = async (
 
 export const createProduct = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const productData = req.body;
@@ -220,6 +275,22 @@ export const createProduct = async (
     res.status(201).json(newProduct);
   } catch (error) {
     console.error("POST /api/products error:", error);
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2000"
+    ) {
+      const columnName = (error.meta?.column_name as string) || "ukendt felt";
+      res.status(400).json({
+        message: `Værdien er for lang for feltet '${columnName}'.`,
+        errors: [
+          {
+            path: columnName,
+            message: `Værdien er for lang for feltet '${columnName}'.`,
+          },
+        ],
+      });
+      return;
+    }
     const msg = error instanceof Error ? error.message : String(error);
     res.status(500).json({ message: "Error creating product", error: msg });
   }
@@ -227,7 +298,7 @@ export const createProduct = async (
 
 export const getCategories = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const categories = await getCategoriesService();
@@ -243,7 +314,7 @@ export const getCategories = async (
 
 export const getCategory = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -264,25 +335,20 @@ export const getCategory = async (
   }
 };
 
-export const getSizes = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getSizes = async (req: Request, res: Response): Promise<void> => {
   try {
     const sizes = await getSizesService();
     res.status(200).json(sizes);
   } catch (error) {
     console.error("GET /api/sizes error:", error);
     const msg = error instanceof Error ? error.message : String(error);
-    res
-      .status(500)
-      .json({ message: "Error retrieving sizes", error: msg });
+    res.status(500).json({ message: "Error retrieving sizes", error: msg });
   }
 };
 
 export const deleteProducts = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const { ids } = req.body;

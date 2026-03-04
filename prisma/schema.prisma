@@ -114,7 +114,7 @@ model order_item {
 model product {
   id               Int                @id @default(autoincrement())
   name             String
-  description      String?
+  description      String?            @db.Text
   price            Float
   offer_price      Float?
   status           ProductStatus      @default(DRAFT)

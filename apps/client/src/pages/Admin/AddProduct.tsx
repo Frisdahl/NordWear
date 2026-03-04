@@ -46,10 +46,7 @@ const getSizeSortValue = (size: string) => {
   return clothingSizeOrder[size] ?? 999;
 };
 
-const toFriendlyDanishErrorMessage = (
-  message?: string,
-  isUpdate?: boolean,
-) => {
+const toFriendlyDanishErrorMessage = (message?: string, isUpdate?: boolean) => {
   if (!message) {
     return isUpdate
       ? "Kunne ikke opdatere produktet. Prøv igen om lidt."

@@ -130,7 +130,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
 
               <Link
                 to="/"
-                className="font-garamond text-2xl md:text-[1.75rem] font-bold tracking-widest uppercase hidden lg:block"
+                className="font-georgia text-xl md:text-2xl font-bold tracking-widest uppercase hidden lg:block"
               >
                 NORDWEAR
               </Link>
@@ -152,7 +152,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
             <div className="absolute left-1/2 -translate-x-1/2 lg:hidden">
               <Link
                 to="/"
-                className="font-garamond text-2xl md:text-[1.75rem] font-bold tracking-widest uppercase"
+                className="font-georgia text-xl md:text-2xl font-bold tracking-widest uppercase"
               >
                 NORDWEAR
               </Link>

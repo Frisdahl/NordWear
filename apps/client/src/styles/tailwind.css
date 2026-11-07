@@ -29,6 +29,10 @@
   }
 
   /* Opt-out of the Montserrat override: logo and hero heading use EB Garamond */
+  .customer-font .font-georgia {
+    font-family: Georgia, "Times New Roman", serif !important;
+  }
+
   .customer-font .font-garamond {
     font-family: "EB Garamond", serif !important;
   }

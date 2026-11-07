@@ -154,10 +154,8 @@ const Home: React.FC = () => {
         <div className="absolute inset-0 bg-black/35"></div>
 
         <div className="relative z-10 px-6 flex flex-col items-center">
-          <h1 className="font-garamond font-medium text-white text-4xl md:text-5xl lg:text-6xl leading-[1.05] tracking-tight">
-            Everyday essentials.
-            <br />
-            Timeless style.
+          <h1 className="font-garamond font-medium text-white text-[clamp(1.25rem,5.6vw,68px)] leading-[1.05] tracking-tight whitespace-nowrap">
+            Everyday essentials. Timeless style.
           </h1>
           <p className="mt-5 text-base lg:text-lg font-figtree text-white/90">
             Designed in Denmark. Crafted in Portugal.

@@ -151,7 +151,7 @@ const Home: React.FC = () => {
           className="absolute inset-0 bg-cover bg-[position:68%_center] lg:bg-center"
           style={{ backgroundImage: `url(${nordwearHero})` }}
         ></div>
-        <div className="absolute inset-0 bg-black/35"></div>
+        <div className="absolute inset-0 bg-black/45"></div>
 
         <div className="relative z-10 px-6 flex flex-col items-center">
           <h1 className="font-garamond font-medium text-white text-[clamp(1.25rem,5.6vw,68px)] leading-[1.05] tracking-tight whitespace-nowrap">
@@ -162,7 +162,7 @@ const Home: React.FC = () => {
           </p>
           <Link
             to="/category"
-            className="mt-8 lg:mt-10 bg-white text-[#000101] text-sm rounded-none py-3.5 font-medium font-['Montserrat'] px-8 transition-colors uppercase tracking-wide hover:bg-[#000101] hover:text-white"
+            className="mt-8 lg:mt-10 border border-white text-white text-sm rounded-none py-3.5 font-medium font-['Montserrat'] px-8 transition-colors uppercase tracking-wide hover:bg-white hover:text-[#000101]"
           >
             Se udvalget
           </Link>

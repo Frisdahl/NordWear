@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 import { EmblaOptionsType } from "embla-carousel";
 import { Product } from "../../types";
 import { fetchProducts } from "../../services/api";
@@ -44,6 +44,7 @@ const OPTIONS: EmblaOptionsType = {
 };
 
 const Home: React.FC = () => {
+  const { headerHeight } = (useOutletContext<{ headerHeight?: number }>() ?? {}) as { headerHeight?: number };
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -142,46 +143,26 @@ const Home: React.FC = () => {
       )}
 
       {/* Hero Section */}
-      <section className="lg:h-[90svh] bg-[#1c1c1c] flex flex-col text-white relative -mt-24 overflow-hidden">
-        {/* Photo: below the text on mobile, full bleed behind it from md up */}
+      <section
+        className="relative flex items-center justify-center text-center text-white bg-[#1c1c1c] min-h-[480px]"
+        style={{ height: headerHeight ? `calc(100svh - ${headerHeight}px)` : "90svh" }}
+      >
         <div
-          className="relative order-2 h-[360px] lg:order-none lg:absolute lg:inset-0 lg:h-auto bg-cover bg-[position:68%_65%] lg:bg-center"
+          className="absolute inset-0 bg-cover bg-[position:68%_center] lg:bg-center"
           style={{ backgroundImage: `url(${nordwearHero})` }}
         ></div>
-        {/* Readability only: darkens the side the text sits on, leaves the sneakers untouched */}
-        <div className="hidden lg:block absolute inset-0 bg-gradient-to-r from-black/60 via-black/25 to-transparent"></div>
+        <div className="absolute inset-0 bg-black/35"></div>
 
-        <div className="relative z-10 order-1 lg:order-none lg:flex-1 flex flex-col justify-start lg:justify-center px-6 lg:px-12 pt-32 pb-10 lg:pt-24 lg:pb-0">
-          <p className="text-xs lg:text-[13px] uppercase tracking-[.3em] font-['Montserrat'] font-medium text-white/85 mb-4 lg:mb-6">
-            NORDWEAR
-          </p>
-          <h1 className="font-['Montserrat'] font-bold text-white text-5xl lg:text-7xl xl:text-8xl leading-[0.95] tracking-tight max-w-[10ch] lg:max-w-[8ch]">
+        <div className="relative z-10 px-6 flex flex-col items-center">
+          <h1 className="font-garamond font-medium text-white text-6xl md:text-7xl lg:text-8xl leading-[0.95] tracking-tight">
             Bløde favoritter
           </h1>
-          <p className="mt-5 lg:mt-7 max-w-[22rem] text-base lg:text-lg text-white/85 font-['figtree'] leading-relaxed">
-            Komfort og stil i hverdagen. Sneakers designet til at følge med.
-          </p>
-          <div className="mt-8 lg:mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
-            <Link
-              to="/category"
-              className="bg-white text-[#000101] text-sm rounded-none py-3.5 font-medium font-['Montserrat'] px-8 transition-colors uppercase tracking-wide hover:bg-[#000101] hover:text-white"
-            >
-              Se udvalget
-            </Link>
-            <Link
-              to="/category"
-              className="text-sm font-['figtree'] font-medium text-white/80 underline underline-offset-[6px] decoration-white/40 transition-colors hover:text-white hover:decoration-white"
-            >
-              3 for 600 kr
-            </Link>
-          </div>
-        </div>
-
-        <div className="relative z-10 order-3 lg:order-none px-6 lg:px-12 pb-6 lg:pb-8 pt-4 lg:pt-0">
-          <div className="flex items-center justify-between lg:border-t border-white/25 lg:pt-4 text-[11px] lg:text-xs uppercase tracking-[.18em] font-['Montserrat'] text-white/80">
-            <span>Faste lave priser</span>
-            <span>Forlænget retur</span>
-          </div>
+          <Link
+            to="/category"
+            className="mt-8 lg:mt-10 bg-white text-[#000101] text-sm rounded-none py-3.5 font-medium font-['Montserrat'] px-8 transition-colors uppercase tracking-wide hover:bg-[#000101] hover:text-white"
+          >
+            Se udvalget
+          </Link>
         </div>
       </section>
 

@@ -21,6 +21,11 @@
   .customer-font * {
     font-family: "Montserrat", sans-serif !important;
   }
+
+  /* Opt-out of the Montserrat override: logo and hero heading use EB Garamond */
+  .customer-font .font-garamond {
+    font-family: "EB Garamond", serif !important;
+  }
 }
 
 @layer base {

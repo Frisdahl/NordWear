@@ -160,7 +160,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
 
             <div className="flex items-center space-x-2 md:space-x-4 min-w-[100px] justify-end">
               <div className="hidden lg:flex items-center">
-                <div className="group/link relative inline-block text-[#1c1c1ca6] text-[0.8125rem] font-medium">
+                <div className="group/link relative inline-block text-[#1c1c1ca6] text-[0.875rem] font-medium">
                   {authLink}
                   <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
                 </div>
@@ -169,7 +169,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
               <div className="flex items-center">
                 <button
                   onClick={handleSearchClick}
-                  className="p-2 text-[#1c1c1ca6] text-[0.8125rem] font-medium hidden sm:block"
+                  className="p-2 text-[#1c1c1ca6] text-[0.875rem] font-medium hidden sm:block"
                 >
                   Søg
                 </button>
@@ -210,7 +210,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
                 </button>
                 <button
                   onClick={() => setIsCartOpen(true)}
-                  className="p-2 hidden lg:block text-[#1c1c1ca6] text-[0.8125rem] font-medium"
+                  className="p-2 hidden lg:block text-[#1c1c1ca6] text-[0.875rem] font-medium"
                 >
                   Indkøbskurv {cartCount > 0 && `(${cartCount})`}
                 </button>

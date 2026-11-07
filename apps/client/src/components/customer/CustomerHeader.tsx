@@ -83,7 +83,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const headerClasses = `transition-colors duration-300 bg-[#f2f1f0] border-b border-[#D1D0CE]`;
+  const headerClasses = `transition-colors duration-300 bg-[#fefffe] border-b border-[#D1D0CE]`;
 
   const authLink = isAuthenticated ? (
     <Link to="/customer/orders">Konto</Link>
@@ -130,12 +130,12 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
 
               <Link
                 to="/"
-                className="font-georgia text-xl md:text-2xl font-bold tracking-widest uppercase hidden lg:block"
+                className="font-georgia text-xl md:text-2xl font-normal tracking-widest uppercase hidden lg:block"
               >
                 NORDWEAR
               </Link>
 
-              <div className="hidden lg:flex items-center space-x-6 text-[0.75rem] absolute left-1/2 -translate-x-1/2">
+              <div className="hidden lg:flex items-center space-x-6 text-[0.8125rem] absolute left-1/2 -translate-x-1/2">
                 {menuItems.map((item) => (
                   <Link
                     key={item.name}
@@ -152,7 +152,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
             <div className="absolute left-1/2 -translate-x-1/2 lg:hidden">
               <Link
                 to="/"
-                className="font-georgia text-xl md:text-2xl font-bold tracking-widest uppercase"
+                className="font-georgia text-xl md:text-2xl font-normal tracking-widest uppercase"
               >
                 NORDWEAR
               </Link>
@@ -160,7 +160,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
 
             <div className="flex items-center space-x-2 md:space-x-4 min-w-[100px] justify-end">
               <div className="hidden lg:flex items-center">
-                <div className="group/link relative inline-block text-[#1c1c1ca6] text-[0.75rem] uppercase tracking-wide font-medium">
+                <div className="group/link relative inline-block text-[#1c1c1ca6] text-[0.8125rem] font-medium">
                   {authLink}
                   <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
                 </div>
@@ -169,7 +169,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
               <div className="flex items-center">
                 <button
                   onClick={handleSearchClick}
-                  className="p-2 text-[#1c1c1ca6] uppercase text-[0.75rem] font-medium tracking-wide hidden sm:block"
+                  className="p-2 text-[#1c1c1ca6] text-[0.8125rem] font-medium hidden sm:block"
                 >
                   Søg
                 </button>
@@ -210,7 +210,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
                 </button>
                 <button
                   onClick={() => setIsCartOpen(true)}
-                  className="p-2 hidden lg:block text-[#1c1c1ca6] uppercase text-[0.75rem] font-medium tracking-wide"
+                  className="p-2 hidden lg:block text-[#1c1c1ca6] text-[0.8125rem] font-medium"
                 >
                   Indkøbskurv {cartCount > 0 && `(${cartCount})`}
                 </button>

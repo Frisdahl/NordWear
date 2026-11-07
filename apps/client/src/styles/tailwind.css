@@ -22,6 +22,12 @@
     font-family: "Montserrat", sans-serif !important;
   }
 
+  /* Figtree for header text and the hero paragraph; declared before .font-garamond so the logo can still opt out */
+  .customer-font .font-figtree,
+  .customer-font .font-figtree * {
+    font-family: "Figtree", sans-serif !important;
+  }
+
   /* Opt-out of the Montserrat override: logo and hero heading use EB Garamond */
   .customer-font .font-garamond {
     font-family: "EB Garamond", serif !important;

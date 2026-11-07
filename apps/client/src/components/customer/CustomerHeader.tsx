@@ -109,7 +109,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
 
       <div
         ref={headerRef}
-        className="fixed top-0 left-0 right-0 z-50 text-[#1c1c1c] group pr-[var(--scrollbar-width)]"
+        className="fixed top-0 left-0 right-0 z-50 font-figtree text-[#1c1c1c] group pr-[var(--scrollbar-width)]"
       >
         {/* Red Top Bar */}
         <div className="bg-[#630D0D] text-[#Fff] text-[0.75rem] md:text-[0.75rem] text-center py-2 px-4">
@@ -135,9 +135,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
                 NORDWEAR
               </Link>
 
-              <div className="hidden lg:block h-[1px] w-8 [1px] bg-[#1c1c1c] mx-6"></div>
-
-              <div className="hidden lg:flex items-center space-x-6 text-[0.75rem]">
+              <div className="hidden lg:flex items-center space-x-6 text-[0.75rem] absolute left-1/2 -translate-x-1/2">
                 {menuItems.map((item) => (
                   <Link
                     key={item.name}

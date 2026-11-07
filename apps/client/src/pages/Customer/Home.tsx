@@ -154,9 +154,14 @@ const Home: React.FC = () => {
         <div className="absolute inset-0 bg-black/35"></div>
 
         <div className="relative z-10 px-6 flex flex-col items-center">
-          <h1 className="font-garamond font-medium text-white text-6xl md:text-7xl lg:text-8xl leading-[0.95] tracking-tight">
-            Bløde favoritter
+          <h1 className="font-garamond font-medium text-white text-4xl md:text-5xl lg:text-6xl leading-[1.05] tracking-tight">
+            Everyday essentials.
+            <br />
+            Timeless style.
           </h1>
+          <p className="mt-5 text-base lg:text-lg font-figtree text-white/90">
+            Designed in Denmark. Crafted in Portugal.
+          </p>
           <Link
             to="/category"
             className="mt-8 lg:mt-10 bg-white text-[#000101] text-sm rounded-none py-3.5 font-medium font-['Montserrat'] px-8 transition-colors uppercase tracking-wide hover:bg-[#000101] hover:text-white"

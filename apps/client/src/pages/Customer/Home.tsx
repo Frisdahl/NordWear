@@ -1,40 +1,24 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import { EmblaOptionsType } from "embla-carousel";
-import { Product } from "../../types";
-import { fetchProducts } from "../../services/api";
-import Notification from "../../components/Notification";
 import RatingSlider from "../../components/customer/RatingSlider";
-import CategoryCard from "../../components/customer/CategoryCard";
-import EmblaCarousel from "../../components/customer/carousel/EmblaCarousel";
+import EmblaCarousel, { CollectionItem } from "../../components/customer/carousel/EmblaCarousel";
 import nordwearHero from "../../assets/nordwear-hero.webp";
 import productionImage from "../../assets/production.webp";
 import overProductionImage from "../../assets/over-production.webp";
-import shirtsImage from "../../assets/shirts.webp";
-import sneakersImage from "../../assets/sneakers.webp";
-import hoodiesImage from "../../assets/hoodies.webp";
+import loafersImage from "../../assets/loafers.webp";
+import dressShoesImage from "../../assets/dress-shoes.webp";
+import bootsImage from "../../assets/boots.webp";
+import accessoriesImage from "../../assets/accessories.webp";
+import sneakersImage from "../../assets/sneakers-studio.webp";
 
-const categories = [
-  {
-    name: "Sneakers",
-    imageUrl: sneakersImage,
-  },
-
-  {
-    name: "Hættetrøjer",
-    imageUrl: hoodiesImage,
-  },
-
-  {
-    name: "Skjorter",
-    imageUrl: shirtsImage,
-  },
-
-  {
-    name: "Bukser",
-    imageUrl:
-      "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?q=80&w=1460&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  },
+// Collections shown under "Udforsk kollektionerne".
+const collections: CollectionItem[] = [
+  { name: "Sneakers", imageUrl: sneakersImage, to: "/category/sneakers" },
+  { name: "Loafers", imageUrl: loafersImage, to: "/category/loafers" },
+  { name: "Dress shoes", imageUrl: dressShoesImage, to: "/category/dress-shoes" },
+  { name: "Boots", imageUrl: bootsImage, to: "/category/boots" },
+  { name: "Accessories", imageUrl: accessoriesImage, to: "/category/accessories" },
 ];
 
 const OPTIONS: EmblaOptionsType = {
@@ -45,14 +29,6 @@ const OPTIONS: EmblaOptionsType = {
 
 const Home: React.FC = () => {
   const { headerHeight } = (useOutletContext<{ headerHeight?: number }>() ?? {}) as { headerHeight?: number };
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [notification, setNotification] = useState({
-    heading: "",
-    subtext: "",
-    type: "",
-  });
   const [showPopup, setShowPopup] = useState(false);
   const [emailInput, setEmailInput] = useState("");
   const [subscribeStatus, setSubscribeStatus] = useState<
@@ -99,52 +75,11 @@ const Home: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        const fetchedProducts = await fetchProducts(undefined, undefined, 12);
-        if (Array.isArray(fetchedProducts)) {
-          setProducts(fetchedProducts);
-        }
-      } catch (err) {
-        setError("Failed to load products");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProducts();
-  }, []);
-
-  const handleNotification = (data: {
-    heading: string;
-    subtext: string;
-    type: "success" | "error";
-  }) => {
-    setNotification({
-      heading: data.heading,
-      subtext: data.subtext,
-      type: data.type as "success" | "error",
-    });
-  };
-
   return (
     <div className="text-[#1c1c1c] overflow-x-hidden w-full">
-      {notification.subtext && (
-        <Notification
-          show={!!notification.subtext}
-          heading={notification.heading}
-          subtext={notification.subtext}
-          type={notification.type as "success" | "error"}
-          onClose={() =>
-            setNotification({ heading: "", subtext: "", type: "" })
-          }
-        />
-      )}
-
       {/* Hero Section */}
       <section
-        className="relative flex items-center justify-center text-center text-white bg-[#1c1c1c] min-h-[480px]"
+        className="relative flex items-center justify-center text-center text-white bg-[#1c1c1c] min-h-[480px] pt-24 lg:pt-36"
         style={{ height: headerHeight ? `calc(100svh - ${headerHeight}px)` : "90svh" }}
       >
         <div
@@ -169,123 +104,103 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Featured Products Section */}
-      <section className="py-12 md:py-16 relative">
-        <div className="mx-auto">
-          <h2 className="text-3xl md:text-4xl font-['EB_Garamond'] text-center mb-8 md:mb-12">
-            Udvalgte produkter
-          </h2>
-          {loading ? (
-            <div className="text-center">Loading products...</div>
-          ) : error ? (
-            <div className="text-center text-red-500">{error}</div>
-          ) : (
-            <div className="relative px-6 md:px-12">
-              <EmblaCarousel
-                products={products}
-                options={OPTIONS}
-                onNotify={handleNotification}
-              />
-            </div>
-          )}
-          <div className="text-center mt-8 md:mt-12">
-            <Link
-              to="/category"
-              className="bg-[#1c1c1c] rounded-none text-white py-3 font-semibold px-8 border border-[#1c1c1c] transition-colors transition-transform duration-500 ease-out transform hover:bg-[#f2f1f0] hover:text-[#1c1c1c] hover:scale-105"
-            >
-              Se alle
-            </Link>
-          </div>
+      {/* Collections: heading left (aligned with the header), arrows right */}
+      <section className="pb-16 pt-12 md:pb-24 md:pt-16">
+        <div className="px-6 md:px-12">
+          <EmblaCarousel
+            items={collections}
+            options={OPTIONS}
+            header={
+              <h2 className="font-garamond text-3xl leading-tight md:text-5xl">
+                Udforsk kollektionerne
+              </h2>
+            }
+          />
         </div>
-      </section>
-
-      {/* Categories Grid */}
-      <section className="py-12 md:py-24 grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 px-6 md:px-12">
-        {categories.map((category) => (
-          <Link
-            to={`/category/${category.name.toLowerCase()}`}
-            key={category.name}
-          >
-            <CategoryCard name={category.name} imageUrl={category.imageUrl} />
-          </Link>
-        ))}
       </section>
 
       {/* Design Showcase 1 */}
-      <div className="relative border-y border-gray-300">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 items-center">
-          <div className="h-[600px] md:h-[900px] overflow-hidden">
-            <img
-              src={productionImage}
-              alt="Design"
-              className="w-full h-full object-cover block"
-            />
-          </div>
-          <div className="relative px-6 py-12 md:py-0 md:pr-12 md:ml-[-64px] z-10">
-            <div className="bg-white text-center py-12 px-6 md:py-16 md:px-12 shadow-lg relative">
-              <h1 className="text-2xl md:text-4xl font-['EB_Garamond'] mb-6">
-                Dansk design - Håndlavet i Portugal
-              </h1>
-              <p className="text-sm md:text-lg text-gray-700 leading-relaxed mb-8">
-                Vi laver ikke hurtig mode. Vi laver produkter, der forener
-                skandinavisk enkelhed, raffineret æstetik og kompromisløs
-                komfort. Altid i nøje udvalgte materialer – valgt for deres
-                kvalitet, skønhed og følelse.
-              </p>
-              <button className="border-b-2 border-black pb-1 text-sm md:text-base font-medium hover:border-gray-600 transition-colors">
-                Læs mere
-              </button>
-            </div>
+      <section className="grid grid-cols-1 items-stretch md:grid-cols-2">
+        <div className="h-[420px] overflow-hidden md:h-[760px]">
+          <img
+            src={productionImage}
+            alt="Håndlavet sneaker i produktion"
+            className="block h-full w-full object-cover"
+          />
+        </div>
+        <div className="flex items-center bg-white px-6 py-14 md:px-16 lg:px-24">
+          <div className="max-w-xl">
+            <p className="mb-5 font-['figtree'] text-xs font-semibold uppercase tracking-[0.28em] text-[#1c1c1c]/50">
+              Håndlavet i Portugal
+            </p>
+            <h2 className="mb-6 font-garamond text-3xl leading-tight md:text-5xl">
+              Dansk design med omtanke
+            </h2>
+            <p className="mb-8 text-sm leading-relaxed text-[#1c1c1c]/75 md:text-lg">
+              Vi laver ikke hurtig mode. Vi laver produkter, der forener
+              skandinavisk enkelhed, raffineret æstetik og kompromisløs
+              komfort. Altid i nøje udvalgte materialer &ndash; valgt for deres
+              kvalitet, skønhed og følelse.
+            </p>
+            <button className="group inline-flex items-center gap-2 border-b border-[#1c1c1c] pb-1 font-['Montserrat'] text-xs font-semibold uppercase tracking-[0.18em]">
+              Læs mere
+              <span className="transition-transform duration-300 group-hover:translate-x-1">
+                &rarr;
+              </span>
+            </button>
           </div>
         </div>
-      </div>
+      </section>
 
-      <h1 className="text-2xl md:text-[2.625rem] text-center mt-14 px-6 font-['EB_Garamond'] mb-6 leading-tight">
-        Hos NordWear tror vi på forfinelse frem for forandring -{" "}
-        <br className="hidden md:block"></br> tidløst design, kvalitet og
-        bæredygtighed.
-      </h1>
-      <div className="flex justify-center mb-14"></div>
+      {/* Statement */}
+      <section className="mx-auto max-w-4xl px-6 py-16 text-center md:py-28">
+        <p className="mb-6 font-['figtree'] text-xs font-semibold uppercase tracking-[0.28em] text-[#1c1c1c]/50">
+          Vores overbevisning
+        </p>
+        <h2 className="font-garamond text-2xl leading-snug md:text-4xl md:leading-[1.25]">
+          Hos NordWear tror vi på forfinelse frem for forandring &ndash; tidløst
+          design, kvalitet og bæredygtighed.
+        </h2>
+      </section>
 
       {/* Overproduction Section */}
-      <div className="border-y border-gray-300">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-14 items-center">
-          <div className="h-[600px] md:h-[900px] overflow-hidden">
-            <img
-              src={overProductionImage}
-              alt="Design"
-              className="w-full h-full object-cover block"
-            />
-          </div>
-          <div className="px-6 py-12 md:py-8">
-            <div className="max-w-xl">
-              <h1 className="text-2xl md:text-4xl font-['EB_Garamond'] mb-6">
-                Slut med overproduktion
-              </h1>
-              <p className="text-sm md:text-lg text-gray-700 leading-relaxed mb-6">
-                Vores "Made for you" koncept bygger på slow fashion og handler
-                om at undgå overproduktion og evige udsalg.
+      <section className="grid grid-cols-1 items-stretch md:grid-cols-2">
+        <div className="h-[420px] overflow-hidden md:h-[760px]">
+          <img
+            src={overProductionImage}
+            alt="Hvide NordWear sneakers"
+            className="block h-full w-full object-cover"
+          />
+        </div>
+        <div className="flex items-center px-6 py-14 md:px-16 lg:px-24">
+          <div className="max-w-xl">
+            <p className="mb-5 font-['figtree'] text-xs font-semibold uppercase tracking-[0.28em] text-[#1c1c1c]/50">
+              Made for you
+            </p>
+            <h2 className="mb-6 font-garamond text-3xl leading-tight md:text-5xl">
+              Slut med overproduktion
+            </h2>
+            <div className="space-y-4 text-sm leading-relaxed text-[#1c1c1c]/75 md:text-lg">
+              <p>
+                Vores &quot;Made for you&quot; koncept bygger på slow fashion og
+                handler om at undgå overproduktion og evige udsalg.
               </p>
-              <p className="text-sm md:text-lg text-gray-700 leading-relaxed mb-6">
+              <p>
                 Vi laver tidløse designs, så vores kollektion er den samme året
-                rundt.
+                rundt. Før vi sætter nye styles i produktion, inddrager vi vores
+                kunder og nyhedsbrevets medlemmer, så vi kun producerer det, der
+                er efterspørgsel på.
               </p>
-              <p className="text-sm md:text-lg text-gray-700 leading-relaxed mb-6">
-                Før vi sætter nye styles i produktion, inddrager vi vores kunder
-                og nyhedsbrevets medlemmer, så vi kun producerer det, der er
-                efterspørgsel på.
-              </p>
-              <p className="text-sm md:text-lg text-gray-700 leading-relaxed mb-6">
-                Det minimerer spild og bidrager til en mere ansvarlig
-                produktion.
-              </p>
-              <button className="border-b-2 border-black pb-1 text-sm md:text-base font-medium hover:border-gray-600 transition-colors">
-                Læs mere
-              </button>
             </div>
+            <button className="group mt-8 inline-flex items-center gap-2 border-b border-[#1c1c1c] pb-1 font-['Montserrat'] text-xs font-semibold uppercase tracking-[0.18em]">
+              Læs mere
+              <span className="transition-transform duration-300 group-hover:translate-x-1">
+                &rarr;
+              </span>
+            </button>
           </div>
         </div>
-      </div>
+      </section>
 
       <RatingSlider />
 
@@ -299,7 +214,7 @@ const Home: React.FC = () => {
             >
               &times;
             </button>
-            <h3 className="text-xl md:text-2xl font-['EB_Garamond'] mb-4">
+            <h3 className="text-xl md:text-2xl font-garamond mb-4">
               Få 15% rabat!
             </h3>
             <p className="text-xs md:text-sm text-gray-300 mb-6">

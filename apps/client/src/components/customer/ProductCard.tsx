@@ -24,6 +24,8 @@ interface ProductCardProps {
   }) => void;
   onUnlike?: (productId: number) => void;
   className?: string;
+  /** 4:5 portrait image instead of square */
+  portrait?: boolean;
   style?: React.CSSProperties;
   index?: number;
 }
@@ -33,6 +35,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   onNotify,
   onUnlike,
   className,
+  portrait = false,
   style,
   index = 0,
 }) => {
@@ -174,7 +177,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 className={`flex flex-col h-full overflow-hidden w-full relative ${className}`}
               >        <Link
           to={`/product/${id}`}
-          className="block relative w-full aspect-square overflow-hidden flex-shrink-0 group"
+          className={`block relative w-full ${portrait ? "aspect-[4/5]" : "aspect-square"} overflow-hidden flex-shrink-0 group`}
         >
           <img
             src={

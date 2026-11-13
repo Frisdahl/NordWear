@@ -8,7 +8,7 @@ interface CategoryCardProps {
 const CategoryCard: React.FC<CategoryCardProps> = ({ name, imageUrl }) => {
   return (
     <div className="group cursor-pointer">
-      <div className="overflow-hidden aspect-video">
+      <div className="overflow-hidden aspect-[4/5] bg-[#e9e7e3]">
         <img
           src={imageUrl}
           alt={name}
@@ -17,8 +17,8 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ name, imageUrl }) => {
       </div>
       <div className="mt-4 inline-block">
         <div className="flex items-center gap-2">
-          <h2 className="font-['EB_Garamond'] text-2xl">{name}</h2>
-          <span className="text-2xl font-medium">→</span>
+          <h3 className="font-garamond text-xl md:text-2xl">{name}</h3>
+          <span className="text-xl font-medium transition-transform duration-500 group-hover:translate-x-1">→</span>
         </div>
         <div className="w-full h-[1px] bg-black origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover:scale-x-100"></div>
       </div>

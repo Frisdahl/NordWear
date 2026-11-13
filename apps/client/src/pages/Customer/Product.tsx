@@ -1,18 +1,12 @@
-import React, { useEffect, useState, useMemo, useRef } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Product as ProductType } from "../../types";
 import { fetchProduct } from "../../services/api";
-import {
-  StarIcon,
-  CheckIcon,
-  TruckIcon,
-  ShieldCheckIcon,
-} from "@heroicons/react/24/solid";
+import { StarIcon, CheckIcon } from "@heroicons/react/24/solid";
 import Accordion from "../../components/Accordion";
 import { formatPrice } from "../../utils/formatPrice";
 import useCart from "../../hooks/useCart";
 import Notification from "../../components/Notification";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
 
 import { fetchCategory } from "../../services/api";
 import ProductCard from "../../components/customer/ProductCard";
@@ -23,28 +17,28 @@ import { fetchProducts } from "../../services/api";
 import boxIconUrl from "../../assets/customer/box-icon.svg";
 import starIconUrl from "../../assets/customer/star-icon.svg";
 import materialIconUrl from "../../assets/customer/material-icon.svg";
-import sizeIconUrl from "../../assets/customer/size-icon.svg";
+import brandImage from "../../assets/over-production.webp";
 
 const sneakerspoints = [
   {
     title: "Konstruktion",
-    description: `Sneakerens overdel er omhyggeligt fastgjort til sålen med en præcis syning, hvilket skaber en ren og strømlinet silhuet, samtidig med at strukturen bevares og komforten understøttes. 
+    description: `Sneakerens overdel er omhyggeligt fastgjort til sålen med en præcis syning, hvilket skaber en ren og strømlinet silhuet, samtidig med at strukturen bevares og komforten understøttes.
 
   Resultatet er en sneaker, der kombinerer visuel elegance med funktionalitet, så du kan bevare et skarpt og stilfuldt udtryk – fra mødelokalet til hverdagen.`,
   },
   {
     title: "Materialer",
-    description: `Vores sneakers fremstilles af premium materialer, herunder blødt læder og slidstærkt kanvas, der sikrer både komfort og holdbarhed. 
+    description: `Vores sneakers fremstilles af premium materialer, herunder blødt læder og slidstærkt kanvas, der sikrer både komfort og holdbarhed.
 
- Den polstrede indersål giver ekstra støtte til dine fødder, mens den fleksible ydersål sikrer et godt greb på forskellige overflader. 
+ Den polstrede indersål giver ekstra støtte til dine fødder, mens den fleksible ydersål sikrer et godt greb på forskellige overflader.
 
  Uanset om du går en tur i byen eller tilbringer dagen på farten, vil vores sneakers holde dine fødder glade og stilfulde.`,
   },
   {
     title: "Design",
-    description: `Vores sneakers kombinerer moderne æstetik med tidløse elementer for at skabe et alsidigt design, der passer til enhver lejlighed. 
+    description: `Vores sneakers kombinerer moderne æstetik med tidløse elementer for at skabe et alsidigt design, der passer til enhver lejlighed.
 
- Med rene linjer, subtile detaljer og en neutral farvepalette er disse sneakers perfekte til både afslappede og mere formelle outfits. 
+ Med rene linjer, subtile detaljer og en neutral farvepalette er disse sneakers perfekte til både afslappede og mere formelle outfits.
 
  Uanset om du klæder dig op eller ned, vil vores sneakers tilføje et strejf af sofistikeret stil til dit look.`,
   },
@@ -53,10 +47,13 @@ const sneakerspoints = [
 const rating = { value: 4.7, count: 128 };
 
 const salesPoints = [
-  "✔ Fri fragt ved køb over 499,-",
-  "✔ Levering indenfor 1-3 hverdage",
-  "✔ Forlænget 30-dages returret",
+  "Fri fragt ved køb over 499,-",
+  "Levering indenfor 1-3 hverdage",
+  "Forlænget 30-dages returret",
 ];
+
+const eyebrowClass =
+  "font-['figtree'] text-xs font-semibold uppercase tracking-[0.28em] text-[#1c1c1c]/50";
 
 const Product: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -76,21 +73,6 @@ const Product: React.FC = () => {
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
-  const [sizeDropdownOpen, setSizeDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setSizeDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   useEffect(() => {
     if (!id) return;
@@ -211,7 +193,7 @@ const Product: React.FC = () => {
   const { name, price, offer_price, images } = product;
 
   return (
-    <div className="bg-[#f2f1f0] overflow-x-hidden">
+    <div className="overflow-x-hidden bg-[#f2f1f0] text-[#1c1c1c]">
       {notification.subtext && (
         <Notification
           heading={notification.heading}
@@ -224,101 +206,83 @@ const Product: React.FC = () => {
         />
       )}
 
-      <div className="px-6 md:px-12 py-8 md:py-12">
-        <div className="lg:grid lg:grid-cols-[1.5fr_1fr] lg:gap-16 xl:gap-24">
-          {/* Image gallery */}
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {images &&
-                images.map((image, idx) => (
-                  <div
-                    key={image.id ?? image.url ?? idx}
-                    className="w-full aspect-square bg-gray-200"
-                  >
-                    <img
-                      src={image.url}
-                      alt={`${name}-${idx}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
-            </div>
+      <div className="px-6 pb-16 pt-8 md:px-12 md:pb-24 md:pt-12">
+        <div className="lg:grid lg:grid-cols-[1.5fr_1fr] lg:items-start lg:gap-16 xl:gap-24">
+          {/* Image gallery: portrait tiles with a tight gap */}
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+            {images &&
+              images.map((image, idx) => (
+                <div
+                  key={image.id ?? image.url ?? idx}
+                  className="aspect-[4/5] w-full overflow-hidden bg-[#e9e7e3]"
+                >
+                  <img
+                    src={image.url}
+                    alt={`${name}-${idx}`}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              ))}
           </div>
 
-          {/* Product info */}
-          <div className="mt-8 lg:mt-0">
-            <h1 className="text-3xl md:text-4xl lg:text-4xl text-gray-800 font-['EB_Garamond'] mb-4">
+          {/* Product info: sticks while the gallery scrolls on desktop */}
+          <div className="mt-10 lg:sticky lg:top-32 lg:mt-0">
+            {categoryName && <p className={`${eyebrowClass} mb-4`}>{categoryName}</p>}
+            <h1 className="font-garamond text-4xl leading-tight md:text-5xl">
               {name}
             </h1>
 
-            <div className="flex items-center mb-6">
-              <div className="flex items-center">
+            <div className="mt-4 flex items-center">
+              <div className="flex items-center gap-0.5 text-[#b8935a]">
                 {[...Array(5)].map((_, i) => (
                   <StarIcon
                     key={i}
-                    className={`h-4 w-4 md:h-5 md:w-5 ${
-                      i < Math.floor(rating.value)
-                        ? "text-[#c9a326]"
-                        : "text-gray-300"
+                    className={`h-4 w-4 ${
+                      i < Math.floor(rating.value) ? "" : "opacity-25"
                     }`}
                   />
                 ))}
               </div>
-              <p className="ml-2 text-xs md:text-sm font-medium text-gray-600">
-                {rating.value.toFixed(1)} ({rating.count} anmeldelser)
+              <p className="ml-3 text-xs text-[#1c1c1c]/60">
+                {rating.value.toFixed(1)} &middot; {rating.count} anmeldelser
               </p>
             </div>
 
-            {/* Key Sales Points */}
-            <ul className="space-y-2 text-sm md:text-base text-[#1c1c1c] mb-8">
-              {salesPoints.map((point) => (
-                <li key={point} className="flex items-center">
-                  <span>{point}</span>
-                </li>
-              ))}
-            </ul>
-
             {/* Price */}
-            <div className="mb-8">
-              <p className="font-['EB_Garamond']">
-                {offer_price ? (
-                  <span className="flex items-baseline gap-3">
-                    <span className="font-normal text-[clamp(1rem,4vw,1.5rem)] text-[rgb(48,122,7)]">
-                      {formatPrice(offer_price)}
-                    </span>
-                    <span className="line-through text-lg text-[#1c1c1ca6]">
-                      {formatPrice(price)}
-                    </span>
-                  </span>
-                ) : (
-                  <span className="font-normal text-[clamp(1.5rem,5vw,1.5rem)] text-[#1c1c1ca6]">
+            <div className="mt-8 flex items-baseline gap-3 font-garamond">
+              {offer_price ? (
+                <>
+                  <span className="text-3xl">{formatPrice(offer_price)}</span>
+                  <span className="text-lg text-[#1c1c1c]/45 line-through">
                     {formatPrice(price)}
                   </span>
-                )}
-              </p>
+                </>
+              ) : (
+                <span className="text-3xl">{formatPrice(price)}</span>
+              )}
             </div>
 
             {/* Selection Controls */}
-            <div className="space-y-6 mb-10">
-              {/* Color Swatches */}
+            <div className="mt-10 space-y-8">
               {availableColors.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900 mb-3">
-                    Farve
-                  </h3>
-                  <div className="flex items-center space-x-3">
+                  <div className="mb-3 flex items-baseline justify-between">
+                    <h3 className={eyebrowClass}>Farve</h3>
+                  </div>
+                  <div className="flex items-center gap-3">
                     {availableColors.map((color) => (
                       <button
                         key={color.id}
                         onClick={() => setSelectedColor(color.name)}
-                        className={`h-8 w-8 rounded-full border-2 p-0.5 transition-all ${
+                        aria-label={color.name}
+                        className={`h-9 w-9 rounded-full border p-0.5 transition-colors ${
                           selectedColor === color.name
                             ? "border-[#1c1c1c]"
-                            : "border-transparent hover:border-gray-300"
+                            : "border-transparent hover:border-[#1c1c1c]/30"
                         }`}
                       >
                         <div
-                          className="h-full w-full rounded-full border border-gray-200"
+                          className="h-full w-full rounded-full border border-black/10"
                           style={{ backgroundColor: color.name }}
                         ></div>
                       </button>
@@ -327,62 +291,51 @@ const Product: React.FC = () => {
                 </div>
               )}
 
-              {/* Size Dropdown */}
+              {/* Sizes as buttons instead of a dropdown */}
               <div>
-                <h3 className="text-sm font-medium text-gray-900 mb-3">
-                  Størrelse
-                </h3>
-                <div className="relative" ref={dropdownRef}>
-                  <button
-                    onClick={() => setSizeDropdownOpen(!sizeDropdownOpen)}
-                    className="w-full flex justify-between items-center px-4 py-3 text-base border border-[#00000026] bg-white hover:bg-gray-50 focus:outline-none rounded-sm transition-colors"
-                  >
-                    <span>{selectedSize || "Vælg størrelse"}</span>
-                    <ChevronDownIcon
-                      className={`h-4 w-4 text-gray-700 transition-transform duration-200 ${
-                        sizeDropdownOpen ? "rotate-180" : ""
+                <h3 className={`${eyebrowClass} mb-3`}>Størrelse</h3>
+                <div className="grid grid-cols-5 gap-2 sm:grid-cols-6">
+                  {availableSizes.map((size) => (
+                    <button
+                      key={size.id}
+                      onClick={() => setSelectedSize(size.name)}
+                      className={`border py-3 text-sm transition-colors duration-200 ${
+                        selectedSize === size.name
+                          ? "border-[#1c1c1c] bg-[#1c1c1c] text-white"
+                          : "border-[#1c1c1c]/20 bg-transparent hover:border-[#1c1c1c]"
                       }`}
-                    />
-                  </button>
-
-                  {sizeDropdownOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#00000026] z-20 shadow-lg rounded-sm">
-                      {availableSizes.map((size) => (
-                        <button
-                          key={size.id}
-                          onClick={() => {
-                            setSelectedSize(size.name);
-                            setSizeDropdownOpen(false);
-                          }}
-                          className={`w-full text-left px-4 py-3 text-base transition-colors ${
-                            selectedSize === size.name
-                              ? "bg-[#1c1c1c] text-white"
-                              : "bg-white text-gray-900 hover:bg-gray-100"
-                          }`}
-                        >
-                          {size.name}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                    >
+                      {size.name}
+                    </button>
+                  ))}
                 </div>
               </div>
-              {/* Add to Cart Button */}
+
               <button
                 onClick={handleAddToCart}
-                className="w-full bg-[#1c1c1c] text-white text-[1rem] py-4 font-semibold hover:bg-opacity-90 transition-all rounded-sm shadow-sm"
+                className="w-full border border-[#1c1c1c] bg-[#1c1c1c] py-4 font-['Montserrat'] text-xs font-semibold uppercase tracking-[0.2em] text-white transition-colors duration-300 hover:bg-transparent hover:text-[#1c1c1c]"
               >
                 Føj til indkøbskurv
               </button>
             </div>
 
+            {/* Key sales points */}
+            <ul className="mt-8 space-y-3 border-y border-[#1c1c1c]/15 py-6 text-sm">
+              {salesPoints.map((point) => (
+                <li key={point} className="flex items-center gap-3">
+                  <CheckIcon className="h-4 w-4 shrink-0 text-[#1c1c1c]" />
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+
             {/* Product description */}
-            <div className="text-gray-700 text-sm md:text-base leading-relaxed whitespace-pre-line mb-8 border-t border-[#00000026] pt-8">
+            <div className="whitespace-pre-line py-8 text-sm leading-relaxed text-[#1c1c1c]/75 md:text-base">
               {product.description || "Ingen beskrivelse tilgængelig."}
             </div>
 
             {/* Accordions */}
-            <div className="border-t border-[#00000026]">
+            <div className="border-t border-[#1c1c1c]/15">
               <Accordion
                 id="shipping"
                 isOpen={openAccordion === "shipping"}
@@ -418,7 +371,7 @@ const Product: React.FC = () => {
                 icon={<img src={materialIconUrl} className="h-5 w-5" />}
                 title="Materialer"
                 content={
-                  <ul className="list-none space-y-3 text-sm md:text-base text-gray-700 pt-2">
+                  <ul className="list-none space-y-3 pt-2 text-sm text-[#1c1c1c]/75 md:text-base">
                     <li className="flex items-start gap-3">
                       <span>
                         ✔ Premium europæiske materialer udvalgt for holdbarhed
@@ -438,15 +391,16 @@ const Product: React.FC = () => {
         </div>
       </div>
 
-      {/* Detail Points Section */}
-      <section className="px-6 md:px-12 py-16 border-t border-[#00000026] bg-transparent">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16">
-          {sneakerspoints.map((point) => (
-            <div key={point.title}>
-              <h3 className="text-2xl md:text-3xl text-gray-800 mb-4 font-['EB_Garamond']">
+      {/* Detail points */}
+      <section className="px-6 pb-16 md:px-12 md:pb-24">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-12">
+          {sneakerspoints.map((point, i) => (
+            <div key={point.title} className="border-t border-[#1c1c1c]/20 pt-6">
+              <p className={`${eyebrowClass} mb-4`}>0{i + 1}</p>
+              <h3 className="mb-4 font-garamond text-3xl md:text-4xl">
                 {point.title}
               </h3>
-              <p className="text-gray-600 text-sm md:text-base leading-relaxed whitespace-pre-line">
+              <p className="whitespace-pre-line text-sm leading-relaxed text-[#1c1c1c]/70 md:text-base">
                 {point.description}
               </p>
             </div>
@@ -454,55 +408,60 @@ const Product: React.FC = () => {
         </div>
       </section>
 
-      {/* Quote Section */}
-      <section className="py-16 w-full bg-[#181c2e] text-center px-6">
-        <h2 className="font-['EB_Garamond'] text-2xl md:text-4xl text-white leading-snug max-w-4xl mx-auto">
-          Hos NORDWEAR tror vi på forfinelse frem for forandring – tidløse
-          designs til den bevidste mand.
+      {/* Quote */}
+      <section className="w-full bg-[#171616] px-6 py-16 text-center md:py-24">
+        <h2 className="mx-auto max-w-4xl font-garamond text-2xl leading-snug text-white md:text-4xl md:leading-[1.25]">
+          Hos NordWear tror vi på forfinelse frem for forandring &ndash;
+          tidløse designs til den bevidste mand.
         </h2>
       </section>
 
-      {/* Related Products */}
-      <section className="py-16 px-6 md:px-12 bg-[#f2f1f0]">
-        <h2 className="text-3xl md:text-4xl font-['EB_Garamond'] text-center mb-12">
-          Du er måske også interesseret i
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+      {/* Related products */}
+      <section className="px-6 py-16 md:px-12 md:py-24">
+        <div className="mb-8 flex items-end justify-between gap-6 md:mb-10">
+          <h2 className="font-garamond text-3xl leading-tight md:text-5xl">
+            Du er måske også interesseret i
+          </h2>
+          {categoryName && (
+            <Link
+              to={`/category/${categoryName.toLowerCase()}`}
+              className="group hidden shrink-0 items-center gap-2 border-b border-[#1c1c1c] pb-1 font-['Montserrat'] text-xs font-semibold uppercase tracking-[0.18em] md:inline-flex"
+            >
+              Se alle {categoryName.toLowerCase()}
+              <span className="transition-transform duration-300 group-hover:translate-x-1">
+                &rarr;
+              </span>
+            </Link>
+          )}
+        </div>
+        <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
           {relatedProducts.map((product) => (
             <ProductCard
               key={product.id}
               product={product}
+              portrait
               onNotify={handleNotification}
             />
           ))}
         </div>
-        {categoryName && (
-          <div className="text-center mt-12">
-            <Link
-              to={`/category/${categoryName.toLowerCase()}`}
-              className="bg-[#1c1c1c] border border-[#1c1c1c] rounded-full text-white px-8 py-3 font-semibold hover:bg-transparent hover:text-[#1c1c1c] transition-all"
-            >
-              Se alle {categoryName.toLowerCase()}
-            </Link>
-          </div>
-        )}
       </section>
 
-      {/* Brand Values Block */}
-      <div className="border-y border-[#00000026] bg-transparent">
-        <div className="grid grid-cols-1 md:grid-cols-2 items-center">
-          <div className="h-72 md:h-[600px] overflow-hidden order-1 md:order-none">
-            <img
-              src="https://images.unsplash.com/photo-1569664739361-5d5727ca3df9?q=80&w=1470&auto=format&fit=crop"
-              alt="Design"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="p-8 md:p-16 lg:p-24 bg-transparent">
-            <h2 className="text-3xl md:text-4xl font-['EB_Garamond'] mb-6">
-              Skandinavisk design - Håndarbejde fra Portugal
+      {/* Brand values */}
+      <section className="grid grid-cols-1 items-stretch md:grid-cols-2">
+        <div className="h-72 overflow-hidden md:h-[600px]">
+          <img
+            src={brandImage}
+            alt="Design"
+            className="h-full w-full object-cover"
+          />
+        </div>
+        <div className="flex items-center bg-white px-6 py-14 md:px-16 lg:px-24">
+          <div className="max-w-xl">
+            <p className={`${eyebrowClass} mb-5`}>Vores værdier</p>
+            <h2 className="mb-6 font-garamond text-3xl leading-tight md:text-5xl">
+              Skandinavisk design &ndash; håndarbejde fra Portugal
             </h2>
-            <p className="text-gray-600 text-sm md:text-lg leading-relaxed">
+            <p className="text-sm leading-relaxed text-[#1c1c1c]/75 md:text-lg">
               Vi skaber ikke trends – vi skaber tidløse stykker. Hvert produkt
               kombinerer nordisk minimalisme, sofistikeret design og
               uomtvisteligt komfort. Udvalgt materiale for dets kvalitet,
@@ -510,7 +469,7 @@ const Product: React.FC = () => {
             </p>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 };

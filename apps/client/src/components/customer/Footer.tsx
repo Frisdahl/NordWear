@@ -4,168 +4,151 @@ import { FaFacebookF } from "react-icons/fa";
 import { IoLogoInstagram } from "react-icons/io";
 import { RiTiktokFill } from "react-icons/ri";
 
+const helpLinks = [
+  "Returret",
+  "Retur",
+  "Care Guide",
+  "Ofte stillede spørgsmål",
+  "Kontakt os",
+];
+
+const infoLinks = [
+  "Om os",
+  "Blog",
+  "Julegaver 2025",
+  "Handelsbetingelser",
+  "Persondata- og cookiepolitik",
+  "Servicevilkår",
+];
+
+const socials = [
+  { name: "Instagram", Icon: IoLogoInstagram },
+  { name: "TikTok", Icon: RiTiktokFill },
+  { name: "Facebook", Icon: FaFacebookF },
+];
+
+const headingClass =
+  "mb-5 font-['figtree'] text-xs font-semibold uppercase tracking-[0.24em] text-white/50";
+
+const linkClass =
+  "group/link relative inline-block text-sm text-white/80 transition-colors duration-300 hover:text-white";
+
+const Underline = () => (
+  <span className="absolute -bottom-0.5 left-0 h-px w-full origin-left scale-x-0 bg-white transition-transform duration-500 ease-in-out group-hover/link:scale-x-100" />
+);
+
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-[#f2f1f0] text-[#1c1c1c] py-12 px-4 sm:px-6 lg:px-12">
-      <div className="mx-auto grid grid-cols-1 md:grid-cols-[1fr_.65fr_.75fr_.75fr] gap-12">
-        {/* Column 1: Logo, about, contact, social */}
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold">NORDWEAR</h2>
-          <p className="text-[1rem]">
+    <footer className="bg-[#171616] px-6 pb-8 pt-16 text-white md:px-12 md:pt-24">
+      {/* Top: brand and newsletter */}
+      <div className="grid grid-cols-1 gap-12 pb-14 md:grid-cols-2 md:gap-20 md:pb-20">
+        <div>
+          <p className="font-garamond text-4xl tracking-[0.08em] md:text-5xl">
+            NORDWEAR
+          </p>
+          <p className="mt-6 max-w-md text-sm leading-relaxed text-white/70 md:text-base">
             Vi forener et tidløst, stilrent udtryk med høj kvalitet og komfort
             til en fair pris. Ved at fjerne dyre mellemled og sælge direkte til
-            dig, kan vi tilbyde bedre materialer og solidt håndværk – uden at
-            prisen stiger.
-          </p>
-          <div>
-            <h3 className="font-semibold">Kundeservice</h3>
-            <p className="text-[1rem]">Man-Fre: kl. 10.00-15.00</p>
-            <p className="text-[1rem] mt-2">
-              <span className="font-semibold">Mail:</span>{" "}
-              kundeservice@nordwear.dk
-            </p>
-            <p className="text-[1rem]">
-              <span className="font-semibold">Telefon:</span> +45 43 43 43 43
-            </p>
-          </div>
-
-          <div className="flex space-x-4 pt-6 text-2xl">
-            <a href="#" className="group/link relative">
-              <FaFacebookF />
-            </a>
-            <a href="#" className="group/link relative">
-              <IoLogoInstagram />
-            </a>
-            <a href="#" className="group/link relative">
-              <RiTiktokFill />
-            </a>
-          </div>
-          <p className="text-xs text-gray-500">
-            &copy; {new Date().getFullYear()} NORDWEAR. All rights reserved.
+            dig, kan vi tilbyde bedre materialer og solidt håndværk &ndash; uden
+            at prisen stiger.
           </p>
         </div>
 
-        {/* Column 2: Customer Service */}
-        <div className="space-y-4">
-          <h3 className="font-semibold">Kundeservice</h3>
-          <ul className="space-y-2 text-sm">
-            <li>
-              <Link to="#" className="group/link relative">
-                Returret
-                <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
-              </Link>
-            </li>
-            <li>
-              <Link to="#" className="group/link relative">
-                Julegaver 2025
-                <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
-              </Link>
-            </li>
-            <li>
-              <Link to="#" className="group/link relative">
-                Blog
-                <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
-              </Link>
-            </li>
-            <li>
-              <Link to="#" className="group/link relative">
-                Om os
-                <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
-              </Link>
-            </li>
-            <li>
-              <Link to="#" className="group/link relative">
-                Kontakt os
-                <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
-              </Link>
-            </li>
-            <li>
-              <Link to="#" className="group/link relative">
-                Retur
-                <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
-              </Link>
-            </li>
-            <li>
-              <Link to="#" className="group/link relative">
-                Care Guide
-                <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
-              </Link>
-            </li>
-            <li>
-              <Link to="#" className="group/link relative">
-                Ofte stillede spørgsmål
-                <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
-              </Link>
-            </li>
-            <li>
-              <Link to="#" className="group/link relative">
-                Handelsbetingelser
-                <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
-              </Link>
-            </li>
-            <li>
-              <Link to="#" className="group/link relative">
-                Persondata- og cookiepolitik
-                <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
-              </Link>
-            </li>
-            <li>
-              <Link to="#" className="group/link relative">
-                Servicevilkår
-                <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Column 3: Newsletter */}
-        <div className="space-y-4">
-          <h3 className="font-semibold">Tilmeld vores nyhedsbrev</h3>
-          <p className="text-sm">
-            Tilmeld dig nyhedsbrevet og bliv holdt opdateret på kampagner,
-            konkurrencer og produktlanceringer.
+        <div className="md:justify-self-end md:w-full md:max-w-md">
+          <h3 className="font-garamond text-2xl md:text-3xl">
+            Tilmeld vores nyhedsbrev
+          </h3>
+          <p className="mt-3 text-sm text-white/70">
+            Bliv holdt opdateret på kampagner, konkurrencer og
+            produktlanceringer.
           </p>
-          <form>
-            <div className="flex flex-col space-y-2">
-              <input
-                type="email"
-                placeholder="Din email"
-                className="p-2 border border-gray-300 rounded-md"
-              />
-              <button
-                type="submit"
-                className="bg-[#1c1c1c] text-white p-2 font-semibold rounded-md"
-              >
-                Abonnér
-              </button>
-            </div>
+          <form className="mt-6 flex items-end gap-4 border-b border-white/40 pb-3 transition-colors duration-300 focus-within:border-white">
+            <input
+              type="email"
+              placeholder="Din email"
+              aria-label="Din email"
+              className="min-w-0 flex-1 bg-transparent text-sm text-white placeholder:text-white/40 focus:outline-none"
+            />
+            <button
+              type="submit"
+              className="font-['Montserrat'] text-xs font-semibold uppercase tracking-[0.18em] transition-opacity duration-300 hover:opacity-70"
+            >
+              Abonnér &rarr;
+            </button>
           </form>
         </div>
+      </div>
 
-        {/* Column 4: Follow Us */}
-        <div className="space-y-4">
-          <h3 className="font-semibold">Følg med</h3>
-          <p className="text-sm">Du kan følge med på vores sociale medier</p>
-          <ul className="space-y-2 text-sm">
-            <li>
-              <a href="#" className="group/link relative">
-                Instagram
-                <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
-              </a>
-            </li>
-            <li>
-              <a href="#" className="group/link relative">
-                TikTok
-                <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
-              </a>
-            </li>
-            <li>
-              <a href="#" className="group/link relative">
-                Facebook
-                <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
-              </a>
-            </li>
+      {/* Link columns */}
+      <div className="grid grid-cols-2 gap-x-6 gap-y-12 border-t border-white/15 py-12 md:grid-cols-4 md:gap-12 md:py-16">
+        <div>
+          <h3 className={headingClass}>Kundeservice</h3>
+          <div className="space-y-2 text-sm text-white/80">
+            <p>Man-Fre: kl. 10.00-15.00</p>
+            <p>kundeservice@nordwear.dk</p>
+            <p>+45 43 43 43 43</p>
+          </div>
+        </div>
+
+        <div>
+          <h3 className={headingClass}>Hjælp</h3>
+          <ul className="space-y-3">
+            {helpLinks.map((label) => (
+              <li key={label}>
+                <Link to="#" className={linkClass}>
+                  {label}
+                  <Underline />
+                </Link>
+              </li>
+            ))}
           </ul>
+        </div>
+
+        <div>
+          <h3 className={headingClass}>Information</h3>
+          <ul className="space-y-3">
+            {infoLinks.map((label) => (
+              <li key={label}>
+                <Link to="#" className={linkClass}>
+                  {label}
+                  <Underline />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <h3 className={headingClass}>Følg med</h3>
+          <ul className="space-y-3">
+            {socials.map(({ name }) => (
+              <li key={name}>
+                <a href="#" className={linkClass}>
+                  {name}
+                  <Underline />
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      {/* Bottom bar */}
+      <div className="flex flex-col-reverse items-start justify-between gap-6 border-t border-white/15 pt-8 md:flex-row md:items-center">
+        <p className="text-xs text-white/50">
+          &copy; {new Date().getFullYear()} NORDWEAR. All rights reserved.
+        </p>
+        <div className="flex items-center gap-5 text-xl text-white/80">
+          {socials.map(({ name, Icon }) => (
+            <a
+              key={name}
+              href="#"
+              aria-label={name}
+              className="transition-opacity duration-300 hover:opacity-60"
+            >
+              <Icon />
+            </a>
+          ))}
         </div>
       </div>
     </footer>

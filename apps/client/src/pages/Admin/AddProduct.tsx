@@ -21,12 +21,13 @@ const chevronRightSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" vie
 
 const CLOTHING_SIZES = ["XS", "S", "M", "L", "XL"];
 const SHOE_SIZES = ["38", "39", "40", "41", "42", "43", "44", "45", "46"];
-const SNEAKERS_CATEGORY_ID = "5";
+// Sneakers, Loafers, Dress shoes and Boots use shoe sizes
+const SHOE_CATEGORY_IDS = ["5", "7", "8", "9"];
 type FieldErrorKey = "name" | "price" | "category_Id" | "status";
 type ProductNotificationType = "" | "success" | "error" | "loading";
 
 const getSizeOptionsForCategory = (categoryId: string) => {
-  return categoryId === SNEAKERS_CATEGORY_ID ? SHOE_SIZES : CLOTHING_SIZES;
+  return SHOE_CATEGORY_IDS.includes(categoryId) ? SHOE_SIZES : CLOTHING_SIZES;
 };
 
 const getSizeSortValue = (size: string) => {

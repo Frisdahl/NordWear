@@ -18,6 +18,7 @@ import boxIconUrl from "../../assets/customer/box-icon.svg";
 import starIconUrl from "../../assets/customer/star-icon.svg";
 import materialIconUrl from "../../assets/customer/material-icon.svg";
 import brandImage from "../../assets/over-production.webp";
+import { areShoeSizes, sortSizes } from "../../utils/sizes";
 
 const sneakerspoints = [
   {
@@ -140,7 +141,9 @@ const Product: React.FC = () => {
 
       if (pq.size) sizeMap.set(pq.size.id, pq.size.name);
     });
-    return Array.from(sizeMap.entries()).map(([id, name]) => ({ id, name }));
+    return sortSizes(
+      Array.from(sizeMap.entries()).map(([id, name]) => ({ id, name })),
+    );
   }, [product, selectedColor]);
 
   useEffect(() => {
@@ -293,13 +296,15 @@ const Product: React.FC = () => {
 
               {/* Sizes as buttons instead of a dropdown */}
               <div>
-                <h3 className={`${eyebrowClass} mb-3`}>Størrelse</h3>
-                <div className="grid grid-cols-5 gap-2 sm:grid-cols-6">
+                <h3 className={`${eyebrowClass} mb-3`}>
+                  {areShoeSizes(availableSizes) ? "Størrelse (EU)" : "Størrelse"}
+                </h3>
+                <div className="flex flex-wrap gap-2">
                   {availableSizes.map((size) => (
                     <button
                       key={size.id}
                       onClick={() => setSelectedSize(size.name)}
-                      className={`border py-3 text-sm transition-colors duration-200 ${
+                      className={`min-w-[3.5rem] border px-3 py-3 text-sm transition-colors duration-200 ${
                         selectedSize === size.name
                           ? "border-[#1c1c1c] bg-[#1c1c1c] text-white"
                           : "border-[#1c1c1c]/20 bg-transparent hover:border-[#1c1c1c]"

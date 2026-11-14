@@ -3,6 +3,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import Accordion from "../Accordion";
 import { fetchCategories, fetchSizes } from "../../services/api";
 import { Category, Size } from "../../types";
+import { sortSizes } from "../../utils/sizes";
 import Slider from "@mui/material/Slider";
 
 interface FilterMenuProps {
@@ -155,7 +156,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
               title="Størrelse"
               content={
                 <div className="pt-4 pb-4 space-y-3">
-                  {sizes.map((size) => (
+                  {sortSizes(sizes).map((size) => (
                     <div
                       key={size.id}
                       className="flex items-center cursor-pointer group"

@@ -27,6 +27,10 @@ function seedPassword(envName: string, localDefault: string): string {
 // Hand-made products with real photos, served from apps/client/public/products.
 // The first image of each product is its thumbnail. Category ids: 5 Sneakers,
 // 7 Loafers, 8 Dress shoes, 9 Boots, 10 Accessories.
+// Shoe categories get EU shoe sizes, accessories one size, the rest S to XL.
+const SHOE_CATEGORY_IDS = [5, 7, 8, 9];
+const ACCESSORIES_CATEGORY_ID = 10;
+
 const sequence = (folder: string, count: number) =>
   Array.from({ length: count }, (_, i) => `/products/${folder}/${i + 1}.webp`);
 
@@ -165,7 +169,22 @@ async function main() {
     { id: 2, name: "M" },
     { id: 3, name: "L" },
     { id: 4, name: "XL" },
+    // EU shoe sizes
+    { id: 5, name: "40" },
+    { id: 6, name: "41" },
+    { id: 7, name: "42" },
+    { id: 8, name: "43" },
+    { id: 9, name: "44" },
+    { id: 10, name: "45" },
+    { id: 11, name: "46" },
+    { id: 12, name: "One size" },
   ];
+  const sizeIdsFor = (categoryId: number) =>
+    SHOE_CATEGORY_IDS.includes(categoryId)
+      ? [5, 6, 7, 8, 9, 10, 11]
+      : categoryId === ACCESSORIES_CATEGORY_ID
+        ? [12]
+        : [1, 2, 3, 4];
   await prisma.size.createMany({ data: sizesToSeed, skipDuplicates: true });
   console.log("Sizes seeded.");
 
@@ -213,7 +232,9 @@ async function main() {
   // 6. Insert Product Quantities
   const quantitiesToSeed = [];
   for (const product of productsToSeed) {
-    for (const size of sizesToSeed) {
+    for (const size of sizesToSeed.filter((s) =>
+      sizeIdsFor(product.category_Id).includes(s.id),
+    )) {
       for (const color of colorsToSeed) {
         if (Math.random() > 0.3) {
           // Create quantity for 70% of combinations

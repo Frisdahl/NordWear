@@ -14,6 +14,7 @@ import {
 import { useSpring, animated } from "react-spring";
 import Notification from "../Notification";
 import { formatPrice } from "../../utils/formatPrice";
+import { sortSizes } from "../../utils/sizes";
 
 interface ProductCardProps {
   product: Product;
@@ -161,15 +162,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
     });
   };
 
-  const sizeOrder = ["XS", "S", "M", "L", "XL", "XXL"];
-  const sortedSizes = sizes?.sort((a, b) => {
-    const indexA = sizeOrder.indexOf(a.name);
-    const indexB = sizeOrder.indexOf(b.name);
-    if (indexA === -1 && indexB === -1) return a.name.localeCompare(b.name);
-    if (indexA === -1) return 1;
-    if (indexB === -1) return -1;
-    return indexA - indexB;
-  });
+  const sortedSizes = sizes ? sortSizes(sizes) : undefined;
 
   return (
     <animated.div style={{ ...style, ...animation }} className="h-full w-full">

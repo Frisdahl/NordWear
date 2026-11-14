@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import ArrowIcon from "../../components/customer/ArrowIcon";
 import nordwearHero from "../../assets/nordwear-hero.webp";
 import productionImage from "../../assets/production.webp";
 import overProductionImage from "../../assets/over-production.webp";
@@ -89,10 +90,10 @@ const About: React.FC = () => {
           <p className={`${eyebrowClass} col-span-4 mb-6 md:col-span-8 lg:col-span-12`}>
             Om NordWear
           </p>
-          <h1 className="col-span-4 font-garamond text-[clamp(2.5rem,7vw,6rem)] font-medium leading-[1.02] tracking-tight [text-wrap:balance] md:col-span-8 lg:col-span-10">
+          <h1 className="col-span-4 font-garamond text-[clamp(2rem,4.2vw,3.5rem)] font-medium leading-[1.1] tracking-tight [text-wrap:balance] md:col-span-8 lg:col-span-9">
             Forfinelse frem for forandring.
           </h1>
-          <p className="col-span-4 mt-10 text-base leading-relaxed text-[#1c1c1c]/75 md:col-span-5 md:col-start-4 md:mt-16 md:text-lg lg:col-span-4 lg:col-start-8">
+          <p className="col-span-4 mt-10 text-base leading-relaxed text-[#1c1c1c]/75 md:col-span-5 md:col-start-4 md:mt-10 md:text-lg lg:col-span-4 lg:col-start-8">
             Designet i Danmark og håndlavet i Portugal – tidløse produkter til
             dig, der vælger kvalitet frem for kvantitet.
           </p>
@@ -112,12 +113,10 @@ const About: React.FC = () => {
               <span className="font-garamond text-2xl md:text-3xl">
                 {link.label}
               </span>
-              <span
-                aria-hidden="true"
-                className="text-base transition-transform duration-300 group-hover:translate-y-1"
-              >
-                &darr;
-              </span>
+              <ArrowIcon
+                direction="down"
+                className="self-center transition-transform duration-300 group-hover:translate-y-1"
+              />
             </a>
           ))}
         </nav>
@@ -198,12 +197,7 @@ const About: React.FC = () => {
               className={`${textLinkClass} mt-8`}
             >
               Se udvalget
-              <span
-                aria-hidden="true"
-                className="transition-transform duration-300 group-hover:translate-x-1"
-              >
-                &rarr;
-              </span>
+              <ArrowIcon className="transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </div>
         </div>
@@ -259,12 +253,7 @@ const About: React.FC = () => {
           </h2>
           <Link to="/category" className={textLinkClass}>
             Se udvalget
-            <span
-              aria-hidden="true"
-              className="transition-transform duration-300 group-hover:translate-x-1"
-            >
-              &rarr;
-            </span>
+            <ArrowIcon className="transition-transform duration-300 group-hover:translate-x-1" />
           </Link>
         </div>
       </section>

@@ -38,6 +38,8 @@ const normalizeSlug = (slug: string | undefined): string => {
 };
 
 // Intro line and the three text blocks under the product grid, per category.
+// Keep the three blocks of a category about the same length (two short
+// paragraphs of roughly 150 and 110 characters) so the columns line up.
 const CATEGORY_CONTENT: Record<string, CategoryContent> = {
   sneakers: {
     description:
@@ -46,17 +48,17 @@ const CATEGORY_CONTENT: Record<string, CategoryContent> = {
       {
         title: "Nordiske Sneakers til Mænd",
         description:
-          "Vores sneakers forener skandinavisk minimalisme med europæisk håndværkstradition. Hver sko er håndlavet i Portugal med fokus på at skabe det perfekte balance mellem stil, komfort og holdbarhed.  \n\n Det stilrene design passer til enhver garderobe - fra casual hverdagslook til mere formelle outfits.",
+          "Vores sneakers forener skandinavisk minimalisme med europæisk håndværk. Hver sko er håndlavet i Portugal med fokus på stil og komfort. \n\n Det stilrene design passer til alt fra hverdagslook til mere formelle outfits.",
       },
       {
-        title: "Kvalitets Sneakers til Enhver Lejlighed",
+        title: "Kvalitet til Enhver Lejlighed",
         description:
-          "Oplev vores eksklusive kollektion af sneakers, der kombinerer tidløst skandinavisk design med førsteklasses europæisk håndværk. Hver sko er omhyggeligt fremstillet i Portugal for at sikre optimal komfort og holdbarhed. \n\n Uanset om du er på udkig efter et par til hverdagsbrug eller noget mere formelt, har vi sneakers, der passer perfekt til din stil.",
+          "Vores kollektion kombinerer tidløst design med førsteklasses håndværk. Hver sko er omhyggeligt fremstillet i Portugal for optimal komfort. \n\n Du finder et par til hverdagen og et par til de lidt pænere dage.",
       },
       {
-        title: "Stilrene Sneakers med Europæisk Håndværk",
+        title: "Europæisk Håndværk",
         description:
-          "Vores sneakers er skabt med en passion for skandinavisk design og europæisk kvalitet. Håndlavet i Portugal, tilbyder hver sko en unik kombination af komfort, holdbarhed og æstetik. \n\n Uanset om du ønsker et par til afslappede dage eller formelle begivenheder, finder du det perfekte match i vores kollektion.",
+          "Vores sneakers er skabt med passion for skandinavisk design og europæisk kvalitet. Hvert par samler komfort, holdbarhed og æstetik. \n\n Fra afslappede dage til formelle begivenheder finder du dit match her.",
       },
     ],
   },
@@ -67,17 +69,17 @@ const CATEGORY_CONTENT: Record<string, CategoryContent> = {
       {
         title: "Loafers med Nordisk Ro",
         description:
-          "Vores loafers forener afdæmpet skandinavisk design med portugisisk skomagerhåndværk. Slip-in-formen gør dem lette at tage på, og de rene linjer passer til både hverdag og de pæne anledninger. \n\n Hvert par er håndlavet af materialer, vi selv har valgt.",
+          "Vores loafers forener afdæmpet skandinavisk design med portugisisk håndværk. Slip-in-formen gør dem lette at tage på. \n\n Hvert par er håndlavet af udvalgte materialer.",
       },
       {
-        title: "Ruskind og Læder i Høj Kvalitet",
+        title: "Ruskind og Læder",
         description:
-          "Vi bruger blødt ruskind og fast læder, der former sig efter foden og får karakter med tiden. \n\n Med læderhæl og fleksibel sål er loafers fra NordWear behagelige fra den første dag.",
+          "Vi bruger blødt ruskind og fast læder, der former sig efter foden og får karakter med tiden. \n\n Med læderhæl og fleksibel sål er de behagelige fra den første dag.",
       },
       {
         title: "Fra Penny til Tassel",
         description:
-          "Vælg mellem penny loafers, tassel og horsebit, alt efter din stil. \n\n Brug dem til habit, chinos eller afslappet hverdag. De er skabt til at blive brugt igen og igen.",
+          "Vælg mellem penny, tassel og horsebit, alt efter din stil. De passer til både habit, chinos og afslappet hverdag. \n\n De er skabt til at blive brugt igen og igen, sæson efter sæson.",
       },
     ],
   },
@@ -86,19 +88,19 @@ const CATEGORY_CONTENT: Record<string, CategoryContent> = {
       "Klassiske dress shoes til kontoret og de pæne anledninger. Oxford, derby, brogue og wholecut, alle håndlavet i Portugal af udvalgt læder og ruskind med læderhæl og læderforing.",
     info: [
       {
-        title: "Klassiske Sko til de Pæne Anledninger",
+        title: "Klassiske Former",
         description:
-          "Vores dress shoes bygger på traditionelle former som oxford, derby og brogue, tegnet med nordisk enkelhed. \n\n Hvert par er håndlavet i Portugal af erfarne skomagere.",
+          "Vores dress shoes bygger på klassiske former som oxford, derby og brogue, tegnet med nordisk enkelhed. \n\n Hvert par er håndlavet i Portugal.",
       },
       {
         title: "Materialer der Holder",
         description:
-          "Vi vælger kalveskind og blødt ruskind med læderforing og læderhæl, så skoene både ser godt ud og er behagelige hele dagen. \n\n Med god pleje holder de i mange år.",
+          "Vi vælger kalveskind og blødt ruskind med læderforing og læderhæl, så skoene er behagelige hele dagen. \n\n Med god pleje holder de i mange år og får karakter undervejs.",
       },
       {
         title: "Fra Kontor til Fest",
         description:
-          "En sort oxford til jakkesættet eller en brun derby til chinos: vores dress shoes passer til en bred garderobe. \n\n Sko, der tåler at blive brugt og bliver bedre med tiden.",
+          "En sort oxford til jakkesættet eller en brun derby til chinos. Vores dress shoes passer til en bred garderobe. \n\n De tåler at blive brugt og bliver bedre med tiden, sæson efter sæson.",
       },
     ],
   },
@@ -107,19 +109,19 @@ const CATEGORY_CONTENT: Record<string, CategoryContent> = {
       "Støvler til efterår og vinter. Chelsea, chukka og snørestøvler i læder og ruskind, håndlavet i Portugal med holdbare såler.",
     info: [
       {
-        title: "Støvler til de Nordiske Årstider",
+        title: "Støvler til Årstiderne",
         description:
           "Vores støvler er designet til efterår og vinter med rene linjer og et robust udtryk. \n\n Hvert par er håndlavet i Portugal af udvalgte materialer.",
       },
       {
-        title: "Chelsea, Chukka og Snørestøvler",
+        title: "Chelsea, Chukka og Snøre",
         description:
-          "Vælg mellem den elegante chelsea, den afslappede chukka eller den kraftige snørestøvle med lugsål. \n\n Alle modeller forener komfort med et tidløst udtryk.",
+          "Vælg mellem den elegante chelsea, den afslappede chukka eller den kraftige snørestøvle med lugsål. \n\n Alle forener komfort med et tidløst udtryk.",
       },
       {
         title: "Bygget til at Holde",
         description:
-          "Vi bruger fast læder og blødt ruskind med solide såler, så støvlerne klarer både byen og vejret. \n\n Med lidt pleje får de karakter og holder i mange sæsoner.",
+          "Vi bruger fast læder og blødt ruskind med solide såler, så støvlerne klarer både byen og vejret. \n\n Med lidt pleje holder de i mange sæsoner.",
       },
     ],
   },
@@ -128,19 +130,19 @@ const CATEGORY_CONTENT: Record<string, CategoryContent> = {
       "Vores skjorter er designet med fokus på kvalitet og pasform. Uanset om du er til et klassisk eller moderne look, har vi en skjorte til dig. Alle vores skjorter er lavet af de bedste materialer for at sikre komfort hele dagen.",
     info: [
       {
-        title: "Kvalitets Skjorter til Enhver Stil",
+        title: "Kvalitet og Pasform",
         description:
-          "Vores skjorter er designet med fokus på kvalitet og pasform. Uanset om du er til et klassisk eller moderne look, har vi en skjorte til dig. \n\n Alle vores skjorter er lavet af de bedste materialer for at sikre komfort hele dagen.",
+          "Vores skjorter er designet med fokus på kvalitet og pasform, uanset om du er til et klassisk eller moderne look. \n\n De er lavet af gode materialer, der er behagelige hele dagen.",
       },
       {
-        title: "Stilfulde Skjorter til Mænd",
+        title: "Tidløst Design",
         description:
-          "Opdag vores eksklusive udvalg af skjorter, der kombinerer tidløst design med moderne trends. Hver skjorte er fremstillet af førsteklasses materialer for at sikre både komfort og holdbarhed. \n\n Uanset om du har brug for en skjorte til arbejde eller fritid, har vi det perfekte valg til dig.",
+          "Vores udvalg forener tidløst design med moderne detaljer. Hver skjorte er fremstillet af materialer, der holder. \n\n Vælg en til arbejde eller en til fritiden.",
       },
       {
         title: "Til Enhver Lejlighed",
         description:
-          "Vores skjorter er skabt med en passion for detaljer og kvalitet. Med et bredt udvalg af stilarter og farver, finder du nemt en skjorte, der passer til din personlige stil. \n\n Perfekt til både formelle og afslappede begivenheder, vores skjorter sikrer, at du altid ser skarp ud.",
+          "Vores skjorter er skabt med passion for detaljer. Med flere stilarter og farver finder du nemt en, der passer til dig. \n\n De klæder både formelle og afslappede anledninger, fra kontoret til weekenden.",
       },
     ],
   },
@@ -151,17 +153,17 @@ const CATEGORY_CONTENT: Record<string, CategoryContent> = {
       {
         title: "Tilbehør med Omtanke",
         description:
-          "Vores tilbehør supplerer resten af kollektionen med få detaljer, rene linjer og materialer, der holder. \n\n Designet i Danmark og produceret i Europa.",
+          "Vores tilbehør supplerer kollektionen med få detaljer og materialer, der holder. \n\n Designet i Danmark og produceret i Europa.",
       },
       {
         title: "Læder i Høj Kvalitet",
         description:
-          "Vi bruger fast læder og solide beslag, så hvert stykke kan bruges hver dag. \n\n Lædret får karakter med tiden.",
+          "Vi bruger fast læder og solide beslag, så hvert stykke kan bruges hver dag. \n\n Lædret får karakter med tiden og bliver kun bedre.",
       },
       {
         title: "Tidløst Design",
         description:
-          "Vi laver tilbehør, der passer til hverdagen og holder længe, uafhængigt af kortvarige trends.",
+          "Vi laver tilbehør, der passer til hverdagen og holder længe. \n\n Det er uafhængigt af kortvarige trends og designet til at blive brugt igen og igen.",
       },
     ],
   },
@@ -412,10 +414,10 @@ const Category: React.FC = () => {
       {/* Filter and View Controls Bar */}
       <div
         ref={filterRef}
-        className={`border-b mb-8 transition-all duration-300 ${
+        className={`border-y mb-8 transition-all duration-300 ${
           isFilterSticky
-            ? "fixed left-0 right-0 z-10 bg-[#fefffe] shadow-md border-t-0"
-            : "relative border-t"
+            ? "fixed left-0 right-0 z-10 bg-[#fefffe] shadow-md"
+            : "relative"
         }`}
         style={{ top: isFilterSticky ? headerHeight : "auto" }}
       >
@@ -593,16 +595,12 @@ const Category: React.FC = () => {
       {/* Category info: light tint band above the dark footer */}
       <section className="mt-20 bg-[#f2f1f0] px-6 py-16 text-[#1c1c1c] md:px-12 md:py-24">
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 md:grid-cols-2 md:gap-16 lg:grid-cols-3 lg:gap-24">
-          {getCategoryInfo(categorySlug).map((element, index, all) => (
+          {getCategoryInfo(categorySlug).map((element, index) => (
             <div key={index} className="space-y-4">
-              {all.length > 1 && (
-                <p className="font-['figtree'] text-xs font-semibold uppercase tracking-[0.28em] text-[#1c1c1c]/50">
-                  {String(index + 1).padStart(2, "0")}
-                </p>
-              )}
               <h2 className="font-garamond text-2xl leading-tight md:text-3xl">
                 {element.title}
               </h2>
+              <div className="h-px w-10 bg-[#1c1c1c]/30" aria-hidden="true" />
               <p className="whitespace-pre-line text-sm leading-relaxed text-[#1c1c1c]/75 md:text-base">
                 {element.description}
               </p>

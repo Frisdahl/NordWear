@@ -93,21 +93,17 @@ const About: React.FC = () => {
           <h1 className="col-span-4 font-garamond text-[clamp(2rem,4.2vw,3.5rem)] font-medium leading-[1.1] tracking-tight [text-wrap:balance] md:col-span-8 lg:col-span-9">
             Forfinelse frem for forandring.
           </h1>
-          <p className="col-span-4 mt-10 text-base leading-relaxed text-[#1c1c1c]/75 md:col-span-5 md:col-start-4 md:mt-10 md:text-lg lg:col-span-4 lg:col-start-8">
-            Designet i Danmark og håndlavet i Portugal – tidløse produkter til
-            dig, der vælger kvalitet frem for kvantitet.
-          </p>
         </div>
 
         <nav
           aria-label="Om os"
-          className="mt-16 grid grid-cols-1 border-t border-[#1c1c1c]/20 md:mt-24 md:grid-cols-3"
+          className="mt-16 grid grid-cols-1 gap-y-2 md:mt-24 md:grid-cols-3 md:gap-x-8"
         >
           {chapterLinks.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              className="group flex items-baseline gap-4 border-b border-[#1c1c1c]/20 py-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#1c1c1c] md:border-b-0 md:py-6"
+              className="group flex items-baseline gap-4 py-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1c1c1c]"
             >
               <span className={`${eyebrowClass} w-8 shrink-0`}>{link.number}</span>
               <span className="font-garamond text-2xl md:text-3xl">
@@ -216,7 +212,7 @@ const About: React.FC = () => {
         id="historien"
         className="scroll-mt-24 px-6 py-16 md:px-12 md:py-28"
       >
-        <div className="grid grid-cols-4 gap-x-6 border-t border-[#1c1c1c]/20 pt-10 md:grid-cols-8 md:gap-x-8 md:pt-12 lg:grid-cols-12">
+        <div className="grid grid-cols-4 gap-x-6 md:grid-cols-8 md:gap-x-8 lg:grid-cols-12">
           <div className="col-span-4 md:col-span-8 lg:col-span-5">
             <p className={`${eyebrowClass} mb-5`}>03 &middot; Historien</p>
             <h2 className="font-garamond text-3xl leading-tight [text-wrap:balance] md:text-5xl">
@@ -235,7 +231,7 @@ const About: React.FC = () => {
         <p className={`${eyebrowClass} mb-8`}>Vores værdier</p>
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-16">
           {values.map((value) => (
-            <div key={value.title} className="border-t border-[#1c1c1c]/20 pt-6">
+            <div key={value.title}>
               <h3 className="mb-4 font-garamond text-3xl md:text-4xl">
                 {value.title}
               </h3>
@@ -247,7 +243,7 @@ const About: React.FC = () => {
 
       {/* Closing */}
       <section className="px-6 pb-16 md:px-12 md:pb-28">
-        <div className="flex flex-col items-start justify-between gap-6 border-t border-[#1c1c1c]/20 pt-10 md:flex-row md:items-end md:pt-12">
+        <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
           <h2 className="font-garamond text-3xl leading-tight md:text-5xl">
             Udforsk kollektionerne
           </h2>

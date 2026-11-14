@@ -75,7 +75,6 @@ const HAND_MADE_PRODUCTS: {
       ["sh-02-the-oxford", "Oxford Skjorte - Lyseblå", 1, 649, "Oxford skjorte i lyseblå bomuld med button-down krave og brystlomme. Klassisk og let at kombinere."],
       ["sh-03-the-linen", "Hørskjorte - Sort", 1, 699, "Skjorte i sort hørlignende stof med perlemorsknapper. Let og luftig, med et mørkt udtryk."],
       ["sh-04-the-stripe", "Stribet Skjorte - Blå", 1, 599, "Skjorte i blå og hvid smalstribet bomuld med button-down krave. Frisk og nordisk."],
-      ["sh-05-the-overshirt", "Overshirt - Oliven", 1, 799, "Overshirt i olivengrøn bomuld med to brystlommer. Kan bruges både som skjorte og let jakke."],
     ] as [string, string, number, number, string][]
   ).map(([folder, name, category_Id, price, description]) => ({
     name,

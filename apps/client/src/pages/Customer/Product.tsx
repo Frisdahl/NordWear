@@ -446,7 +446,7 @@ const Product: React.FC = () => {
 
               <button
                 onClick={handleAddToCart}
-                className="w-full border border-[#1c1c1c] bg-[#1c1c1c] py-4 font-['Montserrat'] text-xs font-semibold uppercase tracking-[0.2em] text-white transition-colors duration-300 hover:bg-transparent hover:text-[#1c1c1c]"
+                className="w-full border border-[#1c1c1c] bg-[#1c1c1c] py-4 font-['Montserrat'] text-xs font-semibold uppercase tracking-[0.2em] text-white [transition-delay:0s,150ms] [transition-duration:300ms,0s] [transition-property:background-color,color] [transition-timing-function:linear] hover:bg-[#fefffe] hover:text-[#1c1c1c]"
               >
                 Føj til indkøbskurv
               </button>

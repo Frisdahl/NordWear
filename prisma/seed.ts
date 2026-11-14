@@ -31,6 +31,34 @@ function seedPassword(envName: string, localDefault: string): string {
 const SHOE_CATEGORY_IDS = [5, 7, 8, 9];
 const ACCESSORIES_CATEGORY_ID = 10;
 
+// Deterministic pseudo-random numbers, so every seed run gives the same sizes.
+const mulberry32 = (seed: number) => () => {
+  seed |= 0;
+  seed = (seed + 0x6d2b79f5) | 0;
+  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
+
+// Not every product comes in every size. Shoes lose 0-1 sizes off the small end
+// and 0-2 off the large end, and sometimes one size inside the range is sold
+// out. Clothing keeps all sizes or loses the smallest or the largest.
+const availableSizeIds = (productId: number, all: number[]): number[] => {
+  if (all.length <= 1) return all;
+  const rng = mulberry32(productId * 7919 + 13);
+  if (all.length <= 4) {
+    const drop = Math.floor(rng() * 3);
+    return drop === 1 ? all.slice(1) : drop === 2 ? all.slice(0, -1) : all;
+  }
+  const start = Math.floor(rng() * 2);
+  const end = all.length - 1 - Math.floor(rng() * 3);
+  const ids = all.slice(start, end + 1);
+  if (rng() < 0.4 && ids.length > 4) {
+    ids.splice(1 + Math.floor(rng() * (ids.length - 2)), 1);
+  }
+  return ids;
+};
+
 const sequence = (folder: string, count: number) =>
   Array.from({ length: count }, (_, i) => `/products/${folder}/${i + 1}.webp`);
 
@@ -228,9 +256,11 @@ async function main() {
   // 6. Insert Product Quantities
   const quantitiesToSeed = [];
   for (const product of productsToSeed) {
-    for (const size of sizesToSeed.filter((s) =>
-      sizeIdsFor(product.category_Id).includes(s.id),
-    )) {
+    const productSizeIds = availableSizeIds(
+      product.id,
+      sizeIdsFor(product.category_Id),
+    );
+    for (const size of sizesToSeed.filter((s) => productSizeIds.includes(s.id))) {
       for (const color of colorsToSeed) {
         quantitiesToSeed.push({
           productId: product.id,
@@ -351,7 +381,7 @@ async function main() {
             productId: 1,
             quantity: 1,
             price: 29900,
-            sizeId: 7, // EU 42
+            sizeId: 12, // One size (product 1 is the crossbody bag)
             colorId: 1,
           },
           {
@@ -359,7 +389,7 @@ async function main() {
             productId: 2,
             quantity: 2,
             price: 30000,
-            sizeId: 8, // EU 43
+            sizeId: 8, // EU 43 (product 2 is in stock in 43)
             colorId: 1,
           },
         ],

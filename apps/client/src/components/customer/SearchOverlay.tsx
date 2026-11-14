@@ -118,7 +118,7 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
         }}
       ></div>
       <div
-        className={`relative z-10 bg-[#f2f1f0] transform transition-transform duration-500 ease-in-out ${
+        className={`relative z-10 bg-[#fefffe] transform transition-transform duration-500 ease-in-out ${
           isAnimating ? "translate-y-0" : "-translate-y-full"
         }`}
         style={{ paddingTop: `${headerHeight}px` }}
@@ -146,7 +146,7 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
                 placeholder="Søg efter..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full py-2 md:py-3 bg-[#f2f1f0] font-sans text-lg md:text-3xl rounded-md focus:outline-none focus:ring-2 focus:ring-[transparent]"
+                className="w-full py-2 md:py-3 bg-[#fefffe] font-sans text-lg md:text-3xl rounded-md focus:outline-none focus:ring-2 focus:ring-[transparent]"
               />
             </form>
             <button onClick={onClose} className="p-2">

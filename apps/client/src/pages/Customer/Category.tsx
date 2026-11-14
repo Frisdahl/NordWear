@@ -27,6 +27,146 @@ interface OutletContextType {
   headerHeight: number;
 }
 
+type CategoryBlock = { title: string; description: string };
+type CategoryContent = { description: string; info: CategoryBlock[] };
+
+// The header links to /category/skjorter, the homepage to /category/shirts.
+const SLUG_ALIASES: Record<string, string> = { skjorter: "shirts" };
+const normalizeSlug = (slug: string | undefined): string => {
+  const key = (slug ?? "").toLowerCase();
+  return SLUG_ALIASES[key] ?? key;
+};
+
+// Intro line and the three text blocks under the product grid, per category.
+const CATEGORY_CONTENT: Record<string, CategoryContent> = {
+  sneakers: {
+    description:
+      "Alt vores footwear - sneakers, dress sko, loafers og støvler er udviklet i et stilrent og klassisk design, hvilket gør at de passer til ethvert outfit. Komfort og kvalitet er noget vi ikke vil gå på kompromis med og derfor er alle produkter håndlavet i Portugal.",
+    info: [
+      {
+        title: "Nordiske Sneakers til Mænd",
+        description:
+          "Vores sneakers forener skandinavisk minimalisme med europæisk håndværkstradition. Hver sko er håndlavet i Portugal med fokus på at skabe det perfekte balance mellem stil, komfort og holdbarhed.  \n\n Det stilrene design passer til enhver garderobe - fra casual hverdagslook til mere formelle outfits.",
+      },
+      {
+        title: "Kvalitets Sneakers til Enhver Lejlighed",
+        description:
+          "Oplev vores eksklusive kollektion af sneakers, der kombinerer tidløst skandinavisk design med førsteklasses europæisk håndværk. Hver sko er omhyggeligt fremstillet i Portugal for at sikre optimal komfort og holdbarhed. \n\n Uanset om du er på udkig efter et par til hverdagsbrug eller noget mere formelt, har vi sneakers, der passer perfekt til din stil.",
+      },
+      {
+        title: "Stilrene Sneakers med Europæisk Håndværk",
+        description:
+          "Vores sneakers er skabt med en passion for skandinavisk design og europæisk kvalitet. Håndlavet i Portugal, tilbyder hver sko en unik kombination af komfort, holdbarhed og æstetik. \n\n Uanset om du ønsker et par til afslappede dage eller formelle begivenheder, finder du det perfekte match i vores kollektion.",
+      },
+    ],
+  },
+  loafers: {
+    description:
+      "Loafers til dig, der vil have det elegante uden besværet. Slip-in-formen og de rene linjer passer lige så godt til chinos som til habit. Alle modeller er håndlavet i Portugal af udvalgt læder og ruskind.",
+    info: [
+      {
+        title: "Loafers med Nordisk Ro",
+        description:
+          "Vores loafers forener afdæmpet skandinavisk design med portugisisk skomagerhåndværk. Slip-in-formen gør dem lette at tage på, og de rene linjer passer til både hverdag og de pæne anledninger. \n\n Hvert par er håndlavet af materialer, vi selv har valgt.",
+      },
+      {
+        title: "Ruskind og Læder i Høj Kvalitet",
+        description:
+          "Vi bruger blødt ruskind og fast læder, der former sig efter foden og får karakter med tiden. \n\n Med læderhæl og fleksibel sål er loafers fra NordWear behagelige fra den første dag.",
+      },
+      {
+        title: "Fra Penny til Tassel",
+        description:
+          "Vælg mellem penny loafers, tassel og horsebit, alt efter din stil. \n\n Brug dem til habit, chinos eller afslappet hverdag. De er skabt til at blive brugt igen og igen.",
+      },
+    ],
+  },
+  "dress-shoes": {
+    description:
+      "Klassiske dress shoes til kontoret og de pæne anledninger. Oxford, derby, brogue og wholecut, alle håndlavet i Portugal af udvalgt læder og ruskind med læderhæl og læderforing.",
+    info: [
+      {
+        title: "Klassiske Sko til de Pæne Anledninger",
+        description:
+          "Vores dress shoes bygger på traditionelle former som oxford, derby og brogue, tegnet med nordisk enkelhed. \n\n Hvert par er håndlavet i Portugal af erfarne skomagere.",
+      },
+      {
+        title: "Materialer der Holder",
+        description:
+          "Vi vælger kalveskind og blødt ruskind med læderforing og læderhæl, så skoene både ser godt ud og er behagelige hele dagen. \n\n Med god pleje holder de i mange år.",
+      },
+      {
+        title: "Fra Kontor til Fest",
+        description:
+          "En sort oxford til jakkesættet eller en brun derby til chinos: vores dress shoes passer til en bred garderobe. \n\n Sko, der tåler at blive brugt og bliver bedre med tiden.",
+      },
+    ],
+  },
+  boots: {
+    description:
+      "Støvler til efterår og vinter. Chelsea, chukka og snørestøvler i læder og ruskind, håndlavet i Portugal med holdbare såler.",
+    info: [
+      {
+        title: "Støvler til de Nordiske Årstider",
+        description:
+          "Vores støvler er designet til efterår og vinter med rene linjer og et robust udtryk. \n\n Hvert par er håndlavet i Portugal af udvalgte materialer.",
+      },
+      {
+        title: "Chelsea, Chukka og Snørestøvler",
+        description:
+          "Vælg mellem den elegante chelsea, den afslappede chukka eller den kraftige snørestøvle med lugsål. \n\n Alle modeller forener komfort med et tidløst udtryk.",
+      },
+      {
+        title: "Bygget til at Holde",
+        description:
+          "Vi bruger fast læder og blødt ruskind med solide såler, så støvlerne klarer både byen og vejret. \n\n Med lidt pleje får de karakter og holder i mange sæsoner.",
+      },
+    ],
+  },
+  shirts: {
+    description:
+      "Vores skjorter er designet med fokus på kvalitet og pasform. Uanset om du er til et klassisk eller moderne look, har vi en skjorte til dig. Alle vores skjorter er lavet af de bedste materialer for at sikre komfort hele dagen.",
+    info: [
+      {
+        title: "Kvalitets Skjorter til Enhver Stil",
+        description:
+          "Vores skjorter er designet med fokus på kvalitet og pasform. Uanset om du er til et klassisk eller moderne look, har vi en skjorte til dig. \n\n Alle vores skjorter er lavet af de bedste materialer for at sikre komfort hele dagen.",
+      },
+      {
+        title: "Stilfulde Skjorter til Mænd",
+        description:
+          "Opdag vores eksklusive udvalg af skjorter, der kombinerer tidløst design med moderne trends. Hver skjorte er fremstillet af førsteklasses materialer for at sikre både komfort og holdbarhed. \n\n Uanset om du har brug for en skjorte til arbejde eller fritid, har vi det perfekte valg til dig.",
+      },
+      {
+        title: "Til Enhver Lejlighed",
+        description:
+          "Vores skjorter er skabt med en passion for detaljer og kvalitet. Med et bredt udvalg af stilarter og farver, finder du nemt en skjorte, der passer til din personlige stil. \n\n Perfekt til både formelle og afslappede begivenheder, vores skjorter sikrer, at du altid ser skarp ud.",
+      },
+    ],
+  },
+  accessories: {
+    description:
+      "Tilbehør i læder, designet til at passe til resten af kollektionen med det samme rolige, nordiske udtryk.",
+    info: [
+      {
+        title: "Tilbehør med Omtanke",
+        description:
+          "Vores tilbehør supplerer resten af kollektionen med få detaljer, rene linjer og materialer, der holder. \n\n Designet i Danmark og produceret i Europa.",
+      },
+      {
+        title: "Læder i Høj Kvalitet",
+        description:
+          "Vi bruger fast læder og solide beslag, så hvert stykke kan bruges hver dag. \n\n Lædret får karakter med tiden.",
+      },
+      {
+        title: "Tidløst Design",
+        description:
+          "Vi laver tilbehør, der passer til hverdagen og holder længe, uafhængigt af kortvarige trends.",
+      },
+    ],
+  },
+};
+
 const Category: React.FC = () => {
   const { headerHeight } = useOutletContext<OutletContextType>();
   const { categoryName: categorySlug } = useParams<{ categoryName: string }>();
@@ -62,58 +202,18 @@ const Category: React.FC = () => {
     if (searchQuery) {
       return [];
     }
-
-    switch (slug) {
-      case "sneakers":
-        return [
-          {
-            title: "Nordiske Sneakers til Mænd",
-            description:
-              "Vores sneakers forener skandinavisk minimalisme med europæisk håndværkstradition. Hver sko er håndlavet i Portugal med fokus på at skabe det perfekte balance mellem stil, komfort og holdbarhed.  \n\n Det stilrene design passer til enhver garderobe - fra casual hverdagslook til mere formelle outfits.",
-          },
-          {
-            title: "Kvalitets Sneakers til Enhver Lejlighed",
-            description:
-              "Oplev vores eksklusive kollektion af sneakers, der kombinerer tidløst skandinavisk design med førsteklasses europæisk håndværk. Hver sko er omhyggeligt fremstillet i Portugal for at sikre optimal komfort og holdbarhed. \n\n Uanset om du er på udkig efter et par til hverdagsbrug eller noget mere formelt, har vi sneakers, der passer perfekt til din stil.",
-          },
-          {
-            title: "Stilrene Sneakers med Europæisk Håndværk",
-            description:
-              "Vores sneakers er skabt med en passion for skandinavisk design og europæisk kvalitet. Håndlavet i Portugal, tilbyder hver sko en unik kombination af komfort, holdbarhed og æstetik. \n\n Uanset om du ønsker et par til afslappede dage eller formelle begivenheder, finder du det perfekte match i vores kollektion.",
-          },
-        ];
-
-      case "shirts":
-        return [
-          {
-            title: "Kvalitets Skjorter til Enhver Stil",
-            description:
-              "Vores skjorter er designet med fokus på kvalitet og pasform. Uanset om du er til et klassisk eller moderne look, har vi en skjorte til dig. \n\n Alle vores skjorter er lavet af de bedste materialer for at sikre komfort hele dagen.",
-          },
-          {
-            title: "Stilfulde Skjorter til Mænd",
-            description:
-              "Opdag vores eksklusive udvalg af skjorter, der kombinerer tidløst design med moderne trends. Hver skjorte er fremstillet af førsteklasses materialer for at sikre både komfort og holdbarhed. \n\n Uanset om du har brug for en skjorte til arbejde eller fritid, har vi det perfekte valg til dig.",
-          },
-          {
-            title: "Til Enhver Lejlighed",
-            description:
-              "Vores skjorter er skabt med en passion for detaljer og kvalitet. Med et bredt udvalg af stilarter og farver, finder du nemt en skjorte, der passer til din personlige stil. \n\n Perfekt til både formelle og afslappede begivenheder, vores skjorter sikrer, at du altid ser skarp ud.",
-          },
-        ];
-
-      default:
-        return [
-          {
-            title: categoryName
-              ? categoryName.charAt(0).toUpperCase() + categoryName.slice(1)
-              : "Alle Produkter",
-            description: categoryName
-              ? `Udforsk vores udvalg af ${categoryName} i høj kvalitet. Designet i Danmark og produceret i Europa.`
-              : "Udforsk vores store udvalg af produkter i høj kvalitet. Designet i Danmark og produceret i Europa.",
-          },
-        ];
-    }
+    const content = CATEGORY_CONTENT[normalizeSlug(slug)];
+    if (content) return content.info;
+    return [
+      {
+        title: categoryName
+          ? categoryName.charAt(0).toUpperCase() + categoryName.slice(1)
+          : "Alle Produkter",
+        description: categoryName
+          ? `Udforsk vores udvalg af ${categoryName} i høj kvalitet. Designet i Danmark og produceret i Europa.`
+          : "Udforsk vores store udvalg af produkter i høj kvalitet. Designet i Danmark og produceret i Europa.",
+      },
+    ];
   };
 
   useEffect(() => {
@@ -204,17 +304,12 @@ const Category: React.FC = () => {
     if (searchQuery) {
       return `${products.length} resultater for "${searchQuery}"`;
     }
-    switch (slug) {
-      case "sneakers":
-        return "Alt vores footwear - sneakers, dress sko, loafers og støvler er udviklet i et stilrent og klassisk design, hvilket gør at de passer til ethvert outfit. Komfort og kvalitet er noget vi ikke vil gå på kompromis med og derfor er alle produkter håndlavet i Portugal.";
-      case "shirts":
-        return "Vores skjorter er designet med fokus på kvalitet og pasform. Uanset om du er til et klassisk eller moderne look, har vi en skjorte til dig. Alle vores skjorter er lavet af de bedste materialer for at sikre komfort hele dagen.";
-      default:
-        if (slug) {
-          return `Udforsk vores udvalg af ${slug} i høj kvalitet. Designet i Danmark og produceret i Europa.`;
-        }
-        return "Udforsk vores store udvalg af produkter i høj kvalitet. Designet i Danmark og produceret i Europa.";
+    const content = CATEGORY_CONTENT[normalizeSlug(slug)];
+    if (content) return content.description;
+    if (slug) {
+      return `Udforsk vores udvalg af ${slug} i høj kvalitet. Designet i Danmark og produceret i Europa.`;
     }
+    return "Udforsk vores store udvalg af produkter i høj kvalitet. Designet i Danmark og produceret i Europa.";
   };
 
   const getCategoryName = (slug: string | undefined): string => {
@@ -222,6 +317,7 @@ const Category: React.FC = () => {
     const translations: { [key: string]: string } = {
       sneakers: "Sneakers",
       shirts: "Skjorter",
+      skjorter: "Skjorter",
       loafers: "Loafers",
       "dress-shoes": "Dress shoes",
       boots: "Boots",
@@ -267,7 +363,7 @@ const Category: React.FC = () => {
     "Sorter efter";
 
   return (
-    <div className="py-6">
+    <div className="pt-6">
       <FilterMenu
         isOpen={isFilterMenuOpen}
         onClose={() => setFilterMenuOpen(false)}
@@ -305,7 +401,7 @@ const Category: React.FC = () => {
           </span>
         </nav>
 
-        <h1 className="font-['EB_Garamond'] text-center mb-4 text-[clamp(2rem,5vw,2.625rem)]">
+        <h1 className="font-garamond text-center mb-4 text-[clamp(2rem,5vw,2.625rem)]">
           {capitalizedCategoryName}
         </h1>
         <p className="text-center text-[#1c1c1c] mb-8 text-base max-w-4xl mx-auto">
@@ -318,7 +414,7 @@ const Category: React.FC = () => {
         ref={filterRef}
         className={`border-b mb-8 transition-all duration-300 ${
           isFilterSticky
-            ? "fixed left-0 right-0 z-10 bg-[#f2f1f0] shadow-md border-t-0"
+            ? "fixed left-0 right-0 z-10 bg-[#fefffe] shadow-md border-t-0"
             : "relative border-t"
         }`}
         style={{ top: isFilterSticky ? headerHeight : "auto" }}
@@ -494,15 +590,20 @@ const Category: React.FC = () => {
         )}
       </div>
 
-      {/* Responsive Category Info Section */}
-      <section className="px-6 md:px-12 mt-20 bg-[#181c2e] text-white py-16 md:py-24">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 md:gap-16 lg:gap-24">
-          {getCategoryInfo(categorySlug).map((element, index) => (
+      {/* Category info: light tint band above the dark footer */}
+      <section className="mt-20 bg-[#f2f1f0] px-6 py-16 text-[#1c1c1c] md:px-12 md:py-24">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 md:grid-cols-2 md:gap-16 lg:grid-cols-3 lg:gap-24">
+          {getCategoryInfo(categorySlug).map((element, index, all) => (
             <div key={index} className="space-y-4">
-              <h2 className="text-2xl md:text-3xl text-white font-['EB_Garamond'] leading-tight">
+              {all.length > 1 && (
+                <p className="font-['figtree'] text-xs font-semibold uppercase tracking-[0.28em] text-[#1c1c1c]/50">
+                  {String(index + 1).padStart(2, "0")}
+                </p>
+              )}
+              <h2 className="font-garamond text-2xl leading-tight md:text-3xl">
                 {element.title}
               </h2>
-              <p className="whitespace-pre-line text-gray-300 text-sm md:text-base leading-relaxed">
+              <p className="whitespace-pre-line text-sm leading-relaxed text-[#1c1c1c]/75 md:text-base">
                 {element.description}
               </p>
             </div>

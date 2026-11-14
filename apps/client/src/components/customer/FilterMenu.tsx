@@ -88,7 +88,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
 
       {/* Filter Drawer - Matching Mobile Menu & Cart Animation */}
       <div
-        className={`fixed top-0 right-0 h-full bg-[#f2f1f0] w-[85vw] md:w-[35vw] lg:w-[25vw] min-w-[320px] max-w-[500px] shadow-xl transform transition-transform duration-500 ease-in-out flex flex-col ${
+        className={`fixed top-0 right-0 h-full bg-[#fefffe] w-[85vw] md:w-[35vw] lg:w-[25vw] min-w-[320px] max-w-[500px] shadow-xl transform transition-transform duration-500 ease-in-out flex flex-col ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
         style={{ zIndex: 9999 }}

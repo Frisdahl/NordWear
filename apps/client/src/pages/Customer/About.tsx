@@ -83,7 +83,7 @@ const Paragraphs: React.FC<{ items: string[]; className?: string }> = ({
 
 const About: React.FC = () => {
   return (
-    <div className="w-full overflow-x-hidden bg-[#f2f1f0] text-[#1c1c1c]">
+    <div className="w-full overflow-x-hidden bg-[#fefffe] text-[#1c1c1c]">
       {/* Intro: large statement, supporting line offset on the grid, chapter index */}
       <section className="px-6 pb-16 pt-16 md:px-12 md:pb-24 md:pt-28">
         <div className="grid grid-cols-4 gap-x-6 md:grid-cols-8 md:gap-x-8 lg:grid-cols-12">

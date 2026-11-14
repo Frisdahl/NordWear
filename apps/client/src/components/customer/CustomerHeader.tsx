@@ -367,7 +367,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
         onClick={() => setIsMenuOpen(false)}
       />
       <div
-        className={`fixed left-0 top-0 h-full bg-[#f2f1f0] w-[80vw] md:w-[40vw] max-w-[400px] shadow-xl transform transition-transform duration-500 ease-in-out flex flex-col ${
+        className={`fixed left-0 top-0 h-full bg-[#fefffe] w-[80vw] md:w-[40vw] max-w-[400px] shadow-xl transform transition-transform duration-500 ease-in-out flex flex-col ${
           isMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         style={{ zIndex: 9999 }}

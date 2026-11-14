@@ -24,7 +24,7 @@ const CheckoutHeader: React.FC = () => {
 
 const CheckoutLayout: React.FC = () => {
   return (
-    <div className="bg-[#f2f1f0] min-h-screen">
+    <div className="bg-[#fefffe] min-h-screen">
       <CheckoutHeader />
       <main>
         <Outlet />

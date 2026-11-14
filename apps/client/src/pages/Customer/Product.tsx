@@ -196,7 +196,7 @@ const Product: React.FC = () => {
   const { name, price, offer_price, images } = product;
 
   return (
-    <div className="overflow-x-hidden bg-[#f2f1f0] text-[#1c1c1c]">
+    <div className="overflow-x-hidden bg-[#fefffe] text-[#1c1c1c]">
       {notification.subtext && (
         <Notification
           heading={notification.heading}

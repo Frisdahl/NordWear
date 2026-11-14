@@ -20,7 +20,7 @@ import materialIconUrl from "../../assets/customer/material-icon.svg";
 import brandImage from "../../assets/over-production.webp";
 import { areShoeSizes, sortSizes } from "../../utils/sizes";
 
-const sneakerspoints = [
+const sneakerPoints = [
   {
     title: "Konstruktion",
     description: `Sneakerens overdel er omhyggeligt fastgjort til sålen med en præcis syning, hvilket skaber en ren og strømlinet silhuet, samtidig med at strukturen bevares og komforten understøttes.
@@ -44,6 +44,132 @@ const sneakerspoints = [
  Uanset om du klæder dig op eller ned, vil vores sneakers tilføje et strejf af sofistikeret stil til dit look.`,
   },
 ];
+
+type DetailPoint = { title: string; description: string };
+
+const block = (a: string, b: string) => `${a}\n\n${b}`;
+
+// The three text blocks under the gallery, per category (matched on the
+// category name from the API, lower-cased). Keep the blocks of a category
+// about the same length.
+const DETAIL_POINTS: Record<string, DetailPoint[]> = {
+  sneakers: sneakerPoints,
+  loafers: [
+    {
+      title: "Konstruktion",
+      description: block(
+        "Vores loafers er bygget over en blød, fleksibel læst og syet med præcise sting, så formen holder sig ren og elegant.",
+        "Slip-in-formen gør dem lette at tage på, uden at det går ud over pasformen.",
+      ),
+    },
+    {
+      title: "Materialer",
+      description: block(
+        "Overdelen er skåret i blødt ruskind eller fast læder, der former sig efter foden og får karakter med tiden.",
+        "Læderhælen og den fleksible sål gør dem behagelige fra den første dag.",
+      ),
+    },
+    {
+      title: "Design",
+      description: block(
+        "Rene linjer, afdæmpede farver og få detaljer giver et tidløst udtryk, der passer til både habit og chinos.",
+        "Fra penny til tassel finder du den model, der passer til din stil.",
+      ),
+    },
+  ],
+  "dress shoes": [
+    {
+      title: "Konstruktion",
+      description: block(
+        "Vores dress shoes er bygget efter klassiske principper med en præcis læst og omhyggelig syning, så formen er skarp og pasformen stabil.",
+        "Hvert par er håndlavet i Portugal.",
+      ),
+    },
+    {
+      title: "Materialer",
+      description: block(
+        "Overdelen er skåret i kalveskind eller blødt ruskind med læderforing og læderhæl, så skoene er behagelige hele dagen.",
+        "Med god pleje holder de i mange år.",
+      ),
+    },
+    {
+      title: "Design",
+      description: block(
+        "Oxford, derby, brogue og wholecut: traditionelle former tegnet med nordisk enkelhed.",
+        "De passer til jakkesættet, og de klæder også en ren skjorte og chinos.",
+      ),
+    },
+  ],
+  boots: [
+    {
+      title: "Konstruktion",
+      description: block(
+        "Vores støvler er bygget med solide sømme og en robust sål, så de klarer både byen og vejret.",
+        "Elastikindsatsen på chelsea-modellerne gør dem lette at tage på og af.",
+      ),
+    },
+    {
+      title: "Materialer",
+      description: block(
+        "Vi bruger fast læder og blødt ruskind med slidstærke såler, og en kraftig lugsål på de grovere modeller.",
+        "Med lidt pleje får støvlerne karakter og holder i mange sæsoner.",
+      ),
+    },
+    {
+      title: "Design",
+      description: block(
+        "Chelsea, chukka og snørestøvler med rene linjer og et tidløst udtryk.",
+        "De passer til både denim og habit, og er lige så brugbare i hverdagen som til de pæne anledninger.",
+      ),
+    },
+  ],
+  skjorter: [
+    {
+      title: "Konstruktion",
+      description: block(
+        "Vores skjorter er syet med præcise sømme og en pasform, der sidder rent over skuldre og talje.",
+        "Button-down kraven og de fine detaljer holder formen dag efter dag.",
+      ),
+    },
+    {
+      title: "Materialer",
+      description: block(
+        "Vi vælger bomuld og hørlignende stoffer, der er bløde mod huden og luftige at have på.",
+        "Stoffet bevarer formen og farven vask efter vask.",
+      ),
+    },
+    {
+      title: "Design",
+      description: block(
+        "Rene linjer, afdæmpede farver og få detaljer giver et tidløst udtryk, der passer til både kontoret og weekenden.",
+        "Brug den alene eller under en blazer.",
+      ),
+    },
+  ],
+  accessories: [
+    {
+      title: "Konstruktion",
+      description: block(
+        "Vores tasker er bygget med solide sømme, kraftig lynlås og forstærkede kanter, så de holder til daglig brug.",
+        "Den justerbare rem gør den let at tilpasse.",
+      ),
+    },
+    {
+      title: "Materialer",
+      description: block(
+        "Vi bruger fast læder med solide beslag, som får karakter og patina med tiden.",
+        "Lædret er valgt for at holde i mange år.",
+      ),
+    },
+    {
+      title: "Design",
+      description: block(
+        "Et kompakt og roligt design med få detaljer og det fremhævede NordWear-logo.",
+        "Den passer til resten af kollektionen og til de fleste outfits.",
+      ),
+    },
+  ],
+};
 
 const rating = { value: 4.7, count: 128 };
 
@@ -154,6 +280,8 @@ const Product: React.FC = () => {
       setSelectedSize(availableSizes[0].name);
     }
   }, [availableColors, availableSizes, selectedColor, selectedSize]);
+
+  const detailPoints = DETAIL_POINTS[categoryName.toLowerCase()] ?? [];
 
   const handleNotification = (data: {
     heading: string;
@@ -396,26 +524,28 @@ const Product: React.FC = () => {
         </div>
       </div>
 
-      {/* Detail points */}
-      <section className="px-6 pb-16 md:px-12 md:pb-24">
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-12">
-          {sneakerspoints.map((point, i) => (
-            <div key={point.title} className="border-t border-[#1c1c1c]/20 pt-6">
-              <p className={`${eyebrowClass} mb-4`}>0{i + 1}</p>
-              <h3 className="mb-4 font-garamond text-3xl md:text-4xl">
-                {point.title}
-              </h3>
-              <p className="whitespace-pre-line text-sm leading-relaxed text-[#1c1c1c]/70 md:text-base">
-                {point.description}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Detail points, specific to the product's category */}
+      {detailPoints.length > 0 && (
+        <section className="px-6 pb-16 md:px-12 md:pb-24">
+          <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-12">
+            {detailPoints.map((point) => (
+              <div key={point.title} className="space-y-4">
+                <h3 className="font-garamond text-3xl md:text-4xl">
+                  {point.title}
+                </h3>
+                <div className="h-px w-10 bg-[#1c1c1c]/30" aria-hidden="true" />
+                <p className="whitespace-pre-line text-sm leading-relaxed text-[#1c1c1c]/70 md:text-base">
+                  {point.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Quote */}
-      <section className="w-full bg-[#171616] px-6 py-16 text-center md:py-24">
-        <h2 className="mx-auto max-w-4xl font-garamond text-2xl leading-snug text-white md:text-4xl md:leading-[1.25]">
+      <section className="w-full bg-[#f2f1f0] px-6 py-16 text-center md:py-24">
+        <h2 className="mx-auto max-w-4xl font-garamond text-2xl leading-snug md:text-4xl md:leading-[1.25]">
           Hos NordWear tror vi på forfinelse frem for forandring &ndash;
           tidløse designs til den bevidste mand.
         </h2>

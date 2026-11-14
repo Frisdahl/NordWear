@@ -210,7 +210,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
                 NORDWEAR
               </Link>
 
-              <div className="hidden lg:flex items-center space-x-7 text-[0.875rem] absolute left-1/2 -translate-x-1/2">
+              <div className="group/nav hidden lg:flex items-center space-x-7 text-[0.875rem] absolute left-1/2 -translate-x-1/2">
                 {menuItems.map((item) =>
                   item.children ? (
                     <div key={item.name} className="relative">
@@ -237,7 +237,9 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
                           setFocusFirstShoe(true);
                         }
                       }}
-                      className="relative inline-flex items-center gap-1 uppercase tracking-wide font-medium"
+                      className={`relative inline-flex items-center gap-1 uppercase tracking-wide font-medium transition-opacity duration-200 group-hover/nav:opacity-40 hover:!opacity-100 ${
+                        isShoesOpen ? "!opacity-100" : ""
+                      }`}
                     >
                       {item.name}
                       <ChevronDownIcon
@@ -258,13 +260,13 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
                           : "pointer-events-none invisible -translate-y-1 opacity-0"
                       }`}
                     >
-                      <ul className="min-w-[10rem] space-y-3 bg-[#fefffe] px-5 py-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
+                      <ul className="group/dd min-w-[10rem] space-y-3 bg-[#fefffe] px-5 py-4 shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
                         {shoeTypes.map((type, index) => (
                           <li key={type.path}>
                             <Link
                               ref={index === 0 ? firstShoeLinkRef : undefined}
                               to={type.path}
-                              className="block whitespace-nowrap uppercase tracking-wide font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1c1c1c]"
+                              className="block whitespace-nowrap uppercase tracking-wide font-medium transition-opacity duration-200 group-hover/dd:opacity-40 hover:!opacity-100 focus-visible:!opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1c1c1c]"
                             >
                               {type.name}
                             </Link>
@@ -279,7 +281,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
                       to={item.path ?? "/"}
                       onMouseEnter={() => setIsShoesOpen(false)}
                       onFocus={() => setIsShoesOpen(false)}
-                      className="relative uppercase tracking-wide font-medium"
+                      className="relative uppercase tracking-wide font-medium transition-opacity duration-200 group-hover/nav:opacity-40 hover:!opacity-100"
                     >
                       {item.name}
                     </Link>

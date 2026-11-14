@@ -64,18 +64,12 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
   // Shoes dropdown (desktop) and accordion (mobile drawer)
   const [isShoesOpen, setIsShoesOpen] = useState(false);
   const [isMobileShoesOpen, setIsMobileShoesOpen] = useState(false);
-  const [shoesPanelLeft, setShoesPanelLeft] = useState(48);
   const [focusFirstShoe, setFocusFirstShoe] = useState(false);
   const shoesTriggerRef = useRef<HTMLButtonElement>(null);
   const firstShoeLinkRef = useRef<HTMLAnchorElement>(null);
   const location = useLocation();
 
-  const openShoes = () => {
-    if (shoesTriggerRef.current) {
-      setShoesPanelLeft(shoesTriggerRef.current.getBoundingClientRect().left);
-    }
-    setIsShoesOpen(true);
-  };
+  const openShoes = () => setIsShoesOpen(true);
 
   // Close the dropdown and the drawer when the page changes
   useEffect(() => {
@@ -219,8 +213,8 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
               <div className="hidden lg:flex items-center space-x-7 text-[0.875rem] absolute left-1/2 -translate-x-1/2">
                 {menuItems.map((item) =>
                   item.children ? (
+                    <div key={item.name} className="relative">
                     <button
-                      key={item.name}
                       ref={shoesTriggerRef}
                       type="button"
                       aria-haspopup="true"
@@ -253,12 +247,33 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
                         }`}
                         strokeWidth={2.5}
                       />
-                      <span
-                        className={`absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left transition-transform duration-500 ease-in-out ${
-                          isShoesOpen ? "scale-x-100" : "scale-x-0"
-                        }`}
-                      ></span>
+                      <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
                     </button>
+
+                    {/* Rectangle under the link, same text style as the nav */}
+                    <div
+                      id="shoes-menu"
+                      className={`absolute left-0 top-full pt-4 transition-[opacity,transform,visibility] duration-200 ease-out motion-reduce:transition-none ${
+                        isShoesOpen
+                          ? "visible translate-y-0 opacity-100"
+                          : "pointer-events-none invisible -translate-y-1 opacity-0"
+                      }`}
+                    >
+                      <ul className="min-w-[10rem] space-y-3 border border-[#D1D0CE] bg-[#fefffe] px-5 py-4">
+                        {shoeTypes.map((type, index) => (
+                          <li key={type.path}>
+                            <Link
+                              ref={index === 0 ? firstShoeLinkRef : undefined}
+                              to={type.path}
+                              className="block whitespace-nowrap uppercase tracking-wide font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1c1c1c]"
+                            >
+                              {type.name}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    </div>
                   ) : (
                     <Link
                       key={item.name}
@@ -343,34 +358,6 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
               </div>
             </div>
           </nav>
-
-          {/* Shoes dropdown: a bar under the header with the shoe types, aligned under the trigger (desktop) */}
-          <div
-            id="shoes-menu"
-            className={`absolute left-0 right-0 top-full hidden border-b border-[#D1D0CE] bg-[#fefffe] transition-[opacity,transform,visibility] duration-200 ease-out motion-reduce:transition-none lg:block ${
-              isShoesOpen
-                ? "visible translate-y-0 opacity-100"
-                : "pointer-events-none invisible -translate-y-1 opacity-0"
-            }`}
-          >
-            <ul
-              className="flex gap-x-12 py-8 pr-12"
-              style={{ paddingLeft: shoesPanelLeft }}
-            >
-              {shoeTypes.map((type, index) => (
-                <li key={type.path}>
-                  <Link
-                    ref={index === 0 ? firstShoeLinkRef : undefined}
-                    to={type.path}
-                    className="group/link relative inline-block font-garamond text-[1.75rem] leading-tight focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1c1c1c]"
-                  >
-                    {type.name}
-                    <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
         </header>
       </div>
 

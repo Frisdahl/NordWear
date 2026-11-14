@@ -34,7 +34,6 @@ const shoeTypes: MenuLink[] = [
 const mainMenuItems: MenuItem[] = [
   { name: "Shoes", children: shoeTypes },
   { name: "Skjorter", path: "/category/skjorter" },
-  { name: "Hættetrøjer", path: "/category/hættetrøjer" },
 ];
 
 const staticMenuItems: MenuItem[] = [{ name: "Om os", path: "/about" }];

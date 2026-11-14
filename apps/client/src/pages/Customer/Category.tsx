@@ -102,25 +102,6 @@ const Category: React.FC = () => {
           },
         ];
 
-      case "hoodies":
-        return [
-          {
-            title: "Komfortable Hættetrøjer",
-            description:
-              "Vores hættetrøjer er indbegrebet af afslappet stil og komfort. Designet til at holde dig varm og komfortabel, uden at gå på kompromis med udseendet. \n\n Lavet i bløde kvalitetsmaterialer der holder pasformen vask efter vask.",
-          },
-          {
-            title: "Dansk Designet Streetwear",
-            description:
-              "Hver hoodie i vores kollektion er designet i Danmark med fokus på rene linjer og funktionalitet. Den perfekte balance mellem moderne streetwear og klassisk nordisk minimalisme. \n\n Brug den til hverdag, træning eller afslapning derhjemme.",
-          },
-          {
-            title: "Kvalitet der Holder",
-            description:
-              "Vi bruger kun kraftige metervarer til vores hættetrøjer for at sikre en premium følelse. Detaljer som forstærkede sømme og kvalitets lynlåse er standard hos os. \n\n En hættetrøje fra NordWear er en investering i din basisgarderobe.",
-          },
-        ];
-
       default:
         return [
           {
@@ -241,9 +222,6 @@ const Category: React.FC = () => {
     const translations: { [key: string]: string } = {
       sneakers: "Sneakers",
       shirts: "Skjorter",
-      hoodies: "Hættetrøjer",
-      pants: "Bukser",
-      deals: "Tilbud",
       loafers: "Loafers",
       "dress-shoes": "Dress shoes",
       boots: "Boots",

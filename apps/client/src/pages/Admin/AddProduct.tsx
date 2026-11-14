@@ -909,10 +909,11 @@ const AddProduct = () => {
                   }}
                 >
                   <option value="1">Skjorter</option>
-                  <option value="2">Hættetrøjer</option>
-                  <option value="4">Bukser</option>
                   <option value="5">Sneakers</option>
-                  <option value="6">Tilbud</option>
+                  <option value="7">Loafers</option>
+                  <option value="8">Dress shoes</option>
+                  <option value="9">Boots</option>
+                  <option value="10">Accessories</option>
                 </select>
                 {fieldErrors.category_Id && (
                   <p className="text-xs text-red-600">

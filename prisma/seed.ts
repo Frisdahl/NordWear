@@ -24,92 +24,6 @@ function seedPassword(envName: string, localDefault: string): string {
   return randomBytes(24).toString("hex");
 }
 
-function generateProducts(categories: { id: number; name: string }[]) {
-  const products = [];
-  let productId = 1;
-  const adjectives = [
-    "Essential",
-    "Premium",
-    "Signatur",
-    "Klassisk",
-    "Urban",
-    "Nordisk",
-    "Limitless",
-    "Timeless",
-  ];
-  const suffixes = [
-    "Walnut",
-    "Midnight",
-    "Forest",
-    "Onyx",
-    "Slate",
-    "Sand",
-    "Navy",
-    "Charcoal",
-    "Ivory",
-    "Olive",
-    "Stone",
-  ];
-  const pricePoints = [
-    299, 349, 399, 449, 499, 549, 599, 649, 699, 749, 799, 899, 999, 1099, 1199,
-    1299, 1499,
-  ];
-
-  const nouns: { [key: string]: string[] } = {
-    Skjorter: [
-      "Oxford Skjorte",
-      "Hørblanding Skjorte",
-      "Denim Skjorte",
-      "Polo",
-      "Business Skjorte",
-    ],
-    Hættetrøjer: [
-      "Heavyweight Hoodie",
-      "Zip Hoodie",
-      "Oversized Sweatshirt",
-      "Crewneck",
-      "Fleece Hoodie",
-    ],
-    Bukser: ["Chinos", "Slim Fit Jeans", "Cargo Bukser", "Joggers", "Shorts"],
-    Sneakers: [
-      "Low Top Sneaker",
-      "High Top Sneaker",
-      "Læder Sneaker",
-      "Canvas Sko",
-      "Runner",
-    ],
-    Tilbud: [
-      "Outlet T-shirt",
-      "Outlet Hoodie",
-      "Sæson Jakke",
-      "Restparti Bukser",
-    ],
-  };
-
-  for (const category of categories) {
-    for (let i = 0; i < 20; i++) {
-      const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-      const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
-      const nounList = nouns[category.name] || ["Produkt"];
-      const noun = nounList[Math.floor(Math.random() * nounList.length)];
-
-      const name = `${adj} ${noun} - ${suffix}`;
-      const price = pricePoints[Math.floor(Math.random() * pricePoints.length)];
-
-      products.push({
-        id: productId++,
-        name,
-        price,
-        offer_price: Math.random() < 0.2 ? Math.floor(price * 0.7) : null, // 20% chance of offer, round down
-        category_Id: category.id,
-        status: ProductStatus.ONLINE,
-        description: `En ${adj.toLowerCase()} ${noun.toLowerCase()} i farven ${suffix.toLowerCase()}. Perfekt til enhver lejlighed.`,
-      });
-    }
-  }
-  return products;
-}
-
 // Hand-made products with real photos, served from apps/client/public/products.
 // The first image of each product is its thumbnail. Category ids: 5 Sneakers,
 // 7 Loafers, 8 Dress shoes, 9 Boots, 10 Accessories.
@@ -123,38 +37,6 @@ const HAND_MADE_PRODUCTS: {
   description: string;
   images: string[];
 }[] = [
-  {
-    name: "Essential Sneaker - Cream Leather",
-    price: 949,
-    category_Id: 5,
-    description:
-      "Low top sneaker i blødt cremefarvet læder med ruskindshæl og tonet gummisål. Et roligt, nordisk udtryk til hverdagen.",
-    images: sequence("cream-leather-sneaker", 4),
-  },
-  {
-    name: "Suede Penny Loafer - Taupe",
-    price: 1199,
-    category_Id: 7,
-    description:
-      "Penny loafer i blødt taupefarvet ruskind med cremefarvet gummisål. Let og elegant, til både habit og chinos.",
-    images: sequence("taupe-suede-loafer", 4),
-  },
-  {
-    name: "Cap Toe Oxford - Black",
-    price: 1399,
-    category_Id: 8,
-    description:
-      "Klassisk oxford med cap toe i sort glatlæder med cognacfarvet læderforing og læderhæl. Til kontoret og de pæne anledninger.",
-    images: sequence("black-cap-toe-oxford", 4),
-  },
-  {
-    name: "Chelsea Boot - Brown",
-    price: 1499,
-    category_Id: 9,
-    description:
-      "Chelsea støvle i mørkebrunt læder med elastikindsats og trækløkke. Tidløs form til efterår og vinter.",
-    images: sequence("brown-chelsea-boot", 4),
-  },
   {
     name: "Crossbody Bag - Brown",
     price: 799,
@@ -255,10 +137,7 @@ async function main() {
   // 2. Insert Categories
   const categoriesToSeed = [
     { id: 1, name: "Skjorter" },
-    { id: 2, name: "Hættetrøjer" },
-    { id: 4, name: "Bukser" },
     { id: 5, name: "Sneakers" },
-    { id: 6, name: "Tilbud" },
     { id: 7, name: "Loafers" },
     { id: 8, name: "Dress shoes" },
     { id: 9, name: "Boots" },
@@ -291,14 +170,8 @@ async function main() {
   console.log("Sizes seeded.");
 
   // 5. Insert Products
-  // Random generated products only for the original categories
-  const productsToSeed = generateProducts(
-    categoriesToSeed.filter((c) => c.id <= 6),
-  );
-  const generatedCount = productsToSeed.length;
-  let nextProductId = generatedCount + 1;
-  const handMade = HAND_MADE_PRODUCTS.map((p) => ({
-    id: nextProductId++,
+  const productsToSeed = HAND_MADE_PRODUCTS.map((p, i) => ({
+    id: i + 1,
     name: p.name,
     price: p.price,
     offer_price: null,
@@ -307,7 +180,6 @@ async function main() {
     description: p.description,
     images: p.images,
   }));
-  productsToSeed.push(...handMade);
   await prisma.product.createMany({
     data: productsToSeed.map(
       ({ id, name, price, offer_price, category_Id, status, description }) => ({
@@ -325,20 +197,13 @@ async function main() {
   console.log(`${productsToSeed.length} products seeded.`);
 
   // Create ProductImage entries for each product
-  const imagesToSeed = [
-    ...productsToSeed.slice(0, generatedCount).map((product) => ({
+  const imagesToSeed = productsToSeed.flatMap((product) =>
+    product.images.map((url, i) => ({
       productId: product.id,
-      url: `https://picsum.photos/seed/product${product.id}/400/400`,
-      isThumbnail: true,
+      url,
+      isThumbnail: i === 0,
     })),
-    ...handMade.flatMap((product) =>
-      product.images.map((url, i) => ({
-        productId: product.id,
-        url,
-        isThumbnail: i === 0,
-      })),
-    ),
-  ];
+  );
   await prisma.productImage.createMany({
     data: imagesToSeed,
     skipDuplicates: true,

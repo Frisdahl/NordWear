@@ -1,7 +1,28 @@
 import { PrismaClient, Role, ProductStatus } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { randomBytes } from "crypto";
 
 const prisma = new PrismaClient();
+
+// Account passwords come from the environment so they never live in the
+// public repository. The old defaults are only used against a local database.
+const isLocalDatabase = /@(localhost|127\.0\.0\.1|mysql)[:/]/.test(
+  process.env.DATABASE_URL ?? "",
+);
+
+function seedPassword(envName: string, localDefault: string): string {
+  const fromEnv = process.env[envName];
+  if (fromEnv) return fromEnv;
+  if (isLocalDatabase) return localDefault;
+  if (envName === "SEED_ADMIN_PASSWORD") {
+    console.error(
+      "Refusing to seed a non-local database without SEED_ADMIN_PASSWORD.",
+    );
+    process.exit(1);
+  }
+  // Remote database and no password given: a random one that nobody knows.
+  return randomBytes(24).toString("hex");
+}
 
 function generateProducts(categories: { id: number; name: string }[]) {
   const products = [];
@@ -86,31 +107,131 @@ function generateProducts(categories: { id: number; name: string }[]) {
       });
     }
   }
-  // Hand-made showcase product with real photos (served from apps/client/public)
-  products.push({
-    id: productId++,
-    name: "Essential Sneaker - Black Suede",
-    price: 899,
-    offer_price: null,
-    category_Id: 5,
-    status: ProductStatus.ONLINE,
-    description:
-      "Low top sneaker i italiensk garvet ruskindslæder (LWG-certificeret) med blød læderforing, økologisk bomuldssnøre og ydersål af naturgummi.",
-  });
   return products;
 }
 
-const SHOWCASE_IMAGES = [
-  "side",
-  "back",
-  "lifestyle",
-  "on-foot",
-  "front-details",
-  "sole",
-].map((n) => `/products/black-suede/${n}.webp`);
+// Hand-made products with real photos, served from apps/client/public/products.
+// The first image of each product is its thumbnail. Category ids: 5 Sneakers,
+// 7 Loafers, 8 Business Sko, 9 Støvler, 10 Tilbehør.
+const sequence = (folder: string, count: number) =>
+  Array.from({ length: count }, (_, i) => `/products/${folder}/${i + 1}.webp`);
+
+const HAND_MADE_PRODUCTS: {
+  name: string;
+  price: number;
+  category_Id: number;
+  description: string;
+  images: string[];
+}[] = [
+  {
+    name: "Essential Sneaker - Black Suede",
+    price: 899,
+    category_Id: 5,
+    description:
+      "Low top sneaker i italiensk garvet ruskindslæder (LWG-certificeret) med blød læderforing, økologisk bomuldssnøre og ydersål af naturgummi.",
+    images: [
+      "side",
+      "back",
+      "lifestyle",
+      "on-foot",
+      "front-details",
+      "sole",
+    ].map((n) => `/products/black-suede/${n}.webp`),
+  },
+  {
+    name: "Essential Sneaker - Taupe Suede",
+    price: 899,
+    category_Id: 5,
+    description:
+      "Low top sneaker i blødt taupefarvet ruskind med cognacfarvet læderforing og hvid gummisål. Et roligt, nordisk udtryk til hverdagen.",
+    images: sequence("taupe-suede-sneaker", 6),
+  },
+  {
+    name: "Essential Sneaker - White Leather",
+    price: 949,
+    category_Id: 5,
+    description:
+      "Ren hvid læder sneaker med tonet sål og cognacfarvet læderforing. Tidløs og nem at style til både jeans og habit.",
+    images: sequence("white-leather-sneaker", 6),
+  },
+  {
+    name: "Court Sneaker - Cream Gum",
+    price: 1099,
+    category_Id: 5,
+    description:
+      "Retro court sneaker i cremefarvet læder og ruskind med sort hælkappe og karamelfarvet gummisål.",
+    images: sequence("cream-gum-sneaker", 6),
+  },
+  {
+    name: "Court Sneaker - Black Gum",
+    price: 1099,
+    category_Id: 5,
+    description:
+      "Retro court sneaker i sort læder med lakdetalje, cremefarvet hælkappe og karamelfarvet gummisål.",
+    images: sequence("black-gum-sneaker", 5),
+  },
+  {
+    name: "Chunky Penny Loafer - Black",
+    price: 1299,
+    category_Id: 7,
+    description:
+      "Penny loafer i sort glatlæder på en kraftig, profileret gummisål. Klassisk form med et moderne, robust udtryk.",
+    images: sequence("black-chunky-loafer", 6),
+  },
+  {
+    name: "Penny Loafer - Brown Suede",
+    price: 1199,
+    category_Id: 7,
+    description:
+      "Penny loafer i mørkebrunt ruskind med cognacfarvet læderforing og læderæsål. Elegant til habit og afslappet til denim.",
+    images: sequence("brown-suede-loafer", 5),
+  },
+  {
+    name: "Derby - Black Polished",
+    price: 1399,
+    category_Id: 8,
+    description:
+      "Derby i højglanspoleret sort læder på en let profileret sål. Pæn nok til kontoret, robust nok til hverdagen.",
+    images: sequence("black-derby", 6),
+  },
+  {
+    name: "Chelsea Boot - Black",
+    price: 1499,
+    category_Id: 9,
+    description:
+      "Chelsea støvle i sort glatlæder med elastikindsats, trækløkke og cognacfarvet læderforing.",
+    images: sequence("black-chelsea-boot", 5),
+  },
+  {
+    name: "Leather Belt - Brown",
+    price: 399,
+    category_Id: 10,
+    description:
+      "Bælte i mørkebrunt glatlæder med poleret sølvfarvet spænde. 3 cm bredt.",
+    images: sequence("brown-leather-belt", 2),
+  },
+  {
+    name: "Leather Belt - Black",
+    price: 399,
+    category_Id: 10,
+    description:
+      "Bælte i sort glatlæder med poleret sølvfarvet spænde. 3 cm bredt.",
+    images: sequence("black-leather-belt", 2),
+  },
+];
 
 async function main() {
   console.log("Seeding database...");
+
+  // Resolve passwords first, so a refused run never touches the database.
+  const hashedPasswordAdmin = await bcrypt.hash(
+    seedPassword("SEED_ADMIN_PASSWORD", "admin123"),
+    10,
+  );
+  const hashedPasswordUser = await bcrypt.hash(
+    seedPassword("SEED_USER_PASSWORD", "user123"),
+    10,
+  );
 
   // 1. Clear tables
   await prisma.$executeRawUnsafe("SET FOREIGN_KEY_CHECKS = 0;");
@@ -132,9 +253,6 @@ async function main() {
   console.log("Tables cleared.");
 
   // 1.5. Seed Users
-  const hashedPasswordAdmin = await bcrypt.hash("admin123", 10);
-  const hashedPasswordUser = await bcrypt.hash("user123", 10);
-
   await prisma.user.createMany({
     data: [
       {
@@ -161,6 +279,10 @@ async function main() {
     { id: 4, name: "Bukser" },
     { id: 5, name: "Sneakers" },
     { id: 6, name: "Tilbud" },
+    { id: 7, name: "Loafers" },
+    { id: 8, name: "Business Sko" },
+    { id: 9, name: "Støvler" },
+    { id: 10, name: "Tilbehør" },
   ];
   await prisma.category.createMany({
     data: categoriesToSeed,
@@ -189,7 +311,23 @@ async function main() {
   console.log("Sizes seeded.");
 
   // 5. Insert Products
-  const productsToSeed = generateProducts(categoriesToSeed);
+  // Random generated products only for the original categories
+  const productsToSeed = generateProducts(
+    categoriesToSeed.filter((c) => c.id <= 6),
+  );
+  const generatedCount = productsToSeed.length;
+  let nextProductId = generatedCount + 1;
+  const handMade = HAND_MADE_PRODUCTS.map((p) => ({
+    id: nextProductId++,
+    name: p.name,
+    price: p.price,
+    offer_price: null,
+    category_Id: p.category_Id,
+    status: ProductStatus.ONLINE,
+    description: p.description,
+    images: p.images,
+  }));
+  productsToSeed.push(...handMade);
   await prisma.product.createMany({
     data: productsToSeed.map(
       ({ id, name, price, offer_price, category_Id, status, description }) => ({
@@ -207,18 +345,19 @@ async function main() {
   console.log(`${productsToSeed.length} products seeded.`);
 
   // Create ProductImage entries for each product
-  const showcaseId = productsToSeed[productsToSeed.length - 1].id;
   const imagesToSeed = [
-    ...productsToSeed.slice(0, -1).map((product) => ({
+    ...productsToSeed.slice(0, generatedCount).map((product) => ({
       productId: product.id,
       url: `https://picsum.photos/seed/product${product.id}/400/400`,
       isThumbnail: true,
     })),
-    ...SHOWCASE_IMAGES.map((url, i) => ({
-      productId: showcaseId,
-      url,
-      isThumbnail: i === 0,
-    })),
+    ...handMade.flatMap((product) =>
+      product.images.map((url, i) => ({
+        productId: product.id,
+        url,
+        isThumbnail: i === 0,
+      })),
+    ),
   ];
   await prisma.productImage.createMany({
     data: imagesToSeed,

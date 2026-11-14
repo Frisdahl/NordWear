@@ -352,7 +352,7 @@ async function main() {
             productId: 1,
             quantity: 1,
             price: 29900,
-            sizeId: 1,
+            sizeId: 7, // EU 42
             colorId: 1,
           },
           {
@@ -360,8 +360,8 @@ async function main() {
             productId: 2,
             quantity: 2,
             price: 30000,
-            sizeId: 2,
-            colorId: 2,
+            sizeId: 8, // EU 43
+            colorId: 1,
           },
         ],
       });

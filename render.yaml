@@ -1,8 +1,9 @@
-# Render Blueprint for the NordWear API (free demo hosting).
+﻿# Render Blueprint for the NordWear API (free demo hosting).
 # Secrets are marked sync: false and must be set in the Render dashboard.
 services:
   - type: web
-    name: nordwear-api
+    name: nordwear-api-staging
+    region: frankfurt
     runtime: docker
     plan: free
     dockerfilePath: ./apps/server/Dockerfile

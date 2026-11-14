@@ -124,21 +124,6 @@ const HAND_MADE_PRODUCTS: {
   images: string[];
 }[] = [
   {
-    name: "Essential Sneaker - Black Suede",
-    price: 899,
-    category_Id: 5,
-    description:
-      "Low top sneaker i italiensk garvet ruskindslæder (LWG-certificeret) med blød læderforing, økologisk bomuldssnøre og ydersål af naturgummi.",
-    images: [
-      "side",
-      "back",
-      "lifestyle",
-      "on-foot",
-      "front-details",
-      "sole",
-    ].map((n) => `/products/black-suede/${n}.webp`),
-  },
-  {
     name: "Essential Sneaker - Cream Leather",
     price: 949,
     category_Id: 5,
@@ -178,7 +163,44 @@ const HAND_MADE_PRODUCTS: {
       "Kompakt crossbody taske i mørkebrunt læder med fremhævet NORDWEAR-logo, lynlås og justerbar stofrem.",
     images: sequence("brown-crossbody-bag", 5),
   },
-];async function main() {
+  // Collection photographed as four 4:5 views each: main, side, front, detail.
+  // Category ids: 1 Skjorter, 5 Sneakers, 7 Loafers, 8 Dress shoes, 9 Boots.
+  ...(
+    [
+      ["sn-01-the-essential", "Essential Low - Ivory", 5, 899, "Low top sneaker i glat elfenbensfarvet læder med ruskindshæl og cremefarvet gummisål. Ren og nordisk, til hverdagen."],
+      ["sn-02-the-suede", "Suede Sneaker - Taupe", 5, 999, "Low top sneaker i blødt taupefarvet ruskind med karamelfarvet gummisål. Varm i tonen og let at style."],
+      ["sn-03-the-classic", "Classic Sneaker - Black", 5, 949, "Helsort low top sneaker i blødt kornet læder med tonet sål. Et diskret og tidløst udtryk."],
+      ["sn-04-the-modern", "Modern Runner - Grey", 5, 1099, "Moderne sneaker i grå mesh og ruskind med let, dæmpet sål. Komfort til lange dage."],
+      ["sn-05-the-heritage", "Heritage Sneaker - Brown", 5, 1049, "Low top sneaker i mørkebrunt læder med cremefarvet sål og kontrastsyning. Klassisk med et varmt udtryk."],
+      ["lo-01-the-penny", "Penny Loafer - Sand Suede", 7, 1199, "Penny loafer i sandfarvet ruskind med læderhæl. Let og elegant, til både habit og chinos."],
+      ["lo-02-the-leather", "Leather Penny Loafer - Brown", 7, 1299, "Penny loafer i mørkebrunt glatlæder med cognacfarvet foring og læderhæl. En fast favorit i garderoben."],
+      ["lo-03-the-bit", "Bit Loafer - Black", 7, 1399, "Sort loafer i blankt læder med metalbeslag over vristen. Skarp og stilren."],
+      ["lo-04-the-tassel", "Tassel Loafer - Sand Suede", 7, 1299, "Tassel loafer i sandfarvet ruskind med læderkvaster. En afslappet klassiker."],
+      ["lo-05-the-signature", "Signature Loafer - Burgundy", 7, 1399, "Penny loafer i dyb burgunderfarvet læder med læderhæl. Et udtryk med karakter."],
+      ["ds-01-the-oxford", "Oxford - Black Calf", 8, 1499, "Klassisk oxford med cap toe i sort kalveskind med læderhæl. Til kontoret og de pæne anledninger."],
+      ["ds-02-the-derby", "Derby - Brown", 8, 1399, "Derby i mørkebrunt glatlæder med åbne snørebånd og læderhæl. Alsidig fra hverdag til fest."],
+      ["ds-03-the-brogue", "Brogue - Burgundy", 8, 1599, "Wingtip brogue i burgunderfarvet læder med fine perforeringer. Håndværk i detaljen."],
+      ["ds-04-the-wholecut", "Wholecut - Black", 8, 1599, "Wholecut oxford skåret i ét stykke sort læder, uden syninger over vristen. Minimalistisk og elegant."],
+      ["ds-05-the-suede", "Suede Derby - Espresso", 8, 1349, "Derby i mørkt espressofarvet ruskind med læderhæl. Blød i overfladen og afdæmpet i udtrykket."],
+      ["bt-01-the-chelsea", "Chelsea - Chestnut", 9, 1599, "Chelsea støvle i kastanjebrunt glatlæder med elastikindsats og trækløkke. Tidløs form til efterår og vinter."],
+      ["bt-02-the-utility", "Utility Boot - Black", 9, 1699, "Snørestøvle i sort læder med kraftig lugsål. Robust i udtrykket og klar til vejret."],
+      ["bt-03-the-chukka", "Chukka Boot - Espresso Suede", 9, 1399, "Chukka støvle i espressofarvet ruskind med to par øjer og lys søm. Afslappet og elegant."],
+      ["sh-01-the-essential", "Essential Skjorte - Ivory", 1, 599, "Button-down skjorte i blød, elfenbensfarvet bomuld med brystlomme. Grundstenen i garderoben."],
+      ["sh-02-the-oxford", "Oxford Skjorte - Lyseblå", 1, 649, "Oxford skjorte i lyseblå bomuld med button-down krave og brystlomme. Klassisk og let at kombinere."],
+      ["sh-03-the-linen", "Hørskjorte - Sort", 1, 699, "Skjorte i sort hørlignende stof med perlemorsknapper. Let og luftig, med et mørkt udtryk."],
+      ["sh-04-the-stripe", "Stribet Skjorte - Blå", 1, 599, "Skjorte i blå og hvid smalstribet bomuld med button-down krave. Frisk og nordisk."],
+      ["sh-05-the-overshirt", "Overshirt - Oliven", 1, 799, "Overshirt i olivengrøn bomuld med to brystlommer. Kan bruges både som skjorte og let jakke."],
+    ] as [string, string, number, number, string][]
+  ).map(([folder, name, category_Id, price, description]) => ({
+    name,
+    price,
+    category_Id,
+    description,
+    images: sequence(folder, 4),
+  })),
+];
+
+async function main() {
   console.log("Seeding database...");
 
   // Resolve passwords first, so a refused run never touches the database.

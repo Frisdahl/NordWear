@@ -150,7 +150,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const headerClasses = `transition-colors duration-300 bg-[#fefffe] border-b border-[#D1D0CE]`;
+  const headerClasses = `transition-colors duration-300 bg-[#fefffe] shadow-[0_2px_12px_rgba(0,0,0,0.05)]`;
 
   const authLink = isAuthenticated ? (
     <Link to="/customer/orders">Konto</Link>
@@ -237,7 +237,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
                           setFocusFirstShoe(true);
                         }
                       }}
-                      className="group/link relative inline-flex items-center gap-1 uppercase tracking-wide font-medium"
+                      className="relative inline-flex items-center gap-1 uppercase tracking-wide font-medium"
                     >
                       {item.name}
                       <ChevronDownIcon
@@ -247,7 +247,6 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
                         }`}
                         strokeWidth={2.5}
                       />
-                      <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
                     </button>
 
                     {/* Rectangle under the link, same text style as the nav */}
@@ -259,7 +258,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
                           : "pointer-events-none invisible -translate-y-1 opacity-0"
                       }`}
                     >
-                      <ul className="min-w-[10rem] space-y-3 border border-[#D1D0CE] bg-[#fefffe] px-5 py-4">
+                      <ul className="min-w-[10rem] space-y-3 bg-[#fefffe] px-5 py-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
                         {shoeTypes.map((type, index) => (
                           <li key={type.path}>
                             <Link
@@ -280,10 +279,9 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
                       to={item.path ?? "/"}
                       onMouseEnter={() => setIsShoesOpen(false)}
                       onFocus={() => setIsShoesOpen(false)}
-                      className="group/link relative uppercase tracking-wide font-medium"
+                      className="relative uppercase tracking-wide font-medium"
                     >
                       {item.name}
-                      <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
                     </Link>
                   ),
                 )}
@@ -301,9 +299,8 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
 
             <div className="flex items-center space-x-2 md:space-x-4 min-w-[100px] justify-end">
               <div className="hidden lg:flex items-center">
-                <div className="group/link relative inline-block text-[#1c1c1ca6] text-[0.9375rem] font-medium">
+                <div className="relative inline-block text-[#1c1c1ca6] text-[0.9375rem] font-medium">
                   {authLink}
-                  <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#1c1c1c] origin-left scale-x-0 transition-transform duration-500 ease-in-out group-hover/link:scale-x-100"></span>
                 </div>
               </div>
 
@@ -433,7 +430,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
                   key={item.name}
                   to={item.path ?? "/"}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`text-[1rem] uppercase tracking-wide font-medium border-b border-transparent hover:border-[#1c1c1c] transition-all duration-500 inline-block w-fit transform ${
+                  className={`text-[1rem] uppercase tracking-wide font-medium transition-all duration-500 inline-block w-fit transform ${
                     isMenuOpen
                       ? "translate-y-0 opacity-100"
                       : "-translate-y-4 opacity-0"

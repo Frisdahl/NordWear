@@ -8,7 +8,7 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
   res.clearCookie('auth_token', {
     httpOnly: true,
     secure: isSecure,
-    sameSite: 'lax',
+    sameSite: isSecure ? 'none' : 'lax',
   });
   res.status(200).json({ message: 'Logged out successfully.' });
 };

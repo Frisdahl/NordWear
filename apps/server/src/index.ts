@@ -69,6 +69,11 @@ app.use("/api", limiter);
 // 8. Normal JSON parsing
 app.use(express.json({ limit: "10mb" }));
 
+// Health check (used by the hosting platform)
+app.get("/api/health", (_req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 // 9. Routes
 app.use("/api", apiRoutes);
 

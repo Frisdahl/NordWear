@@ -86,8 +86,28 @@ function generateProducts(categories: { id: number; name: string }[]) {
       });
     }
   }
+  // Hand-made showcase product with real photos (served from apps/client/public)
+  products.push({
+    id: productId++,
+    name: "Essential Sneaker - Black Suede",
+    price: 899,
+    offer_price: null,
+    category_Id: 5,
+    status: ProductStatus.ONLINE,
+    description:
+      "Low top sneaker i italiensk garvet ruskindslæder (LWG-certificeret) med blød læderforing, økologisk bomuldssnøre og ydersål af naturgummi.",
+  });
   return products;
 }
+
+const SHOWCASE_IMAGES = [
+  "side",
+  "back",
+  "lifestyle",
+  "on-foot",
+  "front-details",
+  "sole",
+].map((n) => `/products/black-suede/${n}.webp`);
 
 async function main() {
   console.log("Seeding database...");
@@ -187,11 +207,19 @@ async function main() {
   console.log(`${productsToSeed.length} products seeded.`);
 
   // Create ProductImage entries for each product
-  const imagesToSeed = productsToSeed.map((product) => ({
-    productId: product.id,
-    url: `https://picsum.photos/seed/product${product.id}/400/400`,
-    isThumbnail: true,
-  }));
+  const showcaseId = productsToSeed[productsToSeed.length - 1].id;
+  const imagesToSeed = [
+    ...productsToSeed.slice(0, -1).map((product) => ({
+      productId: product.id,
+      url: `https://picsum.photos/seed/product${product.id}/400/400`,
+      isThumbnail: true,
+    })),
+    ...SHOWCASE_IMAGES.map((url, i) => ({
+      productId: showcaseId,
+      url,
+      isThumbnail: i === 0,
+    })),
+  ];
   await prisma.productImage.createMany({
     data: imagesToSeed,
     skipDuplicates: true,

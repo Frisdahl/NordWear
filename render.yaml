@@ -1,0 +1,35 @@
+# Render Blueprint for the NordWear API (free demo hosting).
+# Secrets are marked sync: false and must be set in the Render dashboard.
+services:
+  - type: web
+    name: nordwear-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./apps/server/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: CLIENT_URL
+        sync: false # e.g. https://nordwear.pages.dev (no trailing slash)
+      - key: DATABASE_URL
+        sync: false # TiDB Cloud URI, ending in ?sslaccept=strict
+      - key: JWT_SECRET
+        generateValue: true
+      - key: REDIS_URL
+        sync: false # optional
+      - key: STRIPE_SECRET_KEY
+        sync: false # test-mode key
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false

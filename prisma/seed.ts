@@ -112,7 +112,7 @@ function generateProducts(categories: { id: number; name: string }[]) {
 
 // Hand-made products with real photos, served from apps/client/public/products.
 // The first image of each product is its thumbnail. Category ids: 5 Sneakers,
-// 7 Loafers, 8 Business Sko, 9 Støvler, 10 Tilbehør.
+// 7 Loafers, 8 Dress shoes, 9 Boots, 10 Accessories.
 const sequence = (folder: string, count: number) =>
   Array.from({ length: count }, (_, i) => `/products/${folder}/${i + 1}.webp`);
 
@@ -139,88 +139,46 @@ const HAND_MADE_PRODUCTS: {
     ].map((n) => `/products/black-suede/${n}.webp`),
   },
   {
-    name: "Essential Sneaker - Taupe Suede",
-    price: 899,
-    category_Id: 5,
-    description:
-      "Low top sneaker i blødt taupefarvet ruskind med cognacfarvet læderforing og hvid gummisål. Et roligt, nordisk udtryk til hverdagen.",
-    images: sequence("taupe-suede-sneaker", 6),
-  },
-  {
-    name: "Essential Sneaker - White Leather",
+    name: "Essential Sneaker - Cream Leather",
     price: 949,
     category_Id: 5,
     description:
-      "Ren hvid læder sneaker med tonet sål og cognacfarvet læderforing. Tidløs og nem at style til både jeans og habit.",
-    images: sequence("white-leather-sneaker", 6),
+      "Low top sneaker i blødt cremefarvet læder med ruskindshæl og tonet gummisål. Et roligt, nordisk udtryk til hverdagen.",
+    images: sequence("cream-leather-sneaker", 4),
   },
   {
-    name: "Court Sneaker - Cream Gum",
-    price: 1099,
-    category_Id: 5,
-    description:
-      "Retro court sneaker i cremefarvet læder og ruskind med sort hælkappe og karamelfarvet gummisål.",
-    images: sequence("cream-gum-sneaker", 6),
-  },
-  {
-    name: "Court Sneaker - Black Gum",
-    price: 1099,
-    category_Id: 5,
-    description:
-      "Retro court sneaker i sort læder med lakdetalje, cremefarvet hælkappe og karamelfarvet gummisål.",
-    images: sequence("black-gum-sneaker", 5),
-  },
-  {
-    name: "Chunky Penny Loafer - Black",
-    price: 1299,
-    category_Id: 7,
-    description:
-      "Penny loafer i sort glatlæder på en kraftig, profileret gummisål. Klassisk form med et moderne, robust udtryk.",
-    images: sequence("black-chunky-loafer", 6),
-  },
-  {
-    name: "Penny Loafer - Brown Suede",
+    name: "Suede Penny Loafer - Taupe",
     price: 1199,
     category_Id: 7,
     description:
-      "Penny loafer i mørkebrunt ruskind med cognacfarvet læderforing og læderæsål. Elegant til habit og afslappet til denim.",
-    images: sequence("brown-suede-loafer", 5),
+      "Penny loafer i blødt taupefarvet ruskind med cremefarvet gummisål. Let og elegant, til både habit og chinos.",
+    images: sequence("taupe-suede-loafer", 4),
   },
   {
-    name: "Derby - Black Polished",
+    name: "Cap Toe Oxford - Black",
     price: 1399,
     category_Id: 8,
     description:
-      "Derby i højglanspoleret sort læder på en let profileret sål. Pæn nok til kontoret, robust nok til hverdagen.",
-    images: sequence("black-derby", 6),
+      "Klassisk oxford med cap toe i sort glatlæder med cognacfarvet læderforing og læderhæl. Til kontoret og de pæne anledninger.",
+    images: sequence("black-cap-toe-oxford", 4),
   },
   {
-    name: "Chelsea Boot - Black",
+    name: "Chelsea Boot - Brown",
     price: 1499,
     category_Id: 9,
     description:
-      "Chelsea støvle i sort glatlæder med elastikindsats, trækløkke og cognacfarvet læderforing.",
-    images: sequence("black-chelsea-boot", 5),
+      "Chelsea støvle i mørkebrunt læder med elastikindsats og trækløkke. Tidløs form til efterår og vinter.",
+    images: sequence("brown-chelsea-boot", 4),
   },
   {
-    name: "Leather Belt - Brown",
-    price: 399,
+    name: "Crossbody Bag - Brown",
+    price: 799,
     category_Id: 10,
     description:
-      "Bælte i mørkebrunt glatlæder med poleret sølvfarvet spænde. 3 cm bredt.",
-    images: sequence("brown-leather-belt", 2),
+      "Kompakt crossbody taske i mørkebrunt læder med fremhævet NORDWEAR-logo, lynlås og justerbar stofrem.",
+    images: sequence("brown-crossbody-bag", 5),
   },
-  {
-    name: "Leather Belt - Black",
-    price: 399,
-    category_Id: 10,
-    description:
-      "Bælte i sort glatlæder med poleret sølvfarvet spænde. 3 cm bredt.",
-    images: sequence("black-leather-belt", 2),
-  },
-];
-
-async function main() {
+];async function main() {
   console.log("Seeding database...");
 
   // Resolve passwords first, so a refused run never touches the database.
@@ -280,9 +238,9 @@ async function main() {
     { id: 5, name: "Sneakers" },
     { id: 6, name: "Tilbud" },
     { id: 7, name: "Loafers" },
-    { id: 8, name: "Business Sko" },
-    { id: 9, name: "Støvler" },
-    { id: 10, name: "Tilbehør" },
+    { id: 8, name: "Dress shoes" },
+    { id: 9, name: "Boots" },
+    { id: 10, name: "Accessories" },
   ];
   await prisma.category.createMany({
     data: categoriesToSeed,

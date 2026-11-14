@@ -79,8 +79,10 @@ export const getProducts = async (
     if (categoryIds && categoryIds.length > 0) {
       where.category_Id = { in: categoryIds };
     } else if (categoryName) {
+      // URL slugs use hyphens ("dress-shoes"); category names use spaces.
+      const spacedName = categoryName.replace(/-/g, " ");
       const capitalizedCategoryName =
-        categoryName.charAt(0).toUpperCase() + categoryName.slice(1);
+        spacedName.charAt(0).toUpperCase() + spacedName.slice(1);
       where.category = {
         name: {
           equals: capitalizedCategoryName,

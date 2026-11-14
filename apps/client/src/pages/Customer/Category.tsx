@@ -244,6 +244,10 @@ const Category: React.FC = () => {
       hoodies: "Hættetrøjer",
       pants: "Bukser",
       deals: "Tilbud",
+      loafers: "Loafers",
+      "dress-shoes": "Dress shoes",
+      boots: "Boots",
+      accessories: "Accessories",
     };
     return translations[slug?.toLowerCase() || ""] || slug || "Alle Produkter";
   };

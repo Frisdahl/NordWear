@@ -267,7 +267,7 @@ const Product: React.FC = () => {
 
             {/* Selection Controls */}
             <div className="mt-10 space-y-8">
-              {availableColors.length > 0 && (
+              {availableColors.length > 1 && (
                 <div>
                   <div className="mb-3 flex items-baseline justify-between">
                     <h3 className={eyebrowClass}>Farve</h3>

@@ -154,12 +154,9 @@ async function main() {
   console.log("Categories seeded.");
 
   // 3. Insert Colors
-  const colorsToSeed = [
-    { id: 1, name: "Black" },
-    { id: 2, name: "White" },
-    { id: 3, name: "Heather Grey" },
-    { id: 4, name: "Navy Blue" },
-  ];
+  // Products have no colour options; every variant uses this single colour
+  // (id 1, which the admin product form also uses).
+  const colorsToSeed = [{ id: 1, name: "Standard" }];
   await prisma.color.createMany({ data: colorsToSeed, skipDuplicates: true });
   console.log("Colors seeded.");
 
@@ -236,15 +233,12 @@ async function main() {
       sizeIdsFor(product.category_Id).includes(s.id),
     )) {
       for (const color of colorsToSeed) {
-        if (Math.random() > 0.3) {
-          // Create quantity for 70% of combinations
-          quantitiesToSeed.push({
-            productId: product.id,
-            sizeId: size.id,
-            colorId: color.id,
-            quantity: Math.floor(Math.random() * 100),
-          });
-        }
+        quantitiesToSeed.push({
+          productId: product.id,
+          sizeId: size.id,
+          colorId: color.id,
+          quantity: 5 + Math.floor(Math.random() * 55),
+        });
       }
     }
   }

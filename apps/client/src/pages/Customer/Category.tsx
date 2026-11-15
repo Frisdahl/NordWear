@@ -193,7 +193,6 @@ const Category: React.FC = () => {
   const [sortOption, setSortOption] = useState<string>("");
   const [isFilterSticky, setFilterSticky] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
-  const [filterOriginalTop, setFilterOriginalTop] = useState(0);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -218,28 +217,27 @@ const Category: React.FC = () => {
     ];
   };
 
+  // The filter bar sticks natively (position: sticky) just under the fixed header, so it stays
+  // in the page flow and never jumps or disappears behind the header. Only its shadow depends on
+  // whether it is stuck, which is measured here.
   useEffect(() => {
-    if (filterRef.current) {
-      setFilterOriginalTop(filterRef.current.offsetTop);
-    }
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > filterOriginalTop) {
-        setFilterSticky(true);
-      } else {
-        setFilterSticky(false);
-      }
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const bar = filterRef.current;
+      if (!bar) return;
+      setFilterSticky(bar.getBoundingClientRect().top <= headerHeight + 0.5);
     };
-
-    if (filterOriginalTop > 0) {
-      window.addEventListener("scroll", handleScroll);
-    }
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scroll", onScroll);
+      if (frame) cancelAnimationFrame(frame);
     };
-  }, [filterOriginalTop]);
+  }, [headerHeight]);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -414,12 +412,10 @@ const Category: React.FC = () => {
       {/* Filter and View Controls Bar */}
       <div
         ref={filterRef}
-        className={`border-y mb-8 transition-all duration-300 ${
-          isFilterSticky
-            ? "fixed left-0 right-0 z-10 bg-[#fefffe] shadow-md"
-            : "relative"
+        className={`sticky z-10 border-y mb-8 bg-[#fefffe] transition-shadow duration-300 ${
+          isFilterSticky ? "shadow-md" : ""
         }`}
-        style={{ top: isFilterSticky ? headerHeight : "auto" }}
+        style={{ top: headerHeight }}
       >
         <div className="px-6 md:px-12 mx-auto">
           <div className="flex justify-between items-stretch">
@@ -495,10 +491,6 @@ const Category: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {isFilterSticky && (
-        <div style={{ height: filterRef.current?.offsetHeight || 0 }} />
-      )}
 
       {/* Products Grid with aligned padding */}
       <div className="px-6 md:px-12 mx-auto">

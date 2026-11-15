@@ -1,8 +1,7 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import {
   useParams,
   Link,
-  useOutletContext,
   useSearchParams,
 } from "react-router-dom";
 import { Product } from "../../types";
@@ -21,10 +20,6 @@ interface FilterOptions {
   priceRange: [number, number];
   categories: number[];
   sizes: number[];
-}
-
-interface OutletContextType {
-  headerHeight: number;
 }
 
 type CategoryBlock = { title: string; description: string };
@@ -170,7 +165,6 @@ const CATEGORY_CONTENT: Record<string, CategoryContent> = {
 };
 
 const Category: React.FC = () => {
-  const { headerHeight } = useOutletContext<OutletContextType>();
   const { categoryName: categorySlug } = useParams<{ categoryName: string }>();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get("search");
@@ -191,8 +185,6 @@ const Category: React.FC = () => {
   const [isFilterMenuOpen, setFilterMenuOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions | null>(null);
   const [sortOption, setSortOption] = useState<string>("");
-  const [isFilterSticky, setFilterSticky] = useState(false);
-  const filterRef = useRef<HTMLDivElement>(null);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -216,28 +208,6 @@ const Category: React.FC = () => {
       },
     ];
   };
-
-  // The filter bar sticks natively (position: sticky) just under the fixed header, so it stays
-  // in the page flow and never jumps or disappears behind the header. Only its shadow depends on
-  // whether it is stuck, which is measured here.
-  useEffect(() => {
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      const bar = filterRef.current;
-      if (!bar) return;
-      setFilterSticky(bar.getBoundingClientRect().top <= headerHeight + 0.5);
-    };
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (frame) cancelAnimationFrame(frame);
-    };
-  }, [headerHeight]);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -410,13 +380,8 @@ const Category: React.FC = () => {
       </div>
 
       {/* Filter and View Controls Bar */}
-      <div
-        ref={filterRef}
-        className={`sticky z-10 border-y mb-8 bg-[#fefffe] transition-shadow duration-300 ${
-          isFilterSticky ? "shadow-md" : ""
-        }`}
-        style={{ top: headerHeight }}
-      >
+      {/* It stays where it is in the page: it does not follow the header when scrolling. */}
+      <div className="border-y mb-8 bg-[#fefffe]">
         <div className="px-6 md:px-12 mx-auto">
           <div className="flex justify-between items-stretch">
             <div className="flex">

@@ -2,6 +2,15 @@
 
 This project is a full-stack e-commerce application for the fictional brand NordWear.
 
+## Showcase
+
+[![The NordWear homepage scrolling on a MacBook](docs/showcase/nordwear-homepage-loop-poster.webp)](docs/showcase/nordwear-homepage-loop.mp4)
+
+The homepage scrolling on a MacBook mockup, as a 7 second seamless loop with no audio:
+
+-   [`nordwear-homepage-loop.webm`](docs/showcase/nordwear-homepage-loop.webm) (VP9, 3680x2760, 60 fps)
+-   [`nordwear-homepage-loop.mp4`](docs/showcase/nordwear-homepage-loop.mp4) (H.264, 2304x1728, 60 fps)
+
 ## Reviewer & Testing Information
 
 To assist with reviewing and testing the application, here are the necessary credentials and instructions.

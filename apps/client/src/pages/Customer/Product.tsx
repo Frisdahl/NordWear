@@ -339,8 +339,48 @@ const Product: React.FC = () => {
 
       <div className="px-6 pb-16 pt-8 md:px-12 md:pb-24 md:pt-12">
         <div className="lg:grid lg:grid-cols-[1.5fr_1fr] lg:items-start lg:gap-16 xl:gap-24">
-          {/* Image gallery: portrait tiles with a tight gap */}
-          <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+          {/* Phone: one big main image with the others as small thumbnails underneath; a tap on a
+              thumbnail changes the main image. */}
+          {images && images.length > 0 && (
+            <div className="md:hidden">
+              <div className="aspect-[4/5] w-full overflow-hidden bg-[#e9e7e3]">
+                <img
+                  key={selectedImage ?? images[0].url}
+                  src={selectedImage ?? images[0].url}
+                  alt={name}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              {images.length > 1 && (
+                <div className="mt-2 grid grid-cols-4 gap-2">
+                  {images.map((image, idx) => {
+                    const active = (selectedImage ?? images[0].url) === image.url;
+                    return (
+                      <button
+                        key={image.id ?? image.url ?? idx}
+                        type="button"
+                        onClick={() => setSelectedImage(image.url)}
+                        aria-label={`${name} ${idx + 1}`}
+                        aria-current={active}
+                        className={`aspect-[4/5] w-full overflow-hidden bg-[#e9e7e3] outline outline-1 outline-offset-2 transition-opacity duration-200 ${
+                          active ? "outline-[#1c1c1c]" : "outline-transparent opacity-60"
+                        }`}
+                      >
+                        <img
+                          src={image.url}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Tablet and desktop: portrait tiles with a tight gap */}
+          <div className="hidden grid-cols-1 gap-2 md:grid md:grid-cols-2">
             {images &&
               images.map((image, idx) => (
                 <div

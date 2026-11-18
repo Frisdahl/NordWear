@@ -315,11 +315,37 @@ const Product: React.FC = () => {
     }
   };
 
-  if (loading) return <div className="text-center py-20">Loading...</div>;
+  // While the product is fetched the page keeps the shape of the finished one (the same picture tiles and info column in
+  // the placeholder grey the pictures use), so the footer stays below the fold and nothing jumps when the product arrives.
+  // (It used to be a line of text: the page was so short that the dark footer rose up under the header for a moment.)
+  if (loading)
+    return (
+      <div className="overflow-x-hidden bg-[#fefffe] text-[#1c1c1c]" aria-busy="true" aria-label="Indlæser produkt">
+        <div className="px-6 pb-16 pt-8 md:px-12 md:pb-24 md:pt-12">
+          <div className="lg:grid lg:grid-cols-[1.5fr_1fr] lg:items-start lg:gap-16 xl:gap-24">
+            <div className="md:hidden">
+              <div className="aspect-[4/5] w-full bg-[#e9e7e3]" />
+            </div>
+            <div className="hidden grid-cols-1 gap-2 md:grid md:grid-cols-2">
+              {[0, 1, 2, 3].map((tile) => (
+                <div key={tile} className="aspect-[4/5] w-full bg-[#e9e7e3]" />
+              ))}
+            </div>
+            <div className="mt-10 lg:mt-0 lg:pt-32">
+              <div className="mb-4 h-3 w-24 bg-[#e9e7e3]" />
+              <div className="h-10 w-3/4 bg-[#e9e7e3] md:h-12" />
+              <div className="mt-6 h-4 w-40 bg-[#e9e7e3]" />
+              <div className="mt-8 h-7 w-32 bg-[#e9e7e3]" />
+              <div className="mt-10 h-12 w-full bg-[#e9e7e3]" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   if (error)
-    return <div className="text-center py-20 text-red-500">{error}</div>;
+    return <div className="min-h-[70vh] py-20 text-center text-red-500">{error}</div>;
   if (!product)
-    return <div className="text-center py-20">Product not found</div>;
+    return <div className="min-h-[70vh] py-20 text-center">Product not found</div>;
 
   const { name, price, offer_price, images } = product;
 

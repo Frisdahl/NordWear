@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { Outlet } from "react-router-dom";
 import CustomerHeader from "../components/customer/CustomerHeader";
 import Footer from "../components/customer/Footer";
@@ -13,6 +13,13 @@ const CustomerLayout: React.FC = () => {
     return () => {
       document.documentElement.classList.remove("smooth-scroll");
     };
+  }, []);
+
+  // The header is fixed and the spacer under it takes its height, so the height has to be known before the first paint:
+  // measured in an effect after the paint, the whole page was drawn 103 px too high and then dropped (a layout shift of
+  // about 0.13 on every page).
+  useLayoutEffect(() => {
+    if (headerRef.current) setHeaderHeight(headerRef.current.offsetHeight);
   }, []);
 
   useEffect(() => {

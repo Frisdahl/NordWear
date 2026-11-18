@@ -94,7 +94,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
         style={{ zIndex: 9999 }}
       >
         <div className="p-6 flex justify-end items-center pb-4">
-          <button onClick={onClose}>
+          <button onClick={onClose} aria-label="Luk filter">
             <XMarkIcon className="h-6 w-6" />
           </button>
         </div>

@@ -1,0 +1,10 @@
+# NordWear
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /customer
+Disallow: /checkout
+Disallow: /login
+Disallow: /create-user
+Disallow: /forgot-password
+Disallow: /reset-password

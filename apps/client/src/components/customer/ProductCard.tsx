@@ -195,6 +195,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
           <button
             onClick={handleLikeClick}
+            aria-label={isLiked ? "Fjern fra favoritter" : "Føj til favoritter"}
+            aria-pressed={isLiked}
             className="absolute top-2 right-2 h-8 w-8 bg-[#171717] rounded-full flex items-center justify-center text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 z-30"
           >
             {isLiked ? (
@@ -225,7 +227,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         <div className="relative pt-3 text-center h-28 flex flex-col justify-center">
                                   <Link to={`/product/${id}`} className="w-fit mx-auto">
-                                      <h3 className="text-[14px] md:text-[1rem] text-[#1c1c1c] truncate">{name}</h3>
+                                      <p className="text-[14px] md:text-[1rem] text-[#1c1c1c] truncate">{name}</p>
                                   </Link>
                                   <Link to={`/product/${id}`} className="w-fit mx-auto mt-1.5">
                                     <p className="tracking-wide text-[1rem] text-[#1c1c1ca6]">

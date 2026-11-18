@@ -179,6 +179,10 @@ const salesPoints = [
   "Forlænget 30-dages returret",
 ];
 
+// The first picture is what the page is waiting for (its largest paint): the browser is told to fetch it first.
+// (React 18.2 has no `fetchPriority` prop, so the attribute is passed in lower case.)
+const HIGH_PRIORITY = { fetchpriority: "high" } as Record<string, string>;
+
 const eyebrowClass =
   "font-['figtree'] text-xs font-semibold uppercase tracking-[0.28em] text-[#1c1c1c]/50";
 
@@ -375,6 +379,7 @@ const Product: React.FC = () => {
                   src={selectedImage ?? images[0].url}
                   alt={name}
                   className="h-full w-full object-cover"
+                  {...HIGH_PRIORITY}
                 />
               </div>
               {images.length > 1 && (
@@ -417,6 +422,8 @@ const Product: React.FC = () => {
                     src={image.url}
                     alt={`${name}-${idx}`}
                     className="h-full w-full object-cover"
+                    loading={idx < 4 ? undefined : "lazy"}
+                    {...(idx === 0 ? HIGH_PRIORITY : null)}
                   />
                 </div>
               ))}
@@ -464,7 +471,7 @@ const Product: React.FC = () => {
               {availableColors.length > 1 && (
                 <div>
                   <div className="mb-3 flex items-baseline justify-between">
-                    <h3 className={eyebrowClass}>Farve</h3>
+                    <p className={eyebrowClass}>Farve</p>
                   </div>
                   <div className="flex items-center gap-3">
                     {availableColors.map((color) => (
@@ -490,9 +497,9 @@ const Product: React.FC = () => {
 
               {/* Sizes as buttons instead of a dropdown */}
               <div>
-                <h3 className={`${eyebrowClass} mb-3`}>
+                <p className={`${eyebrowClass} mb-3`}>
                   {areShoeSizes(availableSizes) ? "Størrelse (EU)" : "Størrelse"}
-                </h3>
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {availableSizes.map((size) => (
                     <button
@@ -543,7 +550,7 @@ const Product: React.FC = () => {
                     openAccordion === "shipping" ? null : "shipping"
                   )
                 }
-                icon={<img src={boxIconUrl} className="h-5 w-5" />}
+                icon={<img src={boxIconUrl} alt="" aria-hidden="true" className="h-5 w-5" />}
                 title="Gratis fragt | Gratis ombytning"
                 content="Altid gratis fragt til Bring Pakkeshop ved køb over 499,-."
               />
@@ -555,7 +562,7 @@ const Product: React.FC = () => {
                     openAccordion === "trustpilot" ? null : "trustpilot"
                   )
                 }
-                icon={<img src={starIconUrl} className="h-5 w-5" />}
+                icon={<img src={starIconUrl} alt="" aria-hidden="true" className="h-5 w-5" />}
                 title="Fremragende | Trustpilot"
                 content="Læs alle vores +500 anmeldelser på Trustpilot. Vi vægter kundeservice og kvalitet højere end alt andet."
               />
@@ -567,7 +574,7 @@ const Product: React.FC = () => {
                     openAccordion === "materials" ? null : "materials"
                   )
                 }
-                icon={<img src={materialIconUrl} className="h-5 w-5" />}
+                icon={<img src={materialIconUrl} alt="" aria-hidden="true" className="h-5 w-5" />}
                 title="Materialer"
                 content={
                   <ul className="list-none space-y-3 pt-2 text-sm text-[#1c1c1c]/75 md:text-base">

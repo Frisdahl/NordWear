@@ -149,7 +149,7 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
                 className="w-full py-2 md:py-3 bg-[#fefffe] font-sans text-lg md:text-3xl rounded-md focus:outline-none focus:ring-2 focus:ring-[transparent]"
               />
             </form>
-            <button onClick={onClose} className="p-2">
+            <button onClick={onClose} aria-label="Luk søgning" className="p-2">
               <XMarkIcon className="h-6 w-6 text-gray-700" />
             </button>
           </div>

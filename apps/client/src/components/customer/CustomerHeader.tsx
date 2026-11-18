@@ -196,6 +196,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
               <div className="lg:hidden">
                 <button
                   onClick={() => setIsMenuOpen(true)}
+                  aria-label="Åbn menu"
                   className="p-2 -ml-2"
                 >
                   <Bars3Icon className="h-6 w-6" />
@@ -314,6 +315,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
                 </button>
                 <button
                   onClick={handleSearchClick}
+                  aria-label="Søg"
                   className="p-2 text-[#1c1c1c] sm:hidden"
                 >
                   <svg
@@ -373,7 +375,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ headerRef }) => {
         style={{ zIndex: 9999 }}
       >
         <div className="p-6 flex justify-end items-center pb-4">
-          <button onClick={() => setIsMenuOpen(false)}>
+          <button onClick={() => setIsMenuOpen(false)} aria-label="Luk menu">
             <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
